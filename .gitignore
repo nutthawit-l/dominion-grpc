@@ -1,0 +1,13 @@
+# Build artifacts
+/bin/
+/dist/
+
+# Go
+*.test
+*.out
+/coverage.out
+
+# Editor noise
+.vscode/settings.json
+.idea/
+*.swp
