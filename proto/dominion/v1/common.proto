@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package dominion.v1;
+
+// Phase of the currentt player's turn.
+enum Phase {
+    PHASE_UNSPECIFIED = 0;
+    PHASE_ACTION = 1;
+    PHASE_BUY = 2;
+    PHASE_CLEANUP = 3;
+}
+
+// CardType is a set of tags on a card. A single card can have multiple
+// (e.g., a hypotentical Action-Reaction).
+enum CardType {
+    CARD_TYPE_UNSPECIFIED = 0;
+    CARD_TYPE_TREASURE = 1;
+    CARD_TYPE_VICTORY = 2;
+    CARD_TYPE_CURSE = 3;
+    CARD_TYPE_ACTION = 4;
+    CARD_TYPE_ATTACK = 5;
+    CARD_TYPE_REACTION = 6;
+}

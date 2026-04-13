@@ -1,0 +1,173 @@
+syntax = "proto3";
+
+package dominion.v1;
+
+import "dominion/v1/common.proto";
+import "dominion/v1/card.proto";
+import "google/protobuf/timestamp.proto";
+
+// =====================================================================
+// Service
+// =====================================================================
+
+service GameService {
+    rpc CreateGame(CreateGameRequest) returns (CreateGameResponse);
+    rpc StreamGameEvents(StreamGameEventsRequest) returns (stream StreamGameEventsResponse);
+    rpc SubmitAction(SubmitActionRequest) returns (SubmitActionResponse);
+}
+
+// =====================================================================
+// Player view — per-player snapshot of their own visible state
+// =====================================================================
+
+message PlayerView {
+    int32 player_idx = 1;
+    string name = 2;
+    int32 hand_size = 3;
+    int32 deck_size = 4;
+    int32 discard_size = 5;
+    int32 in_play_size = 6;
+    int32 actions = 7;
+    int32 buys = 8;
+    int32 coins = 9;
+    // Only filled in for "me" — server scrubs opponents' hand contents.
+    repeated string hand = 10;
+    repeated string in_play = 11;
+}
+
+// =====================================================================
+// Game state snapshot
+// =====================================================================
+
+message GameStateSnapshot {
+    string game_id = 1;
+    int64 seed = 2;
+    int32 turn = 3;
+    int32 current_player = 4;
+    Phase phase = 5;
+    repeated PlayerView players = 6;
+    repeated SupplyPile supply = 7;
+    int32 trash_size = 8;
+    Decision pending_decision = 9; // nil when no decision pending
+    bool ended = 10;
+    repeated int32 winners = 11;
+}
+
+// =====================================================================
+// Actions
+// =====================================================================
+
+message Action {
+    oneof kind {
+        PlayCardAction play_card = 1;
+        BuyCardAction buy_card = 2;
+        EndPhaseAction end_phase = 3;
+        ResolveDecision resolve = 4;
+    }
+}
+
+message PlayCardAction {
+    int32 player_idx = 1;
+    string card_id = 2;
+}
+
+message BuyCardAction {
+    int32 player_idx = 1;
+    string card_id = 2;
+}
+
+message EndPhaseAction {
+    int32 player_idx = 1;
+}
+
+// =====================================================================
+// Decisions (plumbing is present from Tier 0 even though no basic card
+// uses it — Tier 2 will populate the prompts)
+// =====================================================================
+
+message Decision {
+    string id = 1;
+    int32 player_idx = 2;
+    // Prompt variants will be added in Tier 2. For Tier 0, no card sets a
+    // pending decision, so the prompt oneof is empty on the wire.
+}
+
+message ResolveDecision {
+    string decision_id = 1;
+    int32 player_idx = 2;
+    // Answer variants will be added in Tier 2.
+}
+
+// =====================================================================
+// RPC requests and responses
+// =====================================================================
+
+message CreateGameRequest {
+    // Each entry is a strategy identifier: "human", "bigmoney", "smithy_bm".
+    repeated string players = 1;
+    int64 seed = 2;
+    // If empty, Tier 0 default supply (basics only) is used.
+    repeated string kingdom = 3;
+}
+
+message CreateGameResponse {
+    string game_id = 1;
+    GameStateSnapshot snapshot = 2;
+}
+
+message StreamGameEventsRequest {
+    string game_id = 1;
+    int32 player_idx = 2; // which player's view the stream is scrubbed for
+}
+
+message SubmitActionRequest {
+    string game_id = 1;
+    Action action = 2;
+}
+
+message SubmitActionResponse {
+    // Empty — real results arrive on the event stream.
+}
+
+// =====================================================================
+// Events (server-streamed)
+// =====================================================================
+
+message StreamGameEventsResponse {
+    uint64 sequence = 1;
+    google.protobuf.Timestamp at = 2;
+    oneof kind {
+        GameStateSnapshot snapshot = 3;
+        PlayerActionApplied action_applied = 4;
+        PhaseChanged phase_changed = 5;
+        TurnStarted turn_started = 6;
+        DecisionRequested decision = 7;
+        GameEnded ended = 8;
+    }
+}
+
+message PlayerActionApplied {
+    int32 player_idx = 1;
+    Action action = 2;
+    GameStateSnapshot state_after = 3;
+}
+
+message PhaseChanged {
+    Phase new_phase = 1;
+    int32 player_idx = 2;
+}
+
+message TurnStarted {
+    int32 turn = 1;
+    int32 player_idx = 2;
+}
+
+message DecisionRequested {
+    int32 player_idx = 1;
+    Decision decision = 2;
+}
+
+message GameEnded {
+    repeated int32 winners = 1;
+    map<int32, int32> final_scores = 2;
+}

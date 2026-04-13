@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package dominion.v1;
+
+// A card instance is identified by its card_id string (e.g., "copper",
+// "smithy"). Full card data lives server-side in the engine registry.
+// Clients resolve ids to display data via a lookup table or the snapshot.
+message CardRef {
+    string card_id = 1;
+}
+
+// Supply pile state: how many of each card remain in the central supply.
+message SupplyPile {
+    string card_id = 1;
+    int32 count = 2;
+}
