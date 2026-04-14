@@ -40,3 +40,8 @@ func (r *Registry) All() []*engine.Card {
 	}
 	return out
 }
+
+// DefaultRegistry is the package-global registry populated via init()
+// by each card file. Tests that need a fresh registry should call
+// NewRegistry() directly.
+var DefaultRegistry = NewRegistry()
