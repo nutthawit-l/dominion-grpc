@@ -70,3 +70,8 @@ func (s *Stream) Close() error { return s.inner.Close() }
 
 // Err returns the terminal error, if any.
 func (s *Stream) Err() error { return s.inner.Err() }
+
+// submitResolve wraps the generic SubmitAction with a resolve payload.
+func (c *Client) submitResolve(ctx context.Context, gameID string, r *pb.ResolveDecision) error {
+	return c.SubmitAction(ctx, gameID, &pb.Action{Kind: &pb.Action_Resolve{Resolve: r}})
+}
