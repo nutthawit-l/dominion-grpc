@@ -1,0 +1,68 @@
+package service
+
+import (
+	"context"
+	"testing"
+
+	"connectrpc.com/connect"
+	"github.com/stretchr/testify/require"
+	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	"github.com/tie/dominion-grpc/internal/engine"
+	"github.com/tie/dominion-grpc/internal/engine/cards"
+	"github.com/tie/dominion-grpc/internal/store"
+)
+
+func newTestService() *GameService {
+	return NewGameService(
+		store.NewMemory(),
+		func(id engine.CardID) (*engine.Card, bool) {
+			return cards.DefaultRegistry.Lookup(id)
+		},
+	)
+}
+
+func TestGameService_CreateGame(t *testing.T) {
+	svc := newTestService()
+	ctx := context.Background()
+
+	resp, err := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"alice", "bob"},
+		Seed:    42,
+	}))
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Msg.GameId)
+	require.NotNil(t, resp.Msg.Snapshot)
+	require.Equal(t, pb.Phase_PHASE_ACTION, resp.Msg.Snapshot.Phase)
+}
+
+func TestGameService_SubmitAction_EndPhaseActionToBuy(t *testing.T) {
+	svc := newTestService()
+	ctx := context.Background()
+
+	create, _ := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"a", "b"}, Seed: 1,
+	}))
+
+	_, err := svc.SubmitAction(ctx, connect.NewRequest(&pb.SubmitActionRequest{
+		GameId: create.Msg.GameId,
+		Action: &pb.Action{Kind: &pb.Action_EndPhase{EndPhase: &pb.EndPhaseAction{PlayerIdx: 0}}},
+	}))
+	require.NoError(t, err)
+
+	// Verify state advanced.
+	s, ok := svc.store.Get(create.Msg.GameId)
+	require.True(t, ok)
+	require.Equal(t, engine.PhaseBuy, s.Phase)
+}
+
+func TestGameService_SubmitAction_UnknownGameReturnsNotFound(t *testing.T) {
+	svc := newTestService()
+	_, err := svc.SubmitAction(context.Background(), connect.NewRequest(&pb.SubmitActionRequest{
+		GameId: "nope",
+		Action: &pb.Action{Kind: &pb.Action_EndPhase{EndPhase: &pb.EndPhaseAction{PlayerIdx: 0}}},
+	}))
+	require.Error(t, err)
+	var ce *connect.Error
+	require.ErrorAs(t, err, &ce)
+	require.Equal(t, connect.CodeNotFound, ce.Code())
+}
