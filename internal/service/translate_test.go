@@ -48,7 +48,7 @@ func TestSnapshotFromState_ScrubsOpponentHand(t *testing.T) {
 		},
 		Supply: engine.Supply{Piles: map[engine.CardID]int{"copper": 10}},
 	}
-	snap := SnapshotFromState(s, /*viewer*/ 0)
+	snap := SnapshotFromState(s, 0)
 	require.Equal(t, "g", snap.GameId)
 	require.Equal(t, int32(3), snap.Turn)
 	// viewer=0 sees their own hand contents...

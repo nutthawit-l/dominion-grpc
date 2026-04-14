@@ -29,10 +29,3 @@ func fillDeck(s *GameState, p int, card CardID, n int) {
 		s.Players[p].Deck = append(s.Players[p].Deck, card)
 	}
 }
-
-// fillHand pushes n copies of card onto player p's hand.
-func fillHand(s *GameState, p int, card CardID, n int) {
-	for i := 0; i < n; i++ {
-		s.Players[p].Hand = append(s.Players[p].Hand, card)
-	}
-}

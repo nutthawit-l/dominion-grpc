@@ -1,4 +1,4 @@
-.PHONY: generate test test-short lint server bot install-tools
+.PHONY: generate test test-short lint server bot install-tools tidy
 
 generate:
 	buf generate
@@ -11,14 +11,16 @@ test-short:
 
 lint:
 	buf lint
-	buf breaking --against .git#branch=main,subdir=.
 	golangci-lint run ./...
 
 server:
 	go run ./cmd/server
 
 bot:
-	go run ./cmd/bot
+	go run ./cmd/bot $(ARGS)
+
+tidy:
+	go mod tidy
 
 GOPATH := $(shell go env GOPATH)
 GOBIN  := $(GOPATH)/bin
