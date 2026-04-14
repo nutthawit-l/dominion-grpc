@@ -11,3 +11,7 @@
 .vscode/settings.json
 .idea/
 *.swp
+
+# Binary files
+bot
+server
