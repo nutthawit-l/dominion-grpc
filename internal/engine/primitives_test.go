@@ -88,3 +88,36 @@ func TestAddActions(t *testing.T) {
 	require.Len(t, events, 1)
 	require.Equal(t, EventActionsAdded, events[0].Kind)
 }
+
+func TestGainCard_ToDiscard(t *testing.T) {
+	s := newTestState(1)
+	s.Supply.Piles["silver"] = 40
+
+	events := GainCard(s, 0, "silver", GainToDiscard)
+
+	require.Equal(t, 39, s.Supply.Piles["silver"])
+	require.Equal(t, []CardID{"silver"}, s.Players[0].Discard)
+	require.Len(t, events, 1)
+	require.Equal(t, EventCardGained, events[0].Kind)
+}
+
+func TestGainCard_EmptyPileReturnsNoEvent(t *testing.T) {
+	s := newTestState(1)
+	s.Supply.Piles["province"] = 0
+
+	events := GainCard(s, 0, "province", GainToDiscard)
+
+	require.Empty(t, s.Players[0].Discard)
+	require.Empty(t, events)
+	require.Equal(t, 0, s.Supply.Piles["province"])
+}
+
+func TestGainCard_ToHand(t *testing.T) {
+	s := newTestState(1)
+	s.Supply.Piles["gold"] = 30
+
+	events := GainCard(s, 0, "gold", GainToHand)
+
+	require.Equal(t, []CardID{"gold"}, s.Players[0].Hand)
+	require.Len(t, events, 1)
+}

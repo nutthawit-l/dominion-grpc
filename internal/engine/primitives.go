@@ -70,3 +70,23 @@ func AddActions(s *GameState, p int, n int) []Event {
 	s.Players[p].Actions += n
 	return []Event{{Kind: EventActionsAdded, PlayerIdx: p, Count: n}}
 }
+
+// GainCard gains one copy of card from the supply to the given destination
+// for player p. If the supply pile is empty, nothing happens and no event
+// is emitted.
+func GainCard(s *GameState, p int, card CardID, dest GainDest) []Event {
+	if s.Supply.Piles[card] <= 0 {
+		return nil
+	}
+	s.Supply.Piles[card]--
+	ps := &s.Players[p]
+	switch dest {
+	case GainToHand:
+		ps.Hand = append(ps.Hand, card)
+	case GainToDeck:
+		ps.Deck = append(ps.Deck, card)
+	default:
+		ps.Discard = append(ps.Discard, card)
+	}
+	return []Event{{Kind: EventCardGained, PlayerIdx: p, CardID: card}}
+}
