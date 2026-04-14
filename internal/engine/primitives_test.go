@@ -62,3 +62,29 @@ func TestDiscardFromHand_IgnoresCardsNotInHand(t *testing.T) {
 	require.Len(t, s.Players[0].Discard, 0)
 	require.Len(t, events, 0)
 }
+
+func TestAddCoins(t *testing.T) {
+	s := newTestState(1)
+	events := AddCoins(s, 0, 3)
+	require.Equal(t, 3, s.Players[0].Coins)
+	require.Len(t, events, 1)
+	require.Equal(t, EventCoinsAdded, events[0].Kind)
+	require.Equal(t, 3, events[0].Count)
+}
+
+func TestAddBuys(t *testing.T) {
+	s := newTestState(1)
+	s.Players[0].Buys = 1
+	events := AddBuys(s, 0, 2)
+	require.Equal(t, 3, s.Players[0].Buys)
+	require.Len(t, events, 1)
+	require.Equal(t, EventBuysAdded, events[0].Kind)
+}
+
+func TestAddActions(t *testing.T) {
+	s := newTestState(1)
+	events := AddActions(s, 0, 2)
+	require.Equal(t, 2, s.Players[0].Actions)
+	require.Len(t, events, 1)
+	require.Equal(t, EventActionsAdded, events[0].Kind)
+}

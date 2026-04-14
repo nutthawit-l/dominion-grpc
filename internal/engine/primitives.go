@@ -52,3 +52,21 @@ func indexOf(cards []CardID, c CardID) int {
 	}
 	return -1
 }
+
+// AddCoins adds n to the player's Coins total and emits one event.
+func AddCoins(s *GameState, p int, n int) []Event {
+	s.Players[p].Coins += n
+	return []Event{{Kind: EventCoinsAdded, PlayerIdx: p, Count: n}}
+}
+
+// AddBuys adds n to the player's Buys total and emits one event.
+func AddBuys(s *GameState, p int, n int) []Event {
+	s.Players[p].Buys += n
+	return []Event{{Kind: EventBuysAdded, PlayerIdx: p, Count: n}}
+}
+
+// AddActions adds n to the player's Actions total and emits one event.
+func AddActions(s *GameState, p int, n int) []Event {
+	s.Players[p].Actions += n
+	return []Event{{Kind: EventActionsAdded, PlayerIdx: p, Count: n}}
+}
