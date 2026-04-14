@@ -66,3 +66,36 @@ func TestGameService_SubmitAction_UnknownGameReturnsNotFound(t *testing.T) {
 	require.ErrorAs(t, err, &ce)
 	require.Equal(t, connect.CodeNotFound, ce.Code())
 }
+
+func TestGameService_StreamGameEvents_FirstEventIsSnapshot(t *testing.T) {
+	svc := newTestService()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	create, _ := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"a", "b"}, Seed: 1,
+	}))
+
+	stream := &fakeServerStream{ch: make(chan *pb.StreamGameEventsResponse, 16)}
+	go func() {
+		_ = svc.streamGameEventsInto(ctx, connect.NewRequest(&pb.StreamGameEventsRequest{
+			GameId: create.Msg.GameId, PlayerIdx: 0,
+		}), stream)
+	}()
+
+	// First event should be a snapshot.
+	ev := <-stream.ch
+	require.NotNil(t, ev.GetSnapshot())
+	require.Equal(t, uint64(0), ev.Sequence)
+}
+
+// fakeServerStream is a minimal stand-in for connect.ServerStream[...]
+// that captures sent messages onto a channel.
+type fakeServerStream struct {
+	ch chan *pb.StreamGameEventsResponse
+}
+
+func (f *fakeServerStream) Send(ev *pb.StreamGameEventsResponse) error {
+	f.ch <- ev
+	return nil
+}
