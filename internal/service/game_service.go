@@ -78,42 +78,47 @@ func (g *GameService) SubmitAction(ctx context.Context, req *connect.Request[pb.
 	return connect.NewResponse(&pb.SubmitActionResponse{}), nil
 }
 
-// fanOut translates engine events to proto events and sends them to
-// every subscriber of the game. Must be called with the store mutex
-// held (which it already is from WithLock).
+// fanOut sends one snapshot per SubmitAction call to every subscriber.
+// Sending a single snapshot per action (rather than one per engine event)
+// prevents bots from acting on stale intermediate events that all say
+// "it's your turn." The game-ended event is sent as a structured message
+// so subscribers can detect termination without polling.
+// Must be called with the store mutex held (which it already is from WithLock).
 func (g *GameService) fanOut(gameID string, s *engine.GameState, events []engine.Event) {
 	g.subsMu.Lock()
 	defer g.subsMu.Unlock()
+
+	// Check whether the game ended so we send the right final event.
+	gameEnded := false
 	for _, ev := range events {
-		g.seq[gameID]++
-		resp := &pb.StreamGameEventsResponse{Sequence: g.seq[gameID]}
-		switch ev.Kind {
-		case engine.EventPhaseChanged:
-			resp.Kind = &pb.StreamGameEventsResponse_PhaseChanged{PhaseChanged: &pb.PhaseChanged{
-				NewPhase:  phaseToProto(ev.Phase),
-				PlayerIdx: int32(ev.PlayerIdx),
-			}}
-		case engine.EventTurnStarted:
-			resp.Kind = &pb.StreamGameEventsResponse_TurnStarted{TurnStarted: &pb.TurnStarted{
-				Turn:      int32(ev.Count),
-				PlayerIdx: int32(ev.PlayerIdx),
-			}}
-		case engine.EventGameEnded:
-			resp.Kind = &pb.StreamGameEventsResponse_Ended{Ended: &pb.GameEnded{}}
-		default:
-			// For Tier 0 we use a snapshot-per-action fan-out for any
-			// other event; simpler than modelling every engine event
-			// type and sufficient for bot-vs-bot correctness.
-			resp.Kind = &pb.StreamGameEventsResponse_Snapshot{Snapshot: SnapshotFromState(s, 0)}
+		if ev.Kind == engine.EventGameEnded {
+			gameEnded = true
 		}
-		for _, ch := range g.subs[gameID] {
-			select {
-			case ch <- resp:
-			default:
-				// Drop on slow consumer. The consumer will detect the
-				// sequence gap and resubscribe, receiving a fresh
-				// snapshot.
-			}
+	}
+
+	g.seq[gameID]++
+	var resp *pb.StreamGameEventsResponse
+	if gameEnded {
+		resp = &pb.StreamGameEventsResponse{
+			Sequence: g.seq[gameID],
+			Kind:     &pb.StreamGameEventsResponse_Ended{Ended: &pb.GameEnded{}},
+		}
+	} else {
+		// Send a snapshot for each viewer individually. Since we don't store
+		// viewer-per-subscriber yet, send viewer=0 snapshot to all. Each
+		// subscriber can extract phase/turn from the snapshot for routing.
+		// Tier 1 will track per-subscriber viewer indices.
+		resp = &pb.StreamGameEventsResponse{
+			Sequence: g.seq[gameID],
+			Kind:     &pb.StreamGameEventsResponse_Snapshot{Snapshot: SnapshotFromState(s, 0)},
+		}
+	}
+
+	for _, ch := range g.subs[gameID] {
+		select {
+		case ch <- resp:
+		default:
+			// Drop on slow consumer.
 		}
 	}
 }
