@@ -54,10 +54,14 @@ func NewGame(gameID string, playerNames []string, seed int64, lookup CardLookup)
 		DrawCards(s, i, 5)
 	}
 
+	// Pick starting player after all shuffles/draws so existing
+	// deterministic shuffle results with a given seed are preserved.
+	s.CurrentPlayer = s.rng.Intn(len(playerNames))
+
 	// First player's Action phase resources.
-	s.Players[0].Actions = 1
-	s.Players[0].Buys = 1
-	s.Players[0].Coins = 0
+	s.Players[s.CurrentPlayer].Actions = 1
+	s.Players[s.CurrentPlayer].Buys = 1
+	s.Players[s.CurrentPlayer].Coins = 0
 
 	// lookup is unused in Tier 0's initial setup but is threaded through
 	// so Tier 1+ card-selection logic can use it later.

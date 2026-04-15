@@ -34,11 +34,12 @@ func TestNewGame_TwoPlayer_InitialDeckAndHand(t *testing.T) {
 		require.Equal(t, 7, total("copper"))
 		require.Equal(t, 3, total("estate"))
 	}
+	cp := s.CurrentPlayer
 	require.Equal(t, PhaseAction, s.Phase)
-	require.Equal(t, 0, s.CurrentPlayer)
+	require.Contains(t, []int{0, 1}, s.CurrentPlayer)
 	require.Equal(t, 1, s.Turn)
-	require.Equal(t, 1, s.Players[0].Actions)
-	require.Equal(t, 1, s.Players[0].Buys)
+	require.Equal(t, 1, s.Players[cp].Actions)
+	require.Equal(t, 1, s.Players[cp].Buys)
 }
 
 func TestNewGame_TwoPlayer_SupplyCounts(t *testing.T) {

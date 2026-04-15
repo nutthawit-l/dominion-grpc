@@ -43,9 +43,13 @@ func TestGameService_SubmitAction_EndPhaseActionToBuy(t *testing.T) {
 		Players: []string{"a", "b"}, Seed: 1,
 	}))
 
+	initial, ok := svc.store.Get(create.Msg.GameId)
+	require.True(t, ok)
+	cp := int32(initial.CurrentPlayer)
+
 	_, err := svc.SubmitAction(ctx, connect.NewRequest(&pb.SubmitActionRequest{
 		GameId: create.Msg.GameId,
-		Action: &pb.Action{Kind: &pb.Action_EndPhase{EndPhase: &pb.EndPhaseAction{PlayerIdx: 0}}},
+		Action: &pb.Action{Kind: &pb.Action_EndPhase{EndPhase: &pb.EndPhaseAction{PlayerIdx: cp}}},
 	}))
 	require.NoError(t, err)
 
