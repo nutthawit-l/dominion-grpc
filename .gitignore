@@ -15,3 +15,6 @@
 # Binary files
 bot
 server
+
+# Debug files
+**/*__debug*
