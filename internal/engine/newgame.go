@@ -57,6 +57,7 @@ func NewGame(gameID string, playerNames []string, seed int64, lookup CardLookup)
 	// Pick starting player after all shuffles/draws so existing
 	// deterministic shuffle results with a given seed are preserved.
 	s.CurrentPlayer = s.rng.Intn(len(playerNames))
+	s.StartingPlayer = s.CurrentPlayer
 
 	// First player's Action phase resources.
 	s.Players[s.CurrentPlayer].Actions = 1

@@ -37,7 +37,7 @@ func cleanupAndEndTurn(s *GameState) []Event {
 	// Advance to next player.
 	next := (p + 1) % len(s.Players)
 	s.CurrentPlayer = next
-	if next == 0 {
+	if next == s.StartingPlayer {
 		s.Turn++
 	}
 	s.Phase = PhaseAction

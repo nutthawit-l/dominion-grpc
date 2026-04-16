@@ -11,8 +11,9 @@ type GameState struct {
 	Seed          int64
 	rng           *rand.Rand
 	Players       []PlayerState
-	CurrentPlayer int
-	Phase         Phase
+	CurrentPlayer  int
+	StartingPlayer int
+	Phase          Phase
 	Supply        Supply
 	Trash         []CardID
 	Turn          int
