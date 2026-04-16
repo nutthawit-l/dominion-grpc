@@ -8,6 +8,7 @@ import (
 
 func TestCleanupAndEndTurn_MovesInPlayAndHandToDiscard(t *testing.T) {
 	s := newTestState(2)
+	s.StartingPlayer = 0
 	s.CurrentPlayer = 0
 	s.Phase = PhaseCleanup
 	s.Players[0].Hand = []CardID{"copper", "estate"}
@@ -32,6 +33,7 @@ func TestCleanupAndEndTurn_MovesInPlayAndHandToDiscard(t *testing.T) {
 
 func TestCleanupAndEndTurn_WrapsToFirstPlayerAndIncrementsTurn(t *testing.T) {
 	s := newTestState(2)
+	s.StartingPlayer = 0
 	s.CurrentPlayer = 1
 	s.Phase = PhaseCleanup
 	s.Turn = 1
