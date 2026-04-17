@@ -112,7 +112,8 @@ message CreateGameRequest {
 
 message CreateGameResponse {
     string game_id = 1;
-    GameStateSnapshot snapshot = 2;
+    // No snapshot here — clients subscribe via StreamGameEvents with a
+    // player_idx to receive a snapshot correctly scrubbed to their view.
 }
 
 message StreamGameEventsRequest {

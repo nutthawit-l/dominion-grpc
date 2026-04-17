@@ -31,8 +31,6 @@ func TestGameService_CreateGame(t *testing.T) {
 	}))
 	require.NoError(t, err)
 	require.NotEmpty(t, resp.Msg.GameId)
-	require.NotNil(t, resp.Msg.Snapshot)
-	require.Equal(t, pb.Phase_PHASE_ACTION, resp.Msg.Snapshot.Phase)
 }
 
 func TestGameService_SubmitAction_EndPhaseActionToBuy(t *testing.T) {

@@ -50,8 +50,7 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 	}
 	g.store.Put(s)
 	return connect.NewResponse(&pb.CreateGameResponse{
-		GameId:   id,
-		Snapshot: SnapshotFromState(s, 0),
+		GameId: id,
 	}), nil
 }
 

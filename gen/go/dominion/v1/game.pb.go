@@ -702,7 +702,6 @@ func (x *CreateGameRequest) GetKingdom() []string {
 type CreateGameResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GameId        string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
-	Snapshot      *GameStateSnapshot     `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -742,13 +741,6 @@ func (x *CreateGameResponse) GetGameId() string {
 		return x.GameId
 	}
 	return ""
-}
-
-func (x *CreateGameResponse) GetSnapshot() *GameStateSnapshot {
-	if x != nil {
-		return x.Snapshot
-	}
-	return nil
 }
 
 type StreamGameEventsRequest struct {
@@ -1385,10 +1377,9 @@ const file_dominion_v1_game_proto_rawDesc = "" +
 	"\x11CreateGameRequest\x12\x18\n" +
 	"\aplayers\x18\x01 \x03(\tR\aplayers\x12\x12\n" +
 	"\x04seed\x18\x02 \x01(\x03R\x04seed\x12\x18\n" +
-	"\akingdom\x18\x03 \x03(\tR\akingdom\"i\n" +
+	"\akingdom\x18\x03 \x03(\tR\akingdom\"-\n" +
 	"\x12CreateGameResponse\x12\x17\n" +
-	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12:\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x1e.dominion.v1.GameStateSnapshotR\bsnapshot\"Q\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\"Q\n" +
 	"\x17StreamGameEventsRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\x1d\n" +
 	"\n" +
@@ -1485,31 +1476,30 @@ var file_dominion_v1_game_proto_depIdxs = []int32{
 	4,  // 5: dominion.v1.Action.buy_card:type_name -> dominion.v1.BuyCardAction
 	5,  // 6: dominion.v1.Action.end_phase:type_name -> dominion.v1.EndPhaseAction
 	7,  // 7: dominion.v1.Action.resolve:type_name -> dominion.v1.ResolveDecision
-	1,  // 8: dominion.v1.CreateGameResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
-	2,  // 9: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
-	22, // 10: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
-	1,  // 11: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
-	14, // 12: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
-	15, // 13: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
-	16, // 14: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
-	17, // 15: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
-	18, // 16: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
-	2,  // 17: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
-	1,  // 18: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
-	20, // 19: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
-	6,  // 20: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
-	19, // 21: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
-	8,  // 22: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
-	10, // 23: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
-	11, // 24: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
-	9,  // 25: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
-	13, // 26: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
-	12, // 27: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
-	25, // [25:28] is the sub-list for method output_type
-	22, // [22:25] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	2,  // 8: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
+	22, // 9: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
+	1,  // 10: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
+	14, // 11: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
+	15, // 12: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
+	16, // 13: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
+	17, // 14: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
+	18, // 15: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
+	2,  // 16: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
+	1,  // 17: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
+	20, // 18: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
+	6,  // 19: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
+	19, // 20: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
+	8,  // 21: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
+	10, // 22: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
+	11, // 23: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
+	9,  // 24: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
+	13, // 25: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
+	12, // 26: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
+	24, // [24:27] is the sub-list for method output_type
+	21, // [21:24] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_dominion_v1_game_proto_init() }
