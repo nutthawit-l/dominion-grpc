@@ -16,8 +16,8 @@ bot-vs-bot integration test. See the design spec in the dev-env repo under
 make server
 
 # In another terminal — run two BigMoney bots against each other
-make bot ARGS="--server http://localhost:8080 --player alice"
-make bot ARGS="--server http://localhost:8080 --player bob"
+make bot ARGS="-server http://localhost:8080 -as-player 0 -create -seed 42"
+make bot ARGS="-server http://localhost:8080 -as-player 1 -game <GAME_ID>"
 ```
 
 ## Make targets
@@ -36,28 +36,48 @@ make bot ARGS="--server http://localhost:8080 --player bob"
 ## Playing a bot-vs-bot game manually
 
 1. `make server` — server listens on `http://localhost:8080`
-2. Create a game (curl example):
+2. Start the first bot and let it create the game:
+
+```bash
+make bot ARGS="-create -as-player 0 -seed 42"
+# → prints: created game <id>
+```
+
+3. In another terminal, join the same game as the second player:
+
+```bash
+make bot ARGS="-game <id> -as-player 1"
+```
+
+Flags accepted by `cmd/bot`: `-server` (default `http://localhost:8080`),
+`-create`, `-game`, `-as-player` (int index), `-seed` (only with `-create`),
+`-strategy` (default `bigmoney`).
+
+### Poking the server with curl
+
+`CreateGame` takes **strategy identifiers** per seat, not player names
+(`"bigmoney"`, `"human"`, …):
 
 ```bash
 curl -s -X POST http://localhost:8080/dominion.v1.GameService/CreateGame \
   -H 'Content-Type: application/json' \
-  -d '{"players":["alice","bob"],"seed":42}'
+  -d '{"players":["bigmoney","bigmoney"],"seed":42}'
 ```
 
-3. Stream events for player 0:
+Stream events scrubbed to player 0's view:
 
 ```bash
-curl -s -X POST http://localhost:8080/dominion.v1.GameService/StreamGameEvents \
-  -H 'Content-Type: application/json' \
-  -d '{"game_id":"<id>","player_idx":0}'
+buf curl --schema proto \
+  --data '{"game_id":"<id>","player_idx":0}' \
+  http://localhost:8080/dominion.v1.GameService/StreamGameEvents
 ```
 
-4. Submit an action:
+Submit an action (here, end the current phase for player 0):
 
 ```bash
-curl -s -X POST http://localhost:8080/dominion.v1.GameService/SubmitAction \
-  -H 'Content-Type: application/json' \
-  -d '{"game_id":"<id>","action":{"end_phase":{"player_idx":0}}}'
+buf curl --schema proto \
+  --data '{"game_id":"<id>","action":{"end_phase":{"player_idx":0}}}' \
+  http://localhost:8080/dominion.v1.GameService/SubmitAction
 ```
 
 ## Layout
