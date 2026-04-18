@@ -1,7 +1,7 @@
 package bot
 
 import (
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
 // Strategy decides actions for a bot.

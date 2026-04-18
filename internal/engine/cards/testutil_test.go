@@ -1,7 +1,7 @@
 package cards
 
 import (
-	"github.com/tie/dominion-grpc/internal/engine"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 )
 
 func newTestStateForCards(numPlayers int) *engine.GameState {

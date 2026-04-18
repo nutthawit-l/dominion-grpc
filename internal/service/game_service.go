@@ -7,9 +7,9 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
-	"github.com/tie/dominion-grpc/internal/engine"
-	"github.com/tie/dominion-grpc/internal/store"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
 
 // GameService implements the Connect GameServiceHandler interface.

@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/tie/dominion-grpc/internal/bot"
+	"github.com/nutthawit-l/dominion-grpc/internal/bot"
 )
 
 func main() {

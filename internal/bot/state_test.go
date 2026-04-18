@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
 func TestClientState_Apply_Snapshot(t *testing.T) {

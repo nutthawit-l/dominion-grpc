@@ -3,7 +3,7 @@ package cards
 import (
 	"fmt"
 
-	"github.com/tie/dominion-grpc/internal/engine"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 )
 
 // Registry holds card definitions by ID. It is not safe for concurrent

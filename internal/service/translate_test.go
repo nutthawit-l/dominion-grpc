@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
-	"github.com/tie/dominion-grpc/internal/engine"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 )
 
 func TestActionFromProto_PlayCard(t *testing.T) {

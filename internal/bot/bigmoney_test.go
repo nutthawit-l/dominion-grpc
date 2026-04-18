@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
 func csWithHand(me int, phase pb.Phase, coins int32, buys int32, hand []string) *ClientState {

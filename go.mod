@@ -1,4 +1,4 @@
-module github.com/tie/dominion-grpc
+module github.com/nutthawit-l/dominion-grpc
 
 go 1.26.1
 

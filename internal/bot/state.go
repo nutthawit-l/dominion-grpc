@@ -3,7 +3,7 @@ package bot
 import (
 	"errors"
 
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
 // ErrSequenceGap is returned by Apply when the incoming event's

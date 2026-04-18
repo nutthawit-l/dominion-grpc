@@ -154,8 +154,8 @@ const file_dominion_v1_common_proto_rawDesc = "" +
 	"\x0fCARD_TYPE_CURSE\x10\x03\x12\x14\n" +
 	"\x10CARD_TYPE_ACTION\x10\x04\x12\x14\n" +
 	"\x10CARD_TYPE_ATTACK\x10\x05\x12\x16\n" +
-	"\x12CARD_TYPE_REACTION\x10\x06B\xa7\x01\n" +
-	"\x0fcom.dominion.v1B\vCommonProtoP\x01Z:github.com/tie/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
+	"\x12CARD_TYPE_REACTION\x10\x06B\xaf\x01\n" +
+	"\x0fcom.dominion.v1B\vCommonProtoP\x01ZBgithub.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
 
 var (
 	file_dominion_v1_common_proto_rawDescOnce sync.Once

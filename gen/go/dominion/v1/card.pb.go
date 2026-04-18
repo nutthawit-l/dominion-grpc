@@ -131,8 +131,8 @@ const file_dominion_v1_card_proto_rawDesc = "" +
 	"\n" +
 	"SupplyPile\x12\x17\n" +
 	"\acard_id\x18\x01 \x01(\tR\x06cardId\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x05R\x05countB\xa5\x01\n" +
-	"\x0fcom.dominion.v1B\tCardProtoP\x01Z:github.com/tie/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
+	"\x05count\x18\x02 \x01(\x05R\x05countB\xad\x01\n" +
+	"\x0fcom.dominion.v1B\tCardProtoP\x01ZBgithub.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
 
 var (
 	file_dominion_v1_card_proto_rawDescOnce sync.Once

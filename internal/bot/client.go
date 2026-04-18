@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
-	"github.com/tie/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
+	"github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
 )
 
 // Client is a thin wrapper around the generated Connect client that

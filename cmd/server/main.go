@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/tie/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
-	"github.com/tie/dominion-grpc/internal/engine"
-	"github.com/tie/dominion-grpc/internal/engine/cards"
-	"github.com/tie/dominion-grpc/internal/service"
-	"github.com/tie/dominion-grpc/internal/store"
+	"github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine/cards"
+	"github.com/nutthawit-l/dominion-grpc/internal/service"
+	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
 
 func main() {

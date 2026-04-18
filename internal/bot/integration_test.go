@@ -12,12 +12,12 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/tie/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
-	"github.com/tie/dominion-grpc/internal/bot"
-	"github.com/tie/dominion-grpc/internal/engine"
-	"github.com/tie/dominion-grpc/internal/engine/cards"
-	"github.com/tie/dominion-grpc/internal/service"
-	"github.com/tie/dominion-grpc/internal/store"
+	"github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1/dominionv1connect"
+	"github.com/nutthawit-l/dominion-grpc/internal/bot"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/nutthawit-l/dominion-grpc/internal/engine/cards"
+	"github.com/nutthawit-l/dominion-grpc/internal/service"
+	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
 
 func newTestServer(t *testing.T) *httptest.Server {

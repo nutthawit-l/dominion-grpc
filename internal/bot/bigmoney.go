@@ -1,7 +1,7 @@
 package bot
 
 import (
-	pb "github.com/tie/dominion-grpc/gen/go/dominion/v1"
+	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
 // BigMoney is the canonical starter strategy: never play action cards,

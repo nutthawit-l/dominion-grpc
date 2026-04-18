@@ -1426,8 +1426,8 @@ const file_dominion_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"CreateGame\x12\x1e.dominion.v1.CreateGameRequest\x1a\x1f.dominion.v1.CreateGameResponse\x12a\n" +
 	"\x10StreamGameEvents\x12$.dominion.v1.StreamGameEventsRequest\x1a%.dominion.v1.StreamGameEventsResponse0\x01\x12S\n" +
-	"\fSubmitAction\x12 .dominion.v1.SubmitActionRequest\x1a!.dominion.v1.SubmitActionResponseB\xa5\x01\n" +
-	"\x0fcom.dominion.v1B\tGameProtoP\x01Z:github.com/tie/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
+	"\fSubmitAction\x12 .dominion.v1.SubmitActionRequest\x1a!.dominion.v1.SubmitActionResponseB\xad\x01\n" +
+	"\x0fcom.dominion.v1B\tGameProtoP\x01ZBgithub.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
 
 var (
 	file_dominion_v1_game_proto_rawDescOnce sync.Once

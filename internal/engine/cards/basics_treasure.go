@@ -1,6 +1,6 @@
 package cards
 
-import "github.com/tie/dominion-grpc/internal/engine"
+import "github.com/nutthawit-l/dominion-grpc/internal/engine"
 
 var Copper = &engine.Card{
 	ID:    "copper",

@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/tie/dominion-grpc/gen/go
+      value: github.com/nutthawit-l/dominion-grpc/gen/go
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen/go
