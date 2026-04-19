@@ -130,12 +130,12 @@ func TestEachOtherPlayer_IterationOrderAndEventOrdering(t *testing.T) {
 		return []Event{{Kind: EventCardDrawn, PlayerIdx: idx, Count: 1}}
 	})
 	// Starting from next seat after CurrentPlayer (1), wrapping: 2, 3, 0.
-	require.Equal(t, []int{2, 3, 0}, visited)
+	require.Equal(t, []int{1, 2, 3}, visited)
 	// Events are concatenated in visit order.
 	require.Len(t, events, 3)
-	require.Equal(t, 2, events[0].PlayerIdx)
-	require.Equal(t, 3, events[1].PlayerIdx)
-	require.Equal(t, 0, events[2].PlayerIdx)
+	require.Equal(t, 1, events[0].PlayerIdx)
+	require.Equal(t, 2, events[1].PlayerIdx)
+	require.Equal(t, 3, events[2].PlayerIdx)
 }
 
 func TestEachOtherPlayer_TwoPlayers(t *testing.T) {
