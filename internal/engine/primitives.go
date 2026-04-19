@@ -71,6 +71,19 @@ func AddActions(s *GameState, p int, n int) []Event {
 	return []Event{{Kind: EventActionsAdded, PlayerIdx: p, Count: n}}
 }
 
+// EachOtherPlayer calls fn(idx) for every player except `except`, in
+// turn order starting at the next seat, wrapping around. Returns the
+// concatenation of all events fn returns.
+func EachOtherPlayer(s *GameState, except int, fn func(idx int) []Event) []Event {
+	n := len(s.Players)
+	var events []Event
+	for step := 1; step < n; step++ {
+		idx := (except + step) % n
+		events = append(events, fn(idx)...)
+	}
+	return events
+}
+
 // GainCard gains one copy of card from the supply to the given destination
 // for player p. If the supply pile is empty, nothing happens and no event
 // is emitted.

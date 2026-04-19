@@ -121,3 +121,35 @@ func TestGainCard_ToHand(t *testing.T) {
 	require.Equal(t, []CardID{"gold"}, s.Players[0].Hand)
 	require.Len(t, events, 1)
 }
+
+func TestEachOtherPlayer_IterationOrderAndEventOrdering(t *testing.T) {
+	s := newTestState(4)
+	var visited []int
+	events := EachOtherPlayer(s, 1, func(idx int) []Event {
+		visited = append(visited, idx)
+		return []Event{{Kind: EventActionsAdded, PlayerIdx: idx, Count: 1}}
+	})
+	// Starting from next seat after 1, wrapping: 2, 3, 0.
+	require.Equal(t, []int{2, 3, 0}, visited)
+	// Events are concatenated in visit order.
+	require.Len(t, events, 3)
+	require.Equal(t, 2, events[0].PlayerIdx)
+	require.Equal(t, 3, events[1].PlayerIdx)
+	require.Equal(t, 0, events[2].PlayerIdx)
+}
+
+func TestEachOtherPlayer_TwoPlayers(t *testing.T) {
+	s := newTestState(2)
+	var visited []int
+	_ = EachOtherPlayer(s, 0, func(idx int) []Event {
+		visited = append(visited, idx)
+		return nil
+	})
+	require.Equal(t, []int{1}, visited)
+}
+
+func TestEachOtherPlayer_NilCallbackEvents(t *testing.T) {
+	s := newTestState(3)
+	events := EachOtherPlayer(s, 0, func(idx int) []Event { return nil })
+	require.Nil(t, events)
+}
