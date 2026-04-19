@@ -141,7 +141,7 @@ func TestEachOtherPlayer_IterationOrderAndEventOrdering(t *testing.T) {
 func TestEachOtherPlayer_TwoPlayers(t *testing.T) {
 	s := newTestState(2)
 	var visited []int
-	_ = EachOtherPlayer(s, 0, func(idx int) []Event {
+	_ = EachOtherPlayer(s, s.CurrentPlayer, func(idx int) []Event {
 		visited = append(visited, idx)
 		return nil
 	})
@@ -150,6 +150,6 @@ func TestEachOtherPlayer_TwoPlayers(t *testing.T) {
 
 func TestEachOtherPlayer_NilCallbackEvents(t *testing.T) {
 	s := newTestState(3)
-	events := EachOtherPlayer(s, 0, func(idx int) []Event { return nil })
+	events := EachOtherPlayer(s, s.CurrentPlayer, func(idx int) []Event { return nil })
 	require.Nil(t, events)
 }
