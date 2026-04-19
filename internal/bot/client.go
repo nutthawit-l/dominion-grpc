@@ -22,10 +22,10 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-// CreateGame creates a new game with the given player names and seed.
-func (c *Client) CreateGame(ctx context.Context, players []string, seed int64) (*pb.CreateGameResponse, error) {
+// CreateGame creates a new game with the given player names, seed, and optional kingdom card IDs.
+func (c *Client) CreateGame(ctx context.Context, players []string, seed int64, kingdom []string) (*pb.CreateGameResponse, error) {
 	resp, err := c.inner.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
-		Players: players, Seed: seed,
+		Players: players, Seed: seed, Kingdom: kingdom,
 	}))
 	if err != nil {
 		return nil, err

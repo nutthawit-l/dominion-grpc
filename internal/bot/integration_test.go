@@ -47,7 +47,7 @@ func TestBotVsBot_BigMoney(t *testing.T) {
 	a := bot.NewClient(srv.URL)
 	b := bot.NewClient(srv.URL)
 
-	game, err := a.CreateGame(ctx, []string{"bigmoney", "bigmoney"}, 42)
+	game, err := a.CreateGame(ctx, []string{"bigmoney", "bigmoney"}, 42, nil)
 	require.NoError(t, err)
 	require.NotEmpty(t, game.GameId)
 

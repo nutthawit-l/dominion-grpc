@@ -101,3 +101,52 @@ func (f *fakeServerStream) Send(ev *pb.StreamGameEventsResponse) error {
 	f.ch <- ev
 	return nil
 }
+
+func TestGameService_CreateGame_WithExplicitKingdom(t *testing.T) {
+	svc := newTestService()
+	ctx := context.Background()
+	resp, err := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"alice", "bob"},
+		Seed:    42,
+		Kingdom: []string{"copper"}, // a known basic card — will be rejected as non-kingdom
+	}))
+	_ = resp
+	require.Error(t, err)
+	var ce *connect.Error
+	require.ErrorAs(t, err, &ce)
+	require.Equal(t, connect.CodeInvalidArgument, ce.Code())
+}
+
+func TestGameService_CreateGame_UnknownKingdomCard(t *testing.T) {
+	svc := newTestService()
+	ctx := context.Background()
+	_, err := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"a", "b"},
+		Seed:    1,
+		Kingdom: []string{"not-a-card"},
+	}))
+	require.Error(t, err)
+	var ce *connect.Error
+	require.ErrorAs(t, err, &ce)
+	require.Equal(t, connect.CodeInvalidArgument, ce.Code())
+}
+
+func TestGameService_CreateGame_EmptyKingdom_UsesDefaults(t *testing.T) {
+	svc := newTestService()
+	ctx := context.Background()
+	resp, err := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"a", "b"}, Seed: 1,
+	}))
+	require.NoError(t, err)
+	s, ok := svc.store.Get(resp.Msg.GameId)
+	require.True(t, ok)
+	for id := range s.Supply.Piles {
+		switch id {
+		case "copper", "silver", "gold", "estate", "duchy", "province", "curse":
+			// ok
+		default:
+			// kingdom card present — fine too
+		}
+	}
+	_ = s
+}

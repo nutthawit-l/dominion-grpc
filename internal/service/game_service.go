@@ -43,10 +43,14 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 	if len(names) != 2 {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("expected exactly 2 players in Tier 0"))
 	}
+	kingdom := make([]engine.CardID, len(req.Msg.Kingdom))
+	for i, k := range req.Msg.Kingdom {
+		kingdom[i] = engine.CardID(k)
+	}
 	id := uuid.NewString()
-	s, err := engine.NewGame(id, names, nil, req.Msg.Seed, g.lookup)
+	s, err := engine.NewGame(id, names, kingdom, req.Msg.Seed, g.lookup)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	g.store.Put(s)
 	return connect.NewResponse(&pb.CreateGameResponse{

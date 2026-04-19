@@ -32,7 +32,7 @@ func main() {
 
 	id := *gameID
 	if *create {
-		resp, err := c.CreateGame(ctx, []string{"bigmoney", "bigmoney"}, *seed)
+		resp, err := c.CreateGame(ctx, []string{"bigmoney", "bigmoney"}, *seed, nil)
 		if err != nil {
 			log.Fatalf("create: %v", err)
 		}
