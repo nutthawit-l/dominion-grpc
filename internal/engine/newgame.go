@@ -3,26 +3,42 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 )
 
 // CardLookup is how engine code fetches card definitions without
 // importing the cards package (which would create an import cycle).
 type CardLookup func(CardID) (*Card, bool)
 
-// KingdomLister is an optional interface: if a CardLookup also
-// satisfies this signature (via an attached lister), resolveKingdom
-// can enumerate the registry. Production code (cards.DefaultRegistry)
-// supplies one via NewLookupAndLister; test helpers supply one too.
+// KingdomLister enumerates every card known to the registry, so
+// resolveKingdom can pick out the kingdom cards when NewGame is
+// called with an empty kingdom list. The cards package registers
+// one from its init() via RegisterKingdomLister; tests can install
+// their own lister via the same function.
 type KingdomLister func() []*Card
 
-var kingdomLister KingdomLister
+var (
+	kingdomListerMu sync.Mutex
+	kingdomLister   KingdomLister
+)
 
 // RegisterKingdomLister installs the function used by NewGame to
 // enumerate all kingdom cards when an empty kingdom list is passed.
 // Call this once from the cards package init(), and once per test
 // that uses a custom registry.
 func RegisterKingdomLister(f KingdomLister) {
+	kingdomListerMu.Lock()
+	defer kingdomListerMu.Unlock()
 	kingdomLister = f
+}
+
+// GetKingdomLister returns the currently registered KingdomLister (or
+// nil if none). Tests use this with t.Cleanup to restore the previous
+// lister after swapping in a test-local one.
+func GetKingdomLister() KingdomLister {
+	kingdomListerMu.Lock()
+	defer kingdomListerMu.Unlock()
+	return kingdomLister
 }
 
 // NewGame builds the initial state for a 2-player Base game.
