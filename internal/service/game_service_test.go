@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
@@ -149,4 +150,86 @@ func TestGameService_CreateGame_EmptyKingdom_UsesDefaults(t *testing.T) {
 		}
 	}
 	_ = s
+}
+
+func TestStreamGameEvents_PerViewerScrubbing(t *testing.T) {
+	svc := newTestService()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	create, err := svc.CreateGame(ctx, connect.NewRequest(&pb.CreateGameRequest{
+		Players: []string{"a", "b"}, Seed: 1,
+	}))
+	require.NoError(t, err)
+
+	// Two subscribers, one per seat.
+	stream0 := &fakeServerStream{ch: make(chan *pb.StreamGameEventsResponse, 16)}
+	stream1 := &fakeServerStream{ch: make(chan *pb.StreamGameEventsResponse, 16)}
+	go func() {
+		_ = svc.streamGameEventsInto(ctx, connect.NewRequest(&pb.StreamGameEventsRequest{
+			GameId: create.Msg.GameId, PlayerIdx: 0,
+		}), stream0)
+	}()
+	go func() {
+		_ = svc.streamGameEventsInto(ctx, connect.NewRequest(&pb.StreamGameEventsRequest{
+			GameId: create.Msg.GameId, PlayerIdx: 1,
+		}), stream1)
+	}()
+
+	// Drain the initial snapshots (sequence 0).
+	init0 := drainSnapshot(t, stream0)
+	init1 := drainSnapshot(t, stream1)
+	assertScrubbedForViewer(t, init0, 0)
+	assertScrubbedForViewer(t, init1, 1)
+
+	// Wait until both channels are registered before we fan out.
+	for i := 0; i < 50; i++ {
+		svc.subsMu.Lock()
+		got := len(svc.subs[create.Msg.GameId])
+		svc.subsMu.Unlock()
+		if got == 2 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	// Ask the current player to end the Action phase.
+	s, _ := svc.store.Get(create.Msg.GameId)
+	cp := int32(s.CurrentPlayer)
+	_, err = svc.SubmitAction(ctx, connect.NewRequest(&pb.SubmitActionRequest{
+		GameId: create.Msg.GameId,
+		Action: &pb.Action{Kind: &pb.Action_EndPhase{EndPhase: &pb.EndPhaseAction{PlayerIdx: cp}}},
+	}))
+	require.NoError(t, err)
+
+	// Each subscriber should receive a scrubbed snapshot for its own seat.
+	post0 := drainSnapshot(t, stream0)
+	post1 := drainSnapshot(t, stream1)
+	assertScrubbedForViewer(t, post0, 0)
+	assertScrubbedForViewer(t, post1, 1)
+}
+
+func drainSnapshot(t *testing.T, s *fakeServerStream) *pb.GameStateSnapshot {
+	t.Helper()
+	select {
+	case ev := <-s.ch:
+		snap := ev.GetSnapshot()
+		require.NotNil(t, snap, "expected a snapshot response")
+		return snap
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for snapshot")
+		return nil
+	}
+}
+
+func assertScrubbedForViewer(t *testing.T, snap *pb.GameStateSnapshot, viewer int) {
+	t.Helper()
+	for _, p := range snap.Players {
+		if int(p.PlayerIdx) == viewer {
+			require.Len(t, p.Hand, int(p.HandSize), "viewer %d should see own hand contents", viewer)
+		} else {
+			require.Empty(t, p.Hand, "opponent at seat %d should have hand scrubbed", p.PlayerIdx)
+			require.Greater(t, p.HandSize, int32(0), "opponent hand size should still be reported")
+		}
+	}
 }

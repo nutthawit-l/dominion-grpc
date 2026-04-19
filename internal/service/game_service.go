@@ -12,16 +12,22 @@ import (
 	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
 
+// subscriber carries the per-stream metadata used during fanout.
+type subscriber struct {
+	ch     chan *pb.StreamGameEventsResponse
+	viewer int
+}
+
 // GameService implements the Connect GameServiceHandler interface.
 type GameService struct {
 	store  *store.Memory
 	lookup engine.CardLookup
 
 	subsMu sync.Mutex
-	// subs maps game id -> slice of subscriber channels. Each
-	// StreamGameEvents call appends one channel; SubmitAction fans out
-	// events to every channel for that game.
-	subs map[string][]chan *pb.StreamGameEventsResponse
+	// subs maps game id -> slice of subscribers. Each StreamGameEvents call
+	// appends one subscriber; SubmitAction fans out per-viewer snapshots to
+	// every subscriber for that game.
+	subs map[string][]subscriber
 	// seq is the per-game monotonic event sequence counter.
 	seq map[string]uint64
 }
@@ -32,7 +38,7 @@ func NewGameService(s *store.Memory, lookup engine.CardLookup) *GameService {
 	return &GameService{
 		store:  s,
 		lookup: lookup,
-		subs:   map[string][]chan *pb.StreamGameEventsResponse{},
+		subs:   map[string][]subscriber{},
 		seq:    map[string]uint64{},
 	}
 }
@@ -100,26 +106,39 @@ func (g *GameService) fanOut(gameID string, s *engine.GameState, events []engine
 	}
 
 	g.seq[gameID]++
-	var resp *pb.StreamGameEventsResponse
+	seq := g.seq[gameID]
+
 	if gameEnded {
-		resp = &pb.StreamGameEventsResponse{
-			Sequence: g.seq[gameID],
+		resp := &pb.StreamGameEventsResponse{
+			Sequence: seq,
 			Kind:     &pb.StreamGameEventsResponse_Ended{Ended: &pb.GameEnded{}},
 		}
-	} else {
-		// Send a snapshot for each viewer individually. Since we don't store
-		// viewer-per-subscriber yet, send viewer=0 snapshot to all. Each
-		// subscriber can extract phase/turn from the snapshot for routing.
-		// Tier 1 will track per-subscriber viewer indices.
-		resp = &pb.StreamGameEventsResponse{
-			Sequence: g.seq[gameID],
-			Kind:     &pb.StreamGameEventsResponse_Snapshot{Snapshot: SnapshotFromState(s, 0)},
+		for _, sub := range g.subs[gameID] {
+			select {
+			case sub.ch <- resp:
+			default:
+				// Drop on slow consumer.
+			}
 		}
+		return
 	}
 
-	for _, ch := range g.subs[gameID] {
+	// Build one snapshot response per distinct viewer seat, then send each
+	// subscriber the snapshot for their own seat.
+	snapByViewer := map[int]*pb.StreamGameEventsResponse{}
+	for _, sub := range g.subs[gameID] {
+		if _, ok := snapByViewer[sub.viewer]; ok {
+			continue
+		}
+		snapByViewer[sub.viewer] = &pb.StreamGameEventsResponse{
+			Sequence: seq,
+			Kind:     &pb.StreamGameEventsResponse_Snapshot{Snapshot: SnapshotFromState(s, sub.viewer)},
+		}
+	}
+	for _, sub := range g.subs[gameID] {
+		resp := snapByViewer[sub.viewer]
 		select {
-		case ch <- resp:
+		case sub.ch <- resp:
 		default:
 			// Drop on slow consumer.
 		}
@@ -155,15 +174,16 @@ func (g *GameService) streamGameEventsInto(ctx context.Context, req *connect.Req
 
 	// Register subscriber channel.
 	ch := make(chan *pb.StreamGameEventsResponse, 64)
+	sub := subscriber{ch: ch, viewer: viewer}
 	g.subsMu.Lock()
-	g.subs[gameID] = append(g.subs[gameID], ch)
+	g.subs[gameID] = append(g.subs[gameID], sub)
 	g.subsMu.Unlock()
 
 	defer func() {
 		g.subsMu.Lock()
 		subs := g.subs[gameID]
-		for i, c := range subs {
-			if c == ch {
+		for i, s := range subs {
+			if s.ch == ch {
 				g.subs[gameID] = append(subs[:i], subs[i+1:]...)
 				break
 			}
