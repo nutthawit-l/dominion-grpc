@@ -125,11 +125,11 @@ func TestGainCard_ToHand(t *testing.T) {
 func TestEachOtherPlayer_IterationOrderAndEventOrdering(t *testing.T) {
 	s := newTestState(4)
 	var visited []int
-	events := EachOtherPlayer(s, 1, func(idx int) []Event {
+	events := EachOtherPlayer(s, s.CurrentPlayer, func(idx int) []Event {
 		visited = append(visited, idx)
-		return []Event{{Kind: EventActionsAdded, PlayerIdx: idx, Count: 1}}
+		return []Event{{Kind: EventCardDrawn, PlayerIdx: idx, Count: 1}}
 	})
-	// Starting from next seat after 1, wrapping: 2, 3, 0.
+	// Starting from next seat after CurrentPlayer (1), wrapping: 2, 3, 0.
 	require.Equal(t, []int{2, 3, 0}, visited)
 	// Events are concatenated in visit order.
 	require.Len(t, events, 3)
