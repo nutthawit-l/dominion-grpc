@@ -57,7 +57,7 @@ func TestProperty_CardConservation(t *testing.T) {
 	const seeds = 500
 	const maxSteps = 5000
 	for i := int64(0); i < seeds; i++ {
-		s, err := NewGame("prop", []string{"A", "B"}, i, basicsLookup2)
+		s, err := NewGame("prop", []string{"A", "B"}, nil, i, basicsLookup2)
 		require.NoError(t, err)
 		start := totalCards(s)
 

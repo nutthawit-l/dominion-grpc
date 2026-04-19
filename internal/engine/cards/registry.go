@@ -45,3 +45,9 @@ func (r *Registry) All() []*engine.Card {
 // by each card file. Tests that need a fresh registry should call
 // NewRegistry() directly.
 var DefaultRegistry = NewRegistry()
+
+func init() {
+	engine.RegisterKingdomLister(func() []*engine.Card {
+		return DefaultRegistry.All()
+	})
+}

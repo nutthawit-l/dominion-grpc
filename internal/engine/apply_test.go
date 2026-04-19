@@ -30,7 +30,7 @@ func applyTestLookup(id CardID) (*Card, bool) {
 }
 
 func TestApply_PlayCard_TreasureInBuyPhase(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	// Force a Copper into the current player's hand and go to Buy phase.
 	s.Players[0].Hand = []CardID{"copper"}
@@ -45,7 +45,7 @@ func TestApply_PlayCard_TreasureInBuyPhase(t *testing.T) {
 }
 
 func TestApply_PlayCard_NotMyTurnErrors(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Players[1].Hand = []CardID{"copper"}
 	s.Phase = PhaseBuy
@@ -55,7 +55,7 @@ func TestApply_PlayCard_NotMyTurnErrors(t *testing.T) {
 }
 
 func TestApply_PlayCard_WrongPhaseErrors(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Players[0].Hand = []CardID{"copper"}
 	// still in Action phase
@@ -65,7 +65,7 @@ func TestApply_PlayCard_WrongPhaseErrors(t *testing.T) {
 }
 
 func TestApply_BuyCard_DeductsCoinsAndGainsToDiscard(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Phase = PhaseBuy
 	s.Players[0].Coins = 3
@@ -79,7 +79,7 @@ func TestApply_BuyCard_DeductsCoinsAndGainsToDiscard(t *testing.T) {
 }
 
 func TestApply_BuyCard_NotEnoughCoinsErrors(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Phase = PhaseBuy
 	s.Players[0].Coins = 2
@@ -90,7 +90,7 @@ func TestApply_BuyCard_NotEnoughCoinsErrors(t *testing.T) {
 }
 
 func TestApply_EndPhase_ActionToBuy(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 
 	_, _, err := Apply(s, EndPhase{PlayerIdx: 0}, applyTestLookup)
@@ -100,7 +100,7 @@ func TestApply_EndPhase_ActionToBuy(t *testing.T) {
 }
 
 func TestApply_EndPhase_BuyToNextPlayer(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Phase = PhaseBuy
 
@@ -111,7 +111,7 @@ func TestApply_EndPhase_BuyToNextPlayer(t *testing.T) {
 }
 
 func TestApply_EndPhase_GameEndsAfterBuyIfProvinceGone(t *testing.T) {
-	s, _ := NewGame("g", []string{"A", "B"}, 1, basicsLookup2)
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
 	s.CurrentPlayer = 0
 	s.Phase = PhaseBuy
 	s.Supply.Piles["province"] = 0

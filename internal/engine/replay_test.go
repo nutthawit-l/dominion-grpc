@@ -50,7 +50,7 @@ func TestReplay_RegressionFixtures(t *testing.T) {
 			var fx replayFixture
 			require.NoError(t, json.Unmarshal(raw, &fx))
 
-			s, err := NewGame("replay", fx.PlayerNames, fx.Seed, basicsLookup2)
+			s, err := NewGame("replay", fx.PlayerNames, nil, fx.Seed, basicsLookup2)
 			require.NoError(t, err)
 			for i, step := range fx.Actions {
 				act := step.toAction()

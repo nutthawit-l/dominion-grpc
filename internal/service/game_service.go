@@ -44,7 +44,7 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("expected exactly 2 players in Tier 0"))
 	}
 	id := uuid.NewString()
-	s, err := engine.NewGame(id, names, req.Msg.Seed, g.lookup)
+	s, err := engine.NewGame(id, names, nil, req.Msg.Seed, g.lookup)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
