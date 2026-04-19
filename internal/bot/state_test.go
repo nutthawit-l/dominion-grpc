@@ -47,3 +47,34 @@ func TestClientState_IsMyTurn(t *testing.T) {
 	cs.Ended = true
 	require.False(t, cs.IsMyTurn())
 }
+
+func TestClientState_MyTurnsTaken_IncrementsOnMyTurnSnapshots(t *testing.T) {
+	cs := &ClientState{Me: 0}
+
+	require.NoError(t, cs.Apply(snapshot(0, 1, 0)))
+	require.Equal(t, 1, cs.MyTurnsTaken)
+
+	require.NoError(t, cs.Apply(snapshot(1, 1, 0)))
+	require.Equal(t, 1, cs.MyTurnsTaken)
+
+	require.NoError(t, cs.Apply(snapshot(2, 1, 1)))
+	require.Equal(t, 1, cs.MyTurnsTaken)
+
+	require.NoError(t, cs.Apply(snapshot(3, 2, 0)))
+	require.Equal(t, 2, cs.MyTurnsTaken)
+}
+
+func TestClientState_MyTurnsTaken_StaysZeroIfStartingPlayerIsOpponent(t *testing.T) {
+	cs := &ClientState{Me: 0}
+	require.NoError(t, cs.Apply(snapshot(0, 1, 1)))
+	require.Equal(t, 0, cs.MyTurnsTaken)
+}
+
+func snapshot(seq uint64, turn, currentPlayer int32) *pb.StreamGameEventsResponse {
+	return &pb.StreamGameEventsResponse{
+		Sequence: seq,
+		Kind: &pb.StreamGameEventsResponse_Snapshot{Snapshot: &pb.GameStateSnapshot{
+			Turn: turn, CurrentPlayer: currentPlayer,
+		}},
+	}
+}

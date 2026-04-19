@@ -26,6 +26,9 @@ func (BigMoney) PickAction(cs *ClientState) *pb.Action {
 				return playCard(cs.Me, c)
 			}
 		}
+		if me.Buys <= 0 {
+			return endPhase(cs.Me)
+		}
 		switch {
 		case me.Coins >= 8:
 			return buyCard(cs.Me, "province")

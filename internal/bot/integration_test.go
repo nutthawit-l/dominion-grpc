@@ -56,3 +56,70 @@ func TestBotVsBot_BigMoney(t *testing.T) {
 	grp.Go(func() error { return bot.Run(gctx, b, game.GameId, 1, bot.BigMoney{}) })
 	require.NoError(t, grp.Wait())
 }
+
+func TestBotVsBot_SmithyBM_Outperforms_BigMoney(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration sweep — skipped under -short")
+	}
+
+	const games = 200
+	const threshold = 0.55
+
+	srv := newTestServer(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	wins := 0
+	for seed := int64(0); seed < games; seed++ {
+		smithySeat := int(seed % 2)
+		bmSeat := 1 - smithySeat
+
+		names := make([]string, 2)
+		names[smithySeat] = "smithy_bm"
+		names[bmSeat] = "bigmoney"
+
+		a := bot.NewClient(srv.URL)
+		b := bot.NewClient(srv.URL)
+		game, err := a.CreateGame(ctx, names, seed, []string{"smithy"})
+		require.NoError(t, err)
+
+		strategies := map[int]bot.Strategy{
+			smithySeat: bot.SmithyBM{},
+			bmSeat:     bot.BigMoney{},
+		}
+
+		grp, gctx := errgroup.WithContext(ctx)
+		grp.Go(func() error { return bot.Run(gctx, a, game.GameId, 0, strategies[0]) })
+		grp.Go(func() error { return bot.Run(gctx, b, game.GameId, 1, strategies[1]) })
+		require.NoError(t, grp.Wait(), "seed=%d", seed)
+
+		winners := finalWinners(t, srv, game.GameId)
+		if len(winners) == 1 && winners[0] == smithySeat {
+			wins++
+		}
+	}
+
+	rate := float64(wins) / float64(games)
+	require.GreaterOrEqualf(t, rate, threshold,
+		"SmithyBM win rate %.2f below threshold %.2f over %d games", rate, threshold, games)
+}
+
+func finalWinners(t *testing.T, srv *httptest.Server, gameID string) []int {
+	t.Helper()
+	c := bot.NewClient(srv.URL)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	stream, err := c.StreamGameEvents(ctx, gameID, 0)
+	require.NoError(t, err)
+	defer stream.Close()
+	ev, ok := stream.Receive()
+	require.True(t, ok)
+	snap := ev.GetSnapshot()
+	require.NotNil(t, snap)
+	out := make([]int, 0, len(snap.Winners))
+	for _, w := range snap.Winners {
+		out = append(out, int(w))
+	}
+	return out
+}

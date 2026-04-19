@@ -23,6 +23,8 @@ type ClientState struct {
 	DecidingPlayer  int
 	Ended           bool
 	Winners         []int
+	MyTurnsTaken    int
+	LastMyTurn      int
 }
 
 // Apply reduces one event into the client state.
@@ -43,6 +45,10 @@ func (cs *ClientState) Apply(ev *pb.StreamGameEventsResponse) error {
 		cs.Winners = nil
 		for _, w := range k.Snapshot.Winners {
 			cs.Winners = append(cs.Winners, int(w))
+		}
+		if cs.CurrentPlayer == cs.Me && cs.Turn != cs.LastMyTurn {
+			cs.MyTurnsTaken++
+			cs.LastMyTurn = cs.Turn
 		}
 	case *pb.StreamGameEventsResponse_PhaseChanged:
 		cs.Phase = k.PhaseChanged.NewPhase
