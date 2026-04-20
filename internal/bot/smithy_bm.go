@@ -64,7 +64,7 @@ func (SmithyBM) PickAction(cs *ClientState) *pb.Action {
 }
 
 func (SmithyBM) Resolve(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
-	return safeRefusal(d)
+	return safeRefusal(cs, d)
 }
 
 func supplyCount(snap *pb.GameStateSnapshot, id string) int {

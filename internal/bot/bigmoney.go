@@ -44,7 +44,7 @@ func (BigMoney) PickAction(cs *ClientState) *pb.Action {
 
 // Resolve implements Strategy.
 func (BigMoney) Resolve(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
-	return safeRefusal(d)
+	return safeRefusal(cs, d)
 }
 
 func isTreasure(id string) bool {

@@ -30,10 +30,96 @@ func buyCard(me int, card string) *pb.Action {
 	}}}
 }
 
-// safeRefusal returns the minimum legal answer for a decision, used
-// by strategies that do not know how to handle a particular prompt.
-// Tier 0 never triggers a decision, so this is a stub that returns a
-// ResolveDecision echoing the id with no answer. Tier 2 will expand it.
-func safeRefusal(d *pb.Decision) *pb.ResolveDecision {
-	return &pb.ResolveDecision{DecisionId: d.Id, PlayerIdx: d.PlayerIdx}
+// safeRefusal returns the minimum legal answer for a decision. Used by
+// strategies that do not handle a particular prompt type.
+func safeRefusal(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
+	r := &pb.ResolveDecision{DecisionId: d.Id, PlayerIdx: d.PlayerIdx}
+	switch d.Prompt.(type) {
+	case *pb.Decision_DiscardFromHand:
+		p := d.GetDiscardFromHand()
+		cards := pickFirstN(cs, int(p.Min))
+		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: cards}}
+	case *pb.Decision_TrashFromHand:
+		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: nil}}
+	case *pb.Decision_GainFromSupply:
+		card := cheapestInSupply(cs, d.GetGainFromSupply())
+		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: card}}
+	case *pb.Decision_ChooseFromDiscard:
+		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{None: true}}
+	case *pb.Decision_PutOnDeck:
+		card := firstInHand(cs)
+		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: card}}
+	case *pb.Decision_MayPlayAction:
+		r.Answer = &pb.ResolveDecision_YesNo{YesNo: &pb.YesNoAnswer{Yes: false}}
+	default:
+		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{}}
+	}
+	return r
+}
+
+func pickFirstN(cs *ClientState, n int) []string {
+	me := cs.MyPlayer()
+	if me == nil || n <= 0 {
+		return nil
+	}
+	if n > len(me.Hand) {
+		n = len(me.Hand)
+	}
+	return me.Hand[:n]
+}
+
+func cheapestInSupply(cs *ClientState, p *pb.GainFromSupplyPrompt) string {
+	if cs.Snapshot == nil {
+		return "copper"
+	}
+	best := ""
+	bestCost := int(p.MaxCost) + 1
+	for _, pile := range cs.Snapshot.Supply {
+		if pile.Count <= 0 {
+			continue
+		}
+		cost := cardCost(pile.CardId)
+		if cost <= int(p.MaxCost) && cost < bestCost {
+			best = pile.CardId
+			bestCost = cost
+		}
+	}
+	if best == "" {
+		return "copper"
+	}
+	return best
+}
+
+func firstInHand(cs *ClientState) string {
+	me := cs.MyPlayer()
+	if me == nil || len(me.Hand) == 0 {
+		return ""
+	}
+	return me.Hand[0]
+}
+
+// cardCost returns the known cost of a card by ID. This is a simple
+// lookup for the base set; it avoids importing the engine package.
+func cardCost(id string) int {
+	switch id {
+	case "copper", "curse":
+		return 0
+	case "estate":
+		return 2
+	case "silver", "cellar", "chapel":
+		return 3
+	case "harbinger", "vassal", "workshop":
+		return 3
+	case "moneylender", "poacher", "remodel", "smithy":
+		return 4
+	case "mine", "laboratory", "market", "festival":
+		return 5
+	case "gold", "artisan", "council_room":
+		return 6
+	case "duchy":
+		return 5
+	case "province":
+		return 8
+	}
+	return 0
 }
