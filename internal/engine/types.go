@@ -25,6 +25,14 @@ const (
 	PhaseCleanup
 )
 
+// Zone represents where a card is being played from.
+type Zone int
+
+const (
+	ZoneHand Zone = iota
+	ZoneDiscard
+)
+
 // GainDest says where a gained card should land.
 type GainDest int
 

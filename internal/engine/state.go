@@ -20,9 +20,13 @@ type GameState struct {
 	Ended         bool
 	Winners       []int
 
-	// Tier 0 never sets this, but the plumbing exists so Tier 2 can
-	// drop prompts in without restructuring state.
+	// PendingDecision is set by RequestDecision when a card needs
+	// player input. While set, only ResolveDecision is legal.
 	PendingDecision *Decision
+
+	// DecisionSeq is a monotonic counter for generating deterministic
+	// decision IDs. Incremented by RequestDecision.
+	DecisionSeq uint64
 }
 
 // PlayerState tracks one player's zones and resources.
@@ -42,11 +46,14 @@ type Supply struct {
 	Piles map[CardID]int
 }
 
-// Decision is a server-generated prompt. Tier 0 never sets this; the
-// type exists so engine code compiles with the field declared.
+// Decision is a server-generated prompt requiring player input.
 type Decision struct {
 	ID        string
 	PlayerIdx int
+	CardID    CardID
+	Step      int
+	Prompt    Prompt
+	Context   map[string]any
 }
 
 // Event is an engine-level notification of something that happened.
@@ -74,6 +81,7 @@ const (
 	EventPhaseChanged
 	EventTurnStarted
 	EventGameEnded
+	EventDecisionRequested
 )
 
 // RNG exposes the per-game random source for code inside the engine
