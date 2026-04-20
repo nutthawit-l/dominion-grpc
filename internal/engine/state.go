@@ -87,3 +87,16 @@ const (
 // RNG exposes the per-game random source for code inside the engine
 // package. External code must never reach the underlying field.
 func (s *GameState) RNG() *rand.Rand { return s.rng }
+
+// NewTestStateWithRNG builds a GameState with an initialized RNG.
+// Exported for use by card tests that need primitives requiring rng
+// (e.g., DrawCards shuffles when deck is empty).
+func NewTestStateWithRNG(gameID string, seed int64, players []PlayerState) *GameState {
+	return &GameState{
+		GameID:  gameID,
+		Seed:    seed,
+		rng:     rand.New(rand.NewSource(seed)),
+		Players: players,
+		Supply:  Supply{Piles: map[CardID]int{}},
+	}
+}
