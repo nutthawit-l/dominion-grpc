@@ -28,6 +28,18 @@ func Apply(s *GameState, a Action, lookup CardLookup) (*GameState, []Event, erro
 	if s.Ended {
 		return s, nil, ErrGameEnded
 	}
+
+	// Decision-pending guard: only ResolveDecision is legal while a
+	// decision is pending.
+	if s.PendingDecision != nil {
+		resolve, ok := a.(ResolveDecision)
+		if !ok {
+			return s, nil, ErrDecisionPending
+		}
+		ev, err := applyResolveDecision(s, resolve, lookup)
+		return s, ev, err
+	}
+
 	if a.Player() != s.CurrentPlayer {
 		return s, nil, ErrNotYourTurn
 	}
@@ -42,10 +54,32 @@ func Apply(s *GameState, a Action, lookup CardLookup) (*GameState, []Event, erro
 		ev, err := applyEndPhase(s, lookup)
 		return s, ev, err
 	case ResolveDecision:
-		return s, nil, ErrUnknownAction // Tier 2 adds this path
+		return s, nil, ErrNoDecisionPending
 	default:
 		return s, nil, ErrUnknownAction
 	}
+}
+
+func applyResolveDecision(s *GameState, act ResolveDecision, lookup CardLookup) ([]Event, error) {
+	d := s.PendingDecision
+	if d == nil {
+		return nil, ErrNoDecisionPending
+	}
+	if d.ID != act.DecisionID {
+		return nil, ErrWrongDecisionID
+	}
+	if act.PlayerIdx != d.PlayerIdx {
+		return nil, ErrNotYourTurn
+	}
+	card, ok := lookup(d.CardID)
+	if !ok {
+		return nil, ErrUnknownCard
+	}
+	if card.OnResolve == nil {
+		return nil, ErrNoResolveHandler
+	}
+	s.PendingDecision = nil
+	return card.OnResolve(s, d.PlayerIdx, d, act.Answer, lookup)
 }
 
 func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error) {
@@ -53,12 +87,6 @@ func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error)
 	if !ok {
 		return nil, ErrUnknownCard
 	}
-	if indexOf(s.Players[a.PlayerIdx].Hand, a.Card) < 0 {
-		return nil, ErrCardNotInHand
-	}
-	// In the Action phase, only action cards may be played, and only
-	// if the player has actions available. In the Buy phase, only
-	// treasures may be played.
 	switch s.Phase {
 	case PhaseAction:
 		if !card.HasType(TypeAction) {
@@ -75,15 +103,7 @@ func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error)
 	default:
 		return nil, ErrWrongPhase
 	}
-	// Move the card from hand to in-play.
-	idx := indexOf(s.Players[a.PlayerIdx].Hand, a.Card)
-	s.Players[a.PlayerIdx].Hand = append(s.Players[a.PlayerIdx].Hand[:idx], s.Players[a.PlayerIdx].Hand[idx+1:]...)
-	s.Players[a.PlayerIdx].InPlay = append(s.Players[a.PlayerIdx].InPlay, a.Card)
-	events := []Event{{Kind: EventCardPlayed, PlayerIdx: a.PlayerIdx, CardID: a.Card}}
-	if card.OnPlay != nil {
-		events = append(events, card.OnPlay(s, a.PlayerIdx)...)
-	}
-	return events, nil
+	return PlayCardFromZone(s, a.PlayerIdx, a.Card, ZoneHand, lookup)
 }
 
 func applyBuyCard(s *GameState, a BuyCard, lookup CardLookup) ([]Event, error) {

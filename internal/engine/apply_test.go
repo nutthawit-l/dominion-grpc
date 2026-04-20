@@ -123,3 +123,64 @@ func TestApply_EndPhase_GameEndsAfterBuyIfProvinceGone(t *testing.T) {
 
 // basicsLookup2 returns cards with OnPlay attached so Apply works.
 func basicsLookup2(id CardID) (*Card, bool) { return applyTestLookup(id) }
+
+func TestApply_ResolveDecision_NoDecisionPending(t *testing.T) {
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
+	s.CurrentPlayer = 0
+
+	_, _, err := Apply(s, ResolveDecision{PlayerIdx: 0, DecisionID: "d1"}, applyTestLookup)
+	require.ErrorIs(t, err, ErrNoDecisionPending)
+}
+
+func TestApply_ResolveDecision_WrongID(t *testing.T) {
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
+	s.CurrentPlayer = 0
+	s.PendingDecision = &Decision{
+		ID: "d1", PlayerIdx: 0, CardID: "cellar",
+		Prompt: DiscardFromHandPrompt{Min: 0, Max: 3},
+	}
+
+	_, _, err := Apply(s, ResolveDecision{PlayerIdx: 0, DecisionID: "wrong"}, applyTestLookup)
+	require.ErrorIs(t, err, ErrWrongDecisionID)
+}
+
+func TestApply_DecisionPending_BlocksNonResolveActions(t *testing.T) {
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
+	s.CurrentPlayer = 0
+	s.PendingDecision = &Decision{
+		ID: "d1", PlayerIdx: 0, CardID: "cellar",
+		Prompt: DiscardFromHandPrompt{},
+	}
+
+	_, _, err := Apply(s, EndPhase{PlayerIdx: 0}, applyTestLookup)
+	require.ErrorIs(t, err, ErrDecisionPending)
+}
+
+func TestApply_ResolveDecision_FromDecidingPlayer_NotCurrentPlayer(t *testing.T) {
+	s, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
+	s.CurrentPlayer = 0
+	// Decision is for player 1 (not the current player).
+	resolved := false
+	testCard := &Card{
+		ID: "testcard", Types: []CardType{TypeAction},
+		OnResolve: func(s *GameState, p int, d *Decision, a Answer, lookup CardLookup) ([]Event, error) {
+			resolved = true
+			return nil, nil
+		},
+	}
+	s.PendingDecision = &Decision{
+		ID: "d1", PlayerIdx: 1, CardID: "testcard",
+		Prompt: DiscardFromHandPrompt{},
+	}
+	testLookup := func(id CardID) (*Card, bool) {
+		if id == "testcard" {
+			return testCard, true
+		}
+		return applyTestLookup(id)
+	}
+
+	_, _, err := Apply(s, ResolveDecision{PlayerIdx: 1, DecisionID: "d1", Answer: CardListAnswer{}}, testLookup)
+	require.NoError(t, err)
+	require.True(t, resolved)
+	require.Nil(t, s.PendingDecision)
+}

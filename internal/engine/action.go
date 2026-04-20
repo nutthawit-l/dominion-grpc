@@ -35,11 +35,11 @@ type EndPhase struct {
 func (EndPhase) isAction()     {}
 func (a EndPhase) Player() int { return a.PlayerIdx }
 
-// ResolveDecision answers a pending Decision. Tier 0 never uses this
-// but it is in the union for shape parity with the proto Action.
+// ResolveDecision answers a pending Decision.
 type ResolveDecision struct {
 	PlayerIdx  int
 	DecisionID string
+	Answer     Answer
 }
 
 func (ResolveDecision) isAction()     {}
