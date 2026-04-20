@@ -137,6 +137,59 @@ func (CardType) EnumDescriptor() ([]byte, []int) {
 	return file_dominion_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
+// GainDest says where a gained card should land.
+type GainDest int32
+
+const (
+	GainDest_GAIN_DEST_UNSPECIFIED GainDest = 0
+	GainDest_GAIN_DEST_DISCARD     GainDest = 1
+	GainDest_GAIN_DEST_HAND        GainDest = 2
+	GainDest_GAIN_DEST_DECK        GainDest = 3
+)
+
+// Enum value maps for GainDest.
+var (
+	GainDest_name = map[int32]string{
+		0: "GAIN_DEST_UNSPECIFIED",
+		1: "GAIN_DEST_DISCARD",
+		2: "GAIN_DEST_HAND",
+		3: "GAIN_DEST_DECK",
+	}
+	GainDest_value = map[string]int32{
+		"GAIN_DEST_UNSPECIFIED": 0,
+		"GAIN_DEST_DISCARD":     1,
+		"GAIN_DEST_HAND":        2,
+		"GAIN_DEST_DECK":        3,
+	}
+)
+
+func (x GainDest) Enum() *GainDest {
+	p := new(GainDest)
+	*p = x
+	return p
+}
+
+func (x GainDest) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GainDest) Descriptor() protoreflect.EnumDescriptor {
+	return file_dominion_v1_common_proto_enumTypes[2].Descriptor()
+}
+
+func (GainDest) Type() protoreflect.EnumType {
+	return &file_dominion_v1_common_proto_enumTypes[2]
+}
+
+func (x GainDest) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GainDest.Descriptor instead.
+func (GainDest) EnumDescriptor() ([]byte, []int) {
+	return file_dominion_v1_common_proto_rawDescGZIP(), []int{2}
+}
+
 var File_dominion_v1_common_proto protoreflect.FileDescriptor
 
 const file_dominion_v1_common_proto_rawDesc = "" +
@@ -154,7 +207,12 @@ const file_dominion_v1_common_proto_rawDesc = "" +
 	"\x0fCARD_TYPE_CURSE\x10\x03\x12\x14\n" +
 	"\x10CARD_TYPE_ACTION\x10\x04\x12\x14\n" +
 	"\x10CARD_TYPE_ATTACK\x10\x05\x12\x16\n" +
-	"\x12CARD_TYPE_REACTION\x10\x06B\xaf\x01\n" +
+	"\x12CARD_TYPE_REACTION\x10\x06*d\n" +
+	"\bGainDest\x12\x19\n" +
+	"\x15GAIN_DEST_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11GAIN_DEST_DISCARD\x10\x01\x12\x12\n" +
+	"\x0eGAIN_DEST_HAND\x10\x02\x12\x12\n" +
+	"\x0eGAIN_DEST_DECK\x10\x03B\xaf\x01\n" +
 	"\x0fcom.dominion.v1B\vCommonProtoP\x01ZBgithub.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1;dominionv1\xa2\x02\x03DXX\xaa\x02\vDominion.V1\xca\x02\vDominion\\V1\xe2\x02\x17Dominion\\V1\\GPBMetadata\xea\x02\fDominion::V1b\x06proto3"
 
 var (
@@ -169,10 +227,11 @@ func file_dominion_v1_common_proto_rawDescGZIP() []byte {
 	return file_dominion_v1_common_proto_rawDescData
 }
 
-var file_dominion_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_dominion_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_dominion_v1_common_proto_goTypes = []any{
 	(Phase)(0),    // 0: dominion.v1.Phase
 	(CardType)(0), // 1: dominion.v1.CardType
+	(GainDest)(0), // 2: dominion.v1.GainDest
 }
 var file_dominion_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -192,7 +251,7 @@ func file_dominion_v1_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dominion_v1_common_proto_rawDesc), len(file_dominion_v1_common_proto_rawDesc)),
-			NumEnums:      2,
+			NumEnums:      3,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,

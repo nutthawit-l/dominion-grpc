@@ -21,3 +21,11 @@ enum CardType {
     CARD_TYPE_ATTACK = 5;
     CARD_TYPE_REACTION = 6;
 }
+
+// GainDest says where a gained card should land.
+enum GainDest {
+    GAIN_DEST_UNSPECIFIED = 0;
+    GAIN_DEST_DISCARD = 1;
+    GAIN_DEST_HAND = 2;
+    GAIN_DEST_DECK = 3;
+}

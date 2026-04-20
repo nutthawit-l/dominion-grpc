@@ -88,14 +88,70 @@ message EndPhaseAction {
 message Decision {
     string id = 1;
     int32 player_idx = 2;
-    // Prompt variants will be added in Tier 2. For Tier 0, no card sets a
-    // pending decision, so the prompt oneof is empty on the wire.
+    string card_id = 3;
+    int32 step = 4;
+
+    oneof prompt {
+        DiscardFromHandPrompt discard_from_hand = 5;
+        TrashFromHandPrompt trash_from_hand = 6;
+        GainFromSupplyPrompt gain_from_supply = 7;
+        ChooseFromDiscardPrompt choose_from_discard = 8;
+        PutOnDeckPrompt put_on_deck = 9;
+        MayPlayActionPrompt may_play_action = 10;
+    }
+}
+
+message DiscardFromHandPrompt {
+    int32 min = 1;
+    int32 max = 2;
+}
+
+message TrashFromHandPrompt {
+    int32 min = 1;
+    int32 max = 2;
+    repeated CardType type_filter = 3;
+    repeated string card_filter = 4;
+}
+
+message GainFromSupplyPrompt {
+    int32 max_cost = 1;
+    repeated CardType type_filter = 2;
+    GainDest dest = 3;
+}
+
+message ChooseFromDiscardPrompt {
+    repeated string cards = 1;
+    bool optional = 2;
+}
+
+message PutOnDeckPrompt {}
+
+message MayPlayActionPrompt {
+    string card_id = 1;
 }
 
 message ResolveDecision {
     string decision_id = 1;
     int32 player_idx = 2;
-    // Answer variants will be added in Tier 2.
+
+    oneof answer {
+        CardListAnswer card_list = 3;
+        CardChoiceAnswer card_choice = 4;
+        YesNoAnswer yes_no = 5;
+    }
+}
+
+message CardListAnswer {
+    repeated string cards = 1;
+}
+
+message CardChoiceAnswer {
+    string card = 1;
+    bool none = 2;
+}
+
+message YesNoAnswer {
+    bool yes = 1;
 }
 
 // =====================================================================

@@ -534,9 +534,20 @@ func (x *EndPhaseAction) GetPlayerIdx() int32 {
 }
 
 type Decision struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	PlayerIdx     int32                  `protobuf:"varint,2,opt,name=player_idx,json=playerIdx,proto3" json:"player_idx,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Id        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	PlayerIdx int32                  `protobuf:"varint,2,opt,name=player_idx,json=playerIdx,proto3" json:"player_idx,omitempty"`
+	CardId    string                 `protobuf:"bytes,3,opt,name=card_id,json=cardId,proto3" json:"card_id,omitempty"`
+	Step      int32                  `protobuf:"varint,4,opt,name=step,proto3" json:"step,omitempty"`
+	// Types that are valid to be assigned to Prompt:
+	//
+	//	*Decision_DiscardFromHand
+	//	*Decision_TrashFromHand
+	//	*Decision_GainFromSupply
+	//	*Decision_ChooseFromDiscard
+	//	*Decision_PutOnDeck
+	//	*Decision_MayPlayAction
+	Prompt        isDecision_Prompt `protobuf_oneof:"prompt"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -585,17 +596,450 @@ func (x *Decision) GetPlayerIdx() int32 {
 	return 0
 }
 
-type ResolveDecision struct {
+func (x *Decision) GetCardId() string {
+	if x != nil {
+		return x.CardId
+	}
+	return ""
+}
+
+func (x *Decision) GetStep() int32 {
+	if x != nil {
+		return x.Step
+	}
+	return 0
+}
+
+func (x *Decision) GetPrompt() isDecision_Prompt {
+	if x != nil {
+		return x.Prompt
+	}
+	return nil
+}
+
+func (x *Decision) GetDiscardFromHand() *DiscardFromHandPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_DiscardFromHand); ok {
+			return x.DiscardFromHand
+		}
+	}
+	return nil
+}
+
+func (x *Decision) GetTrashFromHand() *TrashFromHandPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_TrashFromHand); ok {
+			return x.TrashFromHand
+		}
+	}
+	return nil
+}
+
+func (x *Decision) GetGainFromSupply() *GainFromSupplyPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_GainFromSupply); ok {
+			return x.GainFromSupply
+		}
+	}
+	return nil
+}
+
+func (x *Decision) GetChooseFromDiscard() *ChooseFromDiscardPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_ChooseFromDiscard); ok {
+			return x.ChooseFromDiscard
+		}
+	}
+	return nil
+}
+
+func (x *Decision) GetPutOnDeck() *PutOnDeckPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_PutOnDeck); ok {
+			return x.PutOnDeck
+		}
+	}
+	return nil
+}
+
+func (x *Decision) GetMayPlayAction() *MayPlayActionPrompt {
+	if x != nil {
+		if x, ok := x.Prompt.(*Decision_MayPlayAction); ok {
+			return x.MayPlayAction
+		}
+	}
+	return nil
+}
+
+type isDecision_Prompt interface {
+	isDecision_Prompt()
+}
+
+type Decision_DiscardFromHand struct {
+	DiscardFromHand *DiscardFromHandPrompt `protobuf:"bytes,5,opt,name=discard_from_hand,json=discardFromHand,proto3,oneof"`
+}
+
+type Decision_TrashFromHand struct {
+	TrashFromHand *TrashFromHandPrompt `protobuf:"bytes,6,opt,name=trash_from_hand,json=trashFromHand,proto3,oneof"`
+}
+
+type Decision_GainFromSupply struct {
+	GainFromSupply *GainFromSupplyPrompt `protobuf:"bytes,7,opt,name=gain_from_supply,json=gainFromSupply,proto3,oneof"`
+}
+
+type Decision_ChooseFromDiscard struct {
+	ChooseFromDiscard *ChooseFromDiscardPrompt `protobuf:"bytes,8,opt,name=choose_from_discard,json=chooseFromDiscard,proto3,oneof"`
+}
+
+type Decision_PutOnDeck struct {
+	PutOnDeck *PutOnDeckPrompt `protobuf:"bytes,9,opt,name=put_on_deck,json=putOnDeck,proto3,oneof"`
+}
+
+type Decision_MayPlayAction struct {
+	MayPlayAction *MayPlayActionPrompt `protobuf:"bytes,10,opt,name=may_play_action,json=mayPlayAction,proto3,oneof"`
+}
+
+func (*Decision_DiscardFromHand) isDecision_Prompt() {}
+
+func (*Decision_TrashFromHand) isDecision_Prompt() {}
+
+func (*Decision_GainFromSupply) isDecision_Prompt() {}
+
+func (*Decision_ChooseFromDiscard) isDecision_Prompt() {}
+
+func (*Decision_PutOnDeck) isDecision_Prompt() {}
+
+func (*Decision_MayPlayAction) isDecision_Prompt() {}
+
+type DiscardFromHandPrompt struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DecisionId    string                 `protobuf:"bytes,1,opt,name=decision_id,json=decisionId,proto3" json:"decision_id,omitempty"`
-	PlayerIdx     int32                  `protobuf:"varint,2,opt,name=player_idx,json=playerIdx,proto3" json:"player_idx,omitempty"` // Answer variants will be added in Tier 2.
+	Min           int32                  `protobuf:"varint,1,opt,name=min,proto3" json:"min,omitempty"`
+	Max           int32                  `protobuf:"varint,2,opt,name=max,proto3" json:"max,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DiscardFromHandPrompt) Reset() {
+	*x = DiscardFromHandPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiscardFromHandPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiscardFromHandPrompt) ProtoMessage() {}
+
+func (x *DiscardFromHandPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiscardFromHandPrompt.ProtoReflect.Descriptor instead.
+func (*DiscardFromHandPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DiscardFromHandPrompt) GetMin() int32 {
+	if x != nil {
+		return x.Min
+	}
+	return 0
+}
+
+func (x *DiscardFromHandPrompt) GetMax() int32 {
+	if x != nil {
+		return x.Max
+	}
+	return 0
+}
+
+type TrashFromHandPrompt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Min           int32                  `protobuf:"varint,1,opt,name=min,proto3" json:"min,omitempty"`
+	Max           int32                  `protobuf:"varint,2,opt,name=max,proto3" json:"max,omitempty"`
+	TypeFilter    []CardType             `protobuf:"varint,3,rep,packed,name=type_filter,json=typeFilter,proto3,enum=dominion.v1.CardType" json:"type_filter,omitempty"`
+	CardFilter    []string               `protobuf:"bytes,4,rep,name=card_filter,json=cardFilter,proto3" json:"card_filter,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TrashFromHandPrompt) Reset() {
+	*x = TrashFromHandPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrashFromHandPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrashFromHandPrompt) ProtoMessage() {}
+
+func (x *TrashFromHandPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrashFromHandPrompt.ProtoReflect.Descriptor instead.
+func (*TrashFromHandPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *TrashFromHandPrompt) GetMin() int32 {
+	if x != nil {
+		return x.Min
+	}
+	return 0
+}
+
+func (x *TrashFromHandPrompt) GetMax() int32 {
+	if x != nil {
+		return x.Max
+	}
+	return 0
+}
+
+func (x *TrashFromHandPrompt) GetTypeFilter() []CardType {
+	if x != nil {
+		return x.TypeFilter
+	}
+	return nil
+}
+
+func (x *TrashFromHandPrompt) GetCardFilter() []string {
+	if x != nil {
+		return x.CardFilter
+	}
+	return nil
+}
+
+type GainFromSupplyPrompt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MaxCost       int32                  `protobuf:"varint,1,opt,name=max_cost,json=maxCost,proto3" json:"max_cost,omitempty"`
+	TypeFilter    []CardType             `protobuf:"varint,2,rep,packed,name=type_filter,json=typeFilter,proto3,enum=dominion.v1.CardType" json:"type_filter,omitempty"`
+	Dest          GainDest               `protobuf:"varint,3,opt,name=dest,proto3,enum=dominion.v1.GainDest" json:"dest,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GainFromSupplyPrompt) Reset() {
+	*x = GainFromSupplyPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GainFromSupplyPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GainFromSupplyPrompt) ProtoMessage() {}
+
+func (x *GainFromSupplyPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GainFromSupplyPrompt.ProtoReflect.Descriptor instead.
+func (*GainFromSupplyPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GainFromSupplyPrompt) GetMaxCost() int32 {
+	if x != nil {
+		return x.MaxCost
+	}
+	return 0
+}
+
+func (x *GainFromSupplyPrompt) GetTypeFilter() []CardType {
+	if x != nil {
+		return x.TypeFilter
+	}
+	return nil
+}
+
+func (x *GainFromSupplyPrompt) GetDest() GainDest {
+	if x != nil {
+		return x.Dest
+	}
+	return GainDest_GAIN_DEST_UNSPECIFIED
+}
+
+type ChooseFromDiscardPrompt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cards         []string               `protobuf:"bytes,1,rep,name=cards,proto3" json:"cards,omitempty"`
+	Optional      bool                   `protobuf:"varint,2,opt,name=optional,proto3" json:"optional,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChooseFromDiscardPrompt) Reset() {
+	*x = ChooseFromDiscardPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChooseFromDiscardPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChooseFromDiscardPrompt) ProtoMessage() {}
+
+func (x *ChooseFromDiscardPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChooseFromDiscardPrompt.ProtoReflect.Descriptor instead.
+func (*ChooseFromDiscardPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ChooseFromDiscardPrompt) GetCards() []string {
+	if x != nil {
+		return x.Cards
+	}
+	return nil
+}
+
+func (x *ChooseFromDiscardPrompt) GetOptional() bool {
+	if x != nil {
+		return x.Optional
+	}
+	return false
+}
+
+type PutOnDeckPrompt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PutOnDeckPrompt) Reset() {
+	*x = PutOnDeckPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PutOnDeckPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PutOnDeckPrompt) ProtoMessage() {}
+
+func (x *PutOnDeckPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PutOnDeckPrompt.ProtoReflect.Descriptor instead.
+func (*PutOnDeckPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{11}
+}
+
+type MayPlayActionPrompt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CardId        string                 `protobuf:"bytes,1,opt,name=card_id,json=cardId,proto3" json:"card_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MayPlayActionPrompt) Reset() {
+	*x = MayPlayActionPrompt{}
+	mi := &file_dominion_v1_game_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MayPlayActionPrompt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MayPlayActionPrompt) ProtoMessage() {}
+
+func (x *MayPlayActionPrompt) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MayPlayActionPrompt.ProtoReflect.Descriptor instead.
+func (*MayPlayActionPrompt) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *MayPlayActionPrompt) GetCardId() string {
+	if x != nil {
+		return x.CardId
+	}
+	return ""
+}
+
+type ResolveDecision struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	DecisionId string                 `protobuf:"bytes,1,opt,name=decision_id,json=decisionId,proto3" json:"decision_id,omitempty"`
+	PlayerIdx  int32                  `protobuf:"varint,2,opt,name=player_idx,json=playerIdx,proto3" json:"player_idx,omitempty"`
+	// Types that are valid to be assigned to Answer:
+	//
+	//	*ResolveDecision_CardList
+	//	*ResolveDecision_CardChoice
+	//	*ResolveDecision_YesNo
+	Answer        isResolveDecision_Answer `protobuf_oneof:"answer"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ResolveDecision) Reset() {
 	*x = ResolveDecision{}
-	mi := &file_dominion_v1_game_proto_msgTypes[7]
+	mi := &file_dominion_v1_game_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -607,7 +1051,7 @@ func (x *ResolveDecision) String() string {
 func (*ResolveDecision) ProtoMessage() {}
 
 func (x *ResolveDecision) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[7]
+	mi := &file_dominion_v1_game_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -620,7 +1064,7 @@ func (x *ResolveDecision) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveDecision.ProtoReflect.Descriptor instead.
 func (*ResolveDecision) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{7}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ResolveDecision) GetDecisionId() string {
@@ -637,6 +1081,202 @@ func (x *ResolveDecision) GetPlayerIdx() int32 {
 	return 0
 }
 
+func (x *ResolveDecision) GetAnswer() isResolveDecision_Answer {
+	if x != nil {
+		return x.Answer
+	}
+	return nil
+}
+
+func (x *ResolveDecision) GetCardList() *CardListAnswer {
+	if x != nil {
+		if x, ok := x.Answer.(*ResolveDecision_CardList); ok {
+			return x.CardList
+		}
+	}
+	return nil
+}
+
+func (x *ResolveDecision) GetCardChoice() *CardChoiceAnswer {
+	if x != nil {
+		if x, ok := x.Answer.(*ResolveDecision_CardChoice); ok {
+			return x.CardChoice
+		}
+	}
+	return nil
+}
+
+func (x *ResolveDecision) GetYesNo() *YesNoAnswer {
+	if x != nil {
+		if x, ok := x.Answer.(*ResolveDecision_YesNo); ok {
+			return x.YesNo
+		}
+	}
+	return nil
+}
+
+type isResolveDecision_Answer interface {
+	isResolveDecision_Answer()
+}
+
+type ResolveDecision_CardList struct {
+	CardList *CardListAnswer `protobuf:"bytes,3,opt,name=card_list,json=cardList,proto3,oneof"`
+}
+
+type ResolveDecision_CardChoice struct {
+	CardChoice *CardChoiceAnswer `protobuf:"bytes,4,opt,name=card_choice,json=cardChoice,proto3,oneof"`
+}
+
+type ResolveDecision_YesNo struct {
+	YesNo *YesNoAnswer `protobuf:"bytes,5,opt,name=yes_no,json=yesNo,proto3,oneof"`
+}
+
+func (*ResolveDecision_CardList) isResolveDecision_Answer() {}
+
+func (*ResolveDecision_CardChoice) isResolveDecision_Answer() {}
+
+func (*ResolveDecision_YesNo) isResolveDecision_Answer() {}
+
+type CardListAnswer struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cards         []string               `protobuf:"bytes,1,rep,name=cards,proto3" json:"cards,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CardListAnswer) Reset() {
+	*x = CardListAnswer{}
+	mi := &file_dominion_v1_game_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CardListAnswer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CardListAnswer) ProtoMessage() {}
+
+func (x *CardListAnswer) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CardListAnswer.ProtoReflect.Descriptor instead.
+func (*CardListAnswer) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CardListAnswer) GetCards() []string {
+	if x != nil {
+		return x.Cards
+	}
+	return nil
+}
+
+type CardChoiceAnswer struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Card          string                 `protobuf:"bytes,1,opt,name=card,proto3" json:"card,omitempty"`
+	None          bool                   `protobuf:"varint,2,opt,name=none,proto3" json:"none,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CardChoiceAnswer) Reset() {
+	*x = CardChoiceAnswer{}
+	mi := &file_dominion_v1_game_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CardChoiceAnswer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CardChoiceAnswer) ProtoMessage() {}
+
+func (x *CardChoiceAnswer) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CardChoiceAnswer.ProtoReflect.Descriptor instead.
+func (*CardChoiceAnswer) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CardChoiceAnswer) GetCard() string {
+	if x != nil {
+		return x.Card
+	}
+	return ""
+}
+
+func (x *CardChoiceAnswer) GetNone() bool {
+	if x != nil {
+		return x.None
+	}
+	return false
+}
+
+type YesNoAnswer struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Yes           bool                   `protobuf:"varint,1,opt,name=yes,proto3" json:"yes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *YesNoAnswer) Reset() {
+	*x = YesNoAnswer{}
+	mi := &file_dominion_v1_game_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *YesNoAnswer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*YesNoAnswer) ProtoMessage() {}
+
+func (x *YesNoAnswer) ProtoReflect() protoreflect.Message {
+	mi := &file_dominion_v1_game_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use YesNoAnswer.ProtoReflect.Descriptor instead.
+func (*YesNoAnswer) Descriptor() ([]byte, []int) {
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *YesNoAnswer) GetYes() bool {
+	if x != nil {
+		return x.Yes
+	}
+	return false
+}
+
 type CreateGameRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Each entry is a strategy identifier: "human", "bigmoney", "smithy_bm".
@@ -650,7 +1290,7 @@ type CreateGameRequest struct {
 
 func (x *CreateGameRequest) Reset() {
 	*x = CreateGameRequest{}
-	mi := &file_dominion_v1_game_proto_msgTypes[8]
+	mi := &file_dominion_v1_game_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -662,7 +1302,7 @@ func (x *CreateGameRequest) String() string {
 func (*CreateGameRequest) ProtoMessage() {}
 
 func (x *CreateGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[8]
+	mi := &file_dominion_v1_game_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -675,7 +1315,7 @@ func (x *CreateGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGameRequest.ProtoReflect.Descriptor instead.
 func (*CreateGameRequest) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{8}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *CreateGameRequest) GetPlayers() []string {
@@ -708,7 +1348,7 @@ type CreateGameResponse struct {
 
 func (x *CreateGameResponse) Reset() {
 	*x = CreateGameResponse{}
-	mi := &file_dominion_v1_game_proto_msgTypes[9]
+	mi := &file_dominion_v1_game_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +1360,7 @@ func (x *CreateGameResponse) String() string {
 func (*CreateGameResponse) ProtoMessage() {}
 
 func (x *CreateGameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[9]
+	mi := &file_dominion_v1_game_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,7 +1373,7 @@ func (x *CreateGameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGameResponse.ProtoReflect.Descriptor instead.
 func (*CreateGameResponse) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{9}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateGameResponse) GetGameId() string {
@@ -753,7 +1393,7 @@ type StreamGameEventsRequest struct {
 
 func (x *StreamGameEventsRequest) Reset() {
 	*x = StreamGameEventsRequest{}
-	mi := &file_dominion_v1_game_proto_msgTypes[10]
+	mi := &file_dominion_v1_game_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -765,7 +1405,7 @@ func (x *StreamGameEventsRequest) String() string {
 func (*StreamGameEventsRequest) ProtoMessage() {}
 
 func (x *StreamGameEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[10]
+	mi := &file_dominion_v1_game_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -778,7 +1418,7 @@ func (x *StreamGameEventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamGameEventsRequest.ProtoReflect.Descriptor instead.
 func (*StreamGameEventsRequest) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{10}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *StreamGameEventsRequest) GetGameId() string {
@@ -805,7 +1445,7 @@ type SubmitActionRequest struct {
 
 func (x *SubmitActionRequest) Reset() {
 	*x = SubmitActionRequest{}
-	mi := &file_dominion_v1_game_proto_msgTypes[11]
+	mi := &file_dominion_v1_game_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -817,7 +1457,7 @@ func (x *SubmitActionRequest) String() string {
 func (*SubmitActionRequest) ProtoMessage() {}
 
 func (x *SubmitActionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[11]
+	mi := &file_dominion_v1_game_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -830,7 +1470,7 @@ func (x *SubmitActionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitActionRequest.ProtoReflect.Descriptor instead.
 func (*SubmitActionRequest) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{11}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *SubmitActionRequest) GetGameId() string {
@@ -855,7 +1495,7 @@ type SubmitActionResponse struct {
 
 func (x *SubmitActionResponse) Reset() {
 	*x = SubmitActionResponse{}
-	mi := &file_dominion_v1_game_proto_msgTypes[12]
+	mi := &file_dominion_v1_game_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -867,7 +1507,7 @@ func (x *SubmitActionResponse) String() string {
 func (*SubmitActionResponse) ProtoMessage() {}
 
 func (x *SubmitActionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[12]
+	mi := &file_dominion_v1_game_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -880,7 +1520,7 @@ func (x *SubmitActionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitActionResponse.ProtoReflect.Descriptor instead.
 func (*SubmitActionResponse) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{12}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{21}
 }
 
 type StreamGameEventsResponse struct {
@@ -902,7 +1542,7 @@ type StreamGameEventsResponse struct {
 
 func (x *StreamGameEventsResponse) Reset() {
 	*x = StreamGameEventsResponse{}
-	mi := &file_dominion_v1_game_proto_msgTypes[13]
+	mi := &file_dominion_v1_game_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -914,7 +1554,7 @@ func (x *StreamGameEventsResponse) String() string {
 func (*StreamGameEventsResponse) ProtoMessage() {}
 
 func (x *StreamGameEventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[13]
+	mi := &file_dominion_v1_game_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -927,7 +1567,7 @@ func (x *StreamGameEventsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamGameEventsResponse.ProtoReflect.Descriptor instead.
 func (*StreamGameEventsResponse) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{13}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *StreamGameEventsResponse) GetSequence() uint64 {
@@ -1056,7 +1696,7 @@ type PlayerActionApplied struct {
 
 func (x *PlayerActionApplied) Reset() {
 	*x = PlayerActionApplied{}
-	mi := &file_dominion_v1_game_proto_msgTypes[14]
+	mi := &file_dominion_v1_game_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1068,7 +1708,7 @@ func (x *PlayerActionApplied) String() string {
 func (*PlayerActionApplied) ProtoMessage() {}
 
 func (x *PlayerActionApplied) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[14]
+	mi := &file_dominion_v1_game_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1081,7 +1721,7 @@ func (x *PlayerActionApplied) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerActionApplied.ProtoReflect.Descriptor instead.
 func (*PlayerActionApplied) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{14}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *PlayerActionApplied) GetPlayerIdx() int32 {
@@ -1115,7 +1755,7 @@ type PhaseChanged struct {
 
 func (x *PhaseChanged) Reset() {
 	*x = PhaseChanged{}
-	mi := &file_dominion_v1_game_proto_msgTypes[15]
+	mi := &file_dominion_v1_game_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1127,7 +1767,7 @@ func (x *PhaseChanged) String() string {
 func (*PhaseChanged) ProtoMessage() {}
 
 func (x *PhaseChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[15]
+	mi := &file_dominion_v1_game_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1140,7 +1780,7 @@ func (x *PhaseChanged) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PhaseChanged.ProtoReflect.Descriptor instead.
 func (*PhaseChanged) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{15}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *PhaseChanged) GetNewPhase() Phase {
@@ -1167,7 +1807,7 @@ type TurnStarted struct {
 
 func (x *TurnStarted) Reset() {
 	*x = TurnStarted{}
-	mi := &file_dominion_v1_game_proto_msgTypes[16]
+	mi := &file_dominion_v1_game_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1179,7 +1819,7 @@ func (x *TurnStarted) String() string {
 func (*TurnStarted) ProtoMessage() {}
 
 func (x *TurnStarted) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[16]
+	mi := &file_dominion_v1_game_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1192,7 +1832,7 @@ func (x *TurnStarted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurnStarted.ProtoReflect.Descriptor instead.
 func (*TurnStarted) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{16}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *TurnStarted) GetTurn() int32 {
@@ -1219,7 +1859,7 @@ type DecisionRequested struct {
 
 func (x *DecisionRequested) Reset() {
 	*x = DecisionRequested{}
-	mi := &file_dominion_v1_game_proto_msgTypes[17]
+	mi := &file_dominion_v1_game_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1231,7 +1871,7 @@ func (x *DecisionRequested) String() string {
 func (*DecisionRequested) ProtoMessage() {}
 
 func (x *DecisionRequested) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[17]
+	mi := &file_dominion_v1_game_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1244,7 +1884,7 @@ func (x *DecisionRequested) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecisionRequested.ProtoReflect.Descriptor instead.
 func (*DecisionRequested) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{17}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *DecisionRequested) GetPlayerIdx() int32 {
@@ -1271,7 +1911,7 @@ type GameEnded struct {
 
 func (x *GameEnded) Reset() {
 	*x = GameEnded{}
-	mi := &file_dominion_v1_game_proto_msgTypes[18]
+	mi := &file_dominion_v1_game_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1283,7 +1923,7 @@ func (x *GameEnded) String() string {
 func (*GameEnded) ProtoMessage() {}
 
 func (x *GameEnded) ProtoReflect() protoreflect.Message {
-	mi := &file_dominion_v1_game_proto_msgTypes[18]
+	mi := &file_dominion_v1_game_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1296,7 +1936,7 @@ func (x *GameEnded) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameEnded.ProtoReflect.Descriptor instead.
 func (*GameEnded) Descriptor() ([]byte, []int) {
-	return file_dominion_v1_game_proto_rawDescGZIP(), []int{18}
+	return file_dominion_v1_game_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GameEnded) GetWinners() []int32 {
@@ -1364,16 +2004,59 @@ const file_dominion_v1_game_proto_rawDesc = "" +
 	"\acard_id\x18\x02 \x01(\tR\x06cardId\"/\n" +
 	"\x0eEndPhaseAction\x12\x1d\n" +
 	"\n" +
-	"player_idx\x18\x01 \x01(\x05R\tplayerIdx\"9\n" +
+	"player_idx\x18\x01 \x01(\x05R\tplayerIdx\"\xc1\x04\n" +
 	"\bDecision\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
-	"player_idx\x18\x02 \x01(\x05R\tplayerIdx\"Q\n" +
+	"player_idx\x18\x02 \x01(\x05R\tplayerIdx\x12\x17\n" +
+	"\acard_id\x18\x03 \x01(\tR\x06cardId\x12\x12\n" +
+	"\x04step\x18\x04 \x01(\x05R\x04step\x12P\n" +
+	"\x11discard_from_hand\x18\x05 \x01(\v2\".dominion.v1.DiscardFromHandPromptH\x00R\x0fdiscardFromHand\x12J\n" +
+	"\x0ftrash_from_hand\x18\x06 \x01(\v2 .dominion.v1.TrashFromHandPromptH\x00R\rtrashFromHand\x12M\n" +
+	"\x10gain_from_supply\x18\a \x01(\v2!.dominion.v1.GainFromSupplyPromptH\x00R\x0egainFromSupply\x12V\n" +
+	"\x13choose_from_discard\x18\b \x01(\v2$.dominion.v1.ChooseFromDiscardPromptH\x00R\x11chooseFromDiscard\x12>\n" +
+	"\vput_on_deck\x18\t \x01(\v2\x1c.dominion.v1.PutOnDeckPromptH\x00R\tputOnDeck\x12J\n" +
+	"\x0fmay_play_action\x18\n" +
+	" \x01(\v2 .dominion.v1.MayPlayActionPromptH\x00R\rmayPlayActionB\b\n" +
+	"\x06prompt\";\n" +
+	"\x15DiscardFromHandPrompt\x12\x10\n" +
+	"\x03min\x18\x01 \x01(\x05R\x03min\x12\x10\n" +
+	"\x03max\x18\x02 \x01(\x05R\x03max\"\x92\x01\n" +
+	"\x13TrashFromHandPrompt\x12\x10\n" +
+	"\x03min\x18\x01 \x01(\x05R\x03min\x12\x10\n" +
+	"\x03max\x18\x02 \x01(\x05R\x03max\x126\n" +
+	"\vtype_filter\x18\x03 \x03(\x0e2\x15.dominion.v1.CardTypeR\n" +
+	"typeFilter\x12\x1f\n" +
+	"\vcard_filter\x18\x04 \x03(\tR\n" +
+	"cardFilter\"\x94\x01\n" +
+	"\x14GainFromSupplyPrompt\x12\x19\n" +
+	"\bmax_cost\x18\x01 \x01(\x05R\amaxCost\x126\n" +
+	"\vtype_filter\x18\x02 \x03(\x0e2\x15.dominion.v1.CardTypeR\n" +
+	"typeFilter\x12)\n" +
+	"\x04dest\x18\x03 \x01(\x0e2\x15.dominion.v1.GainDestR\x04dest\"K\n" +
+	"\x17ChooseFromDiscardPrompt\x12\x14\n" +
+	"\x05cards\x18\x01 \x03(\tR\x05cards\x12\x1a\n" +
+	"\boptional\x18\x02 \x01(\bR\boptional\"\x11\n" +
+	"\x0fPutOnDeckPrompt\".\n" +
+	"\x13MayPlayActionPrompt\x12\x17\n" +
+	"\acard_id\x18\x01 \x01(\tR\x06cardId\"\x8c\x02\n" +
 	"\x0fResolveDecision\x12\x1f\n" +
 	"\vdecision_id\x18\x01 \x01(\tR\n" +
 	"decisionId\x12\x1d\n" +
 	"\n" +
-	"player_idx\x18\x02 \x01(\x05R\tplayerIdx\"[\n" +
+	"player_idx\x18\x02 \x01(\x05R\tplayerIdx\x12:\n" +
+	"\tcard_list\x18\x03 \x01(\v2\x1b.dominion.v1.CardListAnswerH\x00R\bcardList\x12@\n" +
+	"\vcard_choice\x18\x04 \x01(\v2\x1d.dominion.v1.CardChoiceAnswerH\x00R\n" +
+	"cardChoice\x121\n" +
+	"\x06yes_no\x18\x05 \x01(\v2\x18.dominion.v1.YesNoAnswerH\x00R\x05yesNoB\b\n" +
+	"\x06answer\"&\n" +
+	"\x0eCardListAnswer\x12\x14\n" +
+	"\x05cards\x18\x01 \x03(\tR\x05cards\":\n" +
+	"\x10CardChoiceAnswer\x12\x12\n" +
+	"\x04card\x18\x01 \x01(\tR\x04card\x12\x12\n" +
+	"\x04none\x18\x02 \x01(\bR\x04none\"\x1f\n" +
+	"\vYesNoAnswer\x12\x10\n" +
+	"\x03yes\x18\x01 \x01(\bR\x03yes\"[\n" +
 	"\x11CreateGameRequest\x12\x18\n" +
 	"\aplayers\x18\x01 \x03(\tR\aplayers\x12\x12\n" +
 	"\x04seed\x18\x02 \x01(\x03R\x04seed\x12\x18\n" +
@@ -1441,7 +2124,7 @@ func file_dominion_v1_game_proto_rawDescGZIP() []byte {
 	return file_dominion_v1_game_proto_rawDescData
 }
 
-var file_dominion_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_dominion_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_dominion_v1_game_proto_goTypes = []any{
 	(*PlayerView)(nil),               // 0: dominion.v1.PlayerView
 	(*GameStateSnapshot)(nil),        // 1: dominion.v1.GameStateSnapshot
@@ -1450,56 +2133,79 @@ var file_dominion_v1_game_proto_goTypes = []any{
 	(*BuyCardAction)(nil),            // 4: dominion.v1.BuyCardAction
 	(*EndPhaseAction)(nil),           // 5: dominion.v1.EndPhaseAction
 	(*Decision)(nil),                 // 6: dominion.v1.Decision
-	(*ResolveDecision)(nil),          // 7: dominion.v1.ResolveDecision
-	(*CreateGameRequest)(nil),        // 8: dominion.v1.CreateGameRequest
-	(*CreateGameResponse)(nil),       // 9: dominion.v1.CreateGameResponse
-	(*StreamGameEventsRequest)(nil),  // 10: dominion.v1.StreamGameEventsRequest
-	(*SubmitActionRequest)(nil),      // 11: dominion.v1.SubmitActionRequest
-	(*SubmitActionResponse)(nil),     // 12: dominion.v1.SubmitActionResponse
-	(*StreamGameEventsResponse)(nil), // 13: dominion.v1.StreamGameEventsResponse
-	(*PlayerActionApplied)(nil),      // 14: dominion.v1.PlayerActionApplied
-	(*PhaseChanged)(nil),             // 15: dominion.v1.PhaseChanged
-	(*TurnStarted)(nil),              // 16: dominion.v1.TurnStarted
-	(*DecisionRequested)(nil),        // 17: dominion.v1.DecisionRequested
-	(*GameEnded)(nil),                // 18: dominion.v1.GameEnded
-	nil,                              // 19: dominion.v1.GameEnded.FinalScoresEntry
-	(Phase)(0),                       // 20: dominion.v1.Phase
-	(*SupplyPile)(nil),               // 21: dominion.v1.SupplyPile
-	(*timestamppb.Timestamp)(nil),    // 22: google.protobuf.Timestamp
+	(*DiscardFromHandPrompt)(nil),    // 7: dominion.v1.DiscardFromHandPrompt
+	(*TrashFromHandPrompt)(nil),      // 8: dominion.v1.TrashFromHandPrompt
+	(*GainFromSupplyPrompt)(nil),     // 9: dominion.v1.GainFromSupplyPrompt
+	(*ChooseFromDiscardPrompt)(nil),  // 10: dominion.v1.ChooseFromDiscardPrompt
+	(*PutOnDeckPrompt)(nil),          // 11: dominion.v1.PutOnDeckPrompt
+	(*MayPlayActionPrompt)(nil),      // 12: dominion.v1.MayPlayActionPrompt
+	(*ResolveDecision)(nil),          // 13: dominion.v1.ResolveDecision
+	(*CardListAnswer)(nil),           // 14: dominion.v1.CardListAnswer
+	(*CardChoiceAnswer)(nil),         // 15: dominion.v1.CardChoiceAnswer
+	(*YesNoAnswer)(nil),              // 16: dominion.v1.YesNoAnswer
+	(*CreateGameRequest)(nil),        // 17: dominion.v1.CreateGameRequest
+	(*CreateGameResponse)(nil),       // 18: dominion.v1.CreateGameResponse
+	(*StreamGameEventsRequest)(nil),  // 19: dominion.v1.StreamGameEventsRequest
+	(*SubmitActionRequest)(nil),      // 20: dominion.v1.SubmitActionRequest
+	(*SubmitActionResponse)(nil),     // 21: dominion.v1.SubmitActionResponse
+	(*StreamGameEventsResponse)(nil), // 22: dominion.v1.StreamGameEventsResponse
+	(*PlayerActionApplied)(nil),      // 23: dominion.v1.PlayerActionApplied
+	(*PhaseChanged)(nil),             // 24: dominion.v1.PhaseChanged
+	(*TurnStarted)(nil),              // 25: dominion.v1.TurnStarted
+	(*DecisionRequested)(nil),        // 26: dominion.v1.DecisionRequested
+	(*GameEnded)(nil),                // 27: dominion.v1.GameEnded
+	nil,                              // 28: dominion.v1.GameEnded.FinalScoresEntry
+	(Phase)(0),                       // 29: dominion.v1.Phase
+	(*SupplyPile)(nil),               // 30: dominion.v1.SupplyPile
+	(CardType)(0),                    // 31: dominion.v1.CardType
+	(GainDest)(0),                    // 32: dominion.v1.GainDest
+	(*timestamppb.Timestamp)(nil),    // 33: google.protobuf.Timestamp
 }
 var file_dominion_v1_game_proto_depIdxs = []int32{
-	20, // 0: dominion.v1.GameStateSnapshot.phase:type_name -> dominion.v1.Phase
+	29, // 0: dominion.v1.GameStateSnapshot.phase:type_name -> dominion.v1.Phase
 	0,  // 1: dominion.v1.GameStateSnapshot.players:type_name -> dominion.v1.PlayerView
-	21, // 2: dominion.v1.GameStateSnapshot.supply:type_name -> dominion.v1.SupplyPile
+	30, // 2: dominion.v1.GameStateSnapshot.supply:type_name -> dominion.v1.SupplyPile
 	6,  // 3: dominion.v1.GameStateSnapshot.pending_decision:type_name -> dominion.v1.Decision
 	3,  // 4: dominion.v1.Action.play_card:type_name -> dominion.v1.PlayCardAction
 	4,  // 5: dominion.v1.Action.buy_card:type_name -> dominion.v1.BuyCardAction
 	5,  // 6: dominion.v1.Action.end_phase:type_name -> dominion.v1.EndPhaseAction
-	7,  // 7: dominion.v1.Action.resolve:type_name -> dominion.v1.ResolveDecision
-	2,  // 8: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
-	22, // 9: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
-	1,  // 10: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
-	14, // 11: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
-	15, // 12: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
-	16, // 13: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
-	17, // 14: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
-	18, // 15: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
-	2,  // 16: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
-	1,  // 17: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
-	20, // 18: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
-	6,  // 19: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
-	19, // 20: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
-	8,  // 21: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
-	10, // 22: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
-	11, // 23: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
-	9,  // 24: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
-	13, // 25: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
-	12, // 26: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
-	24, // [24:27] is the sub-list for method output_type
-	21, // [21:24] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	13, // 7: dominion.v1.Action.resolve:type_name -> dominion.v1.ResolveDecision
+	7,  // 8: dominion.v1.Decision.discard_from_hand:type_name -> dominion.v1.DiscardFromHandPrompt
+	8,  // 9: dominion.v1.Decision.trash_from_hand:type_name -> dominion.v1.TrashFromHandPrompt
+	9,  // 10: dominion.v1.Decision.gain_from_supply:type_name -> dominion.v1.GainFromSupplyPrompt
+	10, // 11: dominion.v1.Decision.choose_from_discard:type_name -> dominion.v1.ChooseFromDiscardPrompt
+	11, // 12: dominion.v1.Decision.put_on_deck:type_name -> dominion.v1.PutOnDeckPrompt
+	12, // 13: dominion.v1.Decision.may_play_action:type_name -> dominion.v1.MayPlayActionPrompt
+	31, // 14: dominion.v1.TrashFromHandPrompt.type_filter:type_name -> dominion.v1.CardType
+	31, // 15: dominion.v1.GainFromSupplyPrompt.type_filter:type_name -> dominion.v1.CardType
+	32, // 16: dominion.v1.GainFromSupplyPrompt.dest:type_name -> dominion.v1.GainDest
+	14, // 17: dominion.v1.ResolveDecision.card_list:type_name -> dominion.v1.CardListAnswer
+	15, // 18: dominion.v1.ResolveDecision.card_choice:type_name -> dominion.v1.CardChoiceAnswer
+	16, // 19: dominion.v1.ResolveDecision.yes_no:type_name -> dominion.v1.YesNoAnswer
+	2,  // 20: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
+	33, // 21: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
+	1,  // 22: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
+	23, // 23: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
+	24, // 24: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
+	25, // 25: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
+	26, // 26: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
+	27, // 27: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
+	2,  // 28: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
+	1,  // 29: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
+	29, // 30: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
+	6,  // 31: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
+	28, // 32: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
+	17, // 33: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
+	19, // 34: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
+	20, // 35: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
+	18, // 36: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
+	22, // 37: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
+	21, // 38: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
+	36, // [36:39] is the sub-list for method output_type
+	33, // [33:36] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_dominion_v1_game_proto_init() }
@@ -1515,7 +2221,20 @@ func file_dominion_v1_game_proto_init() {
 		(*Action_EndPhase)(nil),
 		(*Action_Resolve)(nil),
 	}
+	file_dominion_v1_game_proto_msgTypes[6].OneofWrappers = []any{
+		(*Decision_DiscardFromHand)(nil),
+		(*Decision_TrashFromHand)(nil),
+		(*Decision_GainFromSupply)(nil),
+		(*Decision_ChooseFromDiscard)(nil),
+		(*Decision_PutOnDeck)(nil),
+		(*Decision_MayPlayAction)(nil),
+	}
 	file_dominion_v1_game_proto_msgTypes[13].OneofWrappers = []any{
+		(*ResolveDecision_CardList)(nil),
+		(*ResolveDecision_CardChoice)(nil),
+		(*ResolveDecision_YesNo)(nil),
+	}
+	file_dominion_v1_game_proto_msgTypes[22].OneofWrappers = []any{
 		(*StreamGameEventsResponse_Snapshot)(nil),
 		(*StreamGameEventsResponse_ActionApplied)(nil),
 		(*StreamGameEventsResponse_PhaseChanged)(nil),
@@ -1529,7 +2248,7 @@ func file_dominion_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dominion_v1_game_proto_rawDesc), len(file_dominion_v1_game_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
