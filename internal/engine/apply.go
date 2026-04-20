@@ -13,6 +13,11 @@ var (
 	ErrUnknownCard       = errors.New("engine: unknown card")
 	ErrGameEnded         = errors.New("engine: game has ended")
 	ErrUnknownAction     = errors.New("engine: unknown action type")
+	ErrCardNotInDiscard  = errors.New("engine: card not in discard")
+	ErrNoDecisionPending = errors.New("engine: no decision pending")
+	ErrWrongDecisionID   = errors.New("engine: wrong decision ID")
+	ErrDecisionPending   = errors.New("engine: decision pending — only ResolveDecision is legal")
+	ErrNoResolveHandler  = errors.New("engine: card has no OnResolve handler")
 )
 
 // Apply is the engine's only entry point. It mutates s in place and

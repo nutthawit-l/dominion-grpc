@@ -153,3 +153,143 @@ func TestEachOtherPlayer_NilCallbackEvents(t *testing.T) {
 	events := EachOtherPlayer(s, s.CurrentPlayer, func(idx int) []Event { return nil })
 	require.Nil(t, events)
 }
+
+func TestTrashFromHand_MovesCardsToTrash(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Hand = []CardID{"estate", "copper", "estate"}
+
+	events := TrashFromHand(s, 0, []CardID{"estate", "copper"})
+
+	require.Equal(t, []CardID{"estate"}, s.Players[0].Hand)
+	require.Contains(t, s.Trash, CardID("estate"))
+	require.Contains(t, s.Trash, CardID("copper"))
+	require.Len(t, events, 2)
+	require.Equal(t, EventCardTrashed, events[0].Kind)
+}
+
+func TestTrashFromHand_SkipsMissingCards(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Hand = []CardID{"copper"}
+
+	events := TrashFromHand(s, 0, []CardID{"silver"})
+
+	require.Equal(t, []CardID{"copper"}, s.Players[0].Hand)
+	require.Empty(t, s.Trash)
+	require.Empty(t, events)
+}
+
+func TestPutOnDeck_MovesFromHandToTopOfDeck(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Hand = []CardID{"copper", "silver", "gold"}
+	s.Players[0].Deck = []CardID{"estate"}
+
+	events := PutOnDeck(s, 0, []CardID{"silver"})
+
+	require.Equal(t, []CardID{"copper", "gold"}, s.Players[0].Hand)
+	require.Equal(t, []CardID{"estate", "silver"}, s.Players[0].Deck)
+	require.Len(t, events, 1)
+}
+
+func TestPutOnDeck_SkipsMissingCards(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Hand = []CardID{"copper"}
+
+	events := PutOnDeck(s, 0, []CardID{"silver"})
+
+	require.Equal(t, []CardID{"copper"}, s.Players[0].Hand)
+	require.Empty(t, events)
+}
+
+func TestRevealAndDiscardFromDeck_MovesToDiscard(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Deck = []CardID{"estate", "copper", "silver"}
+
+	revealed, events := RevealAndDiscardFromDeck(s, 0, 1)
+
+	require.Equal(t, []CardID{"silver"}, revealed)
+	require.Contains(t, s.Players[0].Discard, CardID("silver"))
+	require.Equal(t, []CardID{"estate", "copper"}, s.Players[0].Deck)
+	require.Len(t, events, 1)
+	require.Equal(t, EventCardDiscarded, events[0].Kind)
+}
+
+func TestRevealAndDiscardFromDeck_EmptyDeckShufflesDiscard(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Deck = nil
+	s.Players[0].Discard = []CardID{"gold", "silver"}
+
+	revealed, events := RevealAndDiscardFromDeck(s, 0, 1)
+
+	require.Len(t, revealed, 1)
+	require.Len(t, events, 1)
+}
+
+func TestRevealAndDiscardFromDeck_EmptyBoth_ReturnsEmpty(t *testing.T) {
+	s := newTestState(2)
+
+	revealed, events := RevealAndDiscardFromDeck(s, 0, 1)
+
+	require.Empty(t, revealed)
+	require.Empty(t, events)
+}
+
+func TestPlayCardFromZone_Hand(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Hand = []CardID{"smithy"}
+	called := false
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "smithy" {
+			return &Card{
+				ID: "smithy", Types: []CardType{TypeAction},
+				OnPlay: func(s *GameState, p int) []Event {
+					called = true
+					return []Event{{Kind: EventCardDrawn, PlayerIdx: p, Count: 3}}
+				},
+			}, true
+		}
+		return nil, false
+	}
+
+	events, err := PlayCardFromZone(s, 0, "smithy", ZoneHand, lookup)
+
+	require.NoError(t, err)
+	require.True(t, called)
+	require.Empty(t, s.Players[0].Hand)
+	require.Contains(t, s.Players[0].InPlay, CardID("smithy"))
+	require.GreaterOrEqual(t, len(events), 1)
+	require.Equal(t, EventCardPlayed, events[0].Kind)
+}
+
+func TestPlayCardFromZone_Discard(t *testing.T) {
+	s := newTestState(2)
+	s.Players[0].Discard = []CardID{"village"}
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "village" {
+			return &Card{
+				ID: "village", Types: []CardType{TypeAction},
+				OnPlay: func(s *GameState, p int) []Event { return nil },
+			}, true
+		}
+		return nil, false
+	}
+
+	events, err := PlayCardFromZone(s, 0, "village", ZoneDiscard, lookup)
+
+	require.NoError(t, err)
+	require.Empty(t, s.Players[0].Discard)
+	require.Contains(t, s.Players[0].InPlay, CardID("village"))
+	require.Equal(t, EventCardPlayed, events[0].Kind)
+}
+
+func TestPlayCardFromZone_CardNotInZone_Error(t *testing.T) {
+	s := newTestState(2)
+	lookup := func(id CardID) (*Card, bool) {
+		return &Card{ID: "smithy"}, true
+	}
+
+	_, err := PlayCardFromZone(s, 0, "smithy", ZoneHand, lookup)
+	require.ErrorIs(t, err, ErrCardNotInHand)
+
+	_, err = PlayCardFromZone(s, 0, "smithy", ZoneDiscard, lookup)
+	require.ErrorIs(t, err, ErrCardNotInDiscard)
+}
