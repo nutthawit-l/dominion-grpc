@@ -222,6 +222,67 @@ func drainSnapshot(t *testing.T, s *fakeServerStream) *pb.GameStateSnapshot {
 	}
 }
 
+func TestDecisionToProto_DiscardFromHand(t *testing.T) {
+	d := &engine.Decision{
+		ID: "d1", PlayerIdx: 0, CardID: "cellar", Step: 0,
+		Prompt: engine.DiscardFromHandPrompt{Min: 0, Max: 3},
+	}
+
+	proto := DecisionToProto(d)
+
+	require.Equal(t, "d1", proto.Id)
+	require.Equal(t, int32(0), proto.PlayerIdx)
+	require.Equal(t, "cellar", proto.CardId)
+	p := proto.GetDiscardFromHand()
+	require.NotNil(t, p)
+	require.Equal(t, int32(0), p.Min)
+	require.Equal(t, int32(3), p.Max)
+}
+
+func TestAnswerFromProto_CardList(t *testing.T) {
+	r := &pb.ResolveDecision{
+		DecisionId: "d1", PlayerIdx: 0,
+		Answer: &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{
+			Cards: []string{"copper", "estate"},
+		}},
+	}
+
+	answer, err := AnswerFromProto(r)
+	require.NoError(t, err)
+	cl, ok := answer.(engine.CardListAnswer)
+	require.True(t, ok)
+	require.Equal(t, []engine.CardID{"copper", "estate"}, cl.Cards)
+}
+
+func TestAnswerFromProto_CardChoice(t *testing.T) {
+	r := &pb.ResolveDecision{
+		DecisionId: "d1", PlayerIdx: 0,
+		Answer: &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{
+			Card: "silver", None: false,
+		}},
+	}
+
+	answer, err := AnswerFromProto(r)
+	require.NoError(t, err)
+	cc, ok := answer.(engine.CardChoiceAnswer)
+	require.True(t, ok)
+	require.Equal(t, engine.CardID("silver"), cc.Card)
+	require.False(t, cc.None)
+}
+
+func TestAnswerFromProto_YesNo(t *testing.T) {
+	r := &pb.ResolveDecision{
+		DecisionId: "d1", PlayerIdx: 0,
+		Answer: &pb.ResolveDecision_YesNo{YesNo: &pb.YesNoAnswer{Yes: true}},
+	}
+
+	answer, err := AnswerFromProto(r)
+	require.NoError(t, err)
+	yn, ok := answer.(engine.YesNoAnswer)
+	require.True(t, ok)
+	require.True(t, yn.Yes)
+}
+
 func assertScrubbedForViewer(t *testing.T, snap *pb.GameStateSnapshot, viewer int) {
 	t.Helper()
 	for _, p := range snap.Players {

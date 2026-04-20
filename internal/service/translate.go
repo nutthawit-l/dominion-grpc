@@ -27,9 +27,14 @@ func ActionFromProto(a *pb.Action) (engine.Action, error) {
 	case *pb.Action_EndPhase:
 		return engine.EndPhase{PlayerIdx: int(k.EndPhase.PlayerIdx)}, nil
 	case *pb.Action_Resolve:
+		answer, err := AnswerFromProto(k.Resolve)
+		if err != nil {
+			return nil, err
+		}
 		return engine.ResolveDecision{
 			PlayerIdx:  int(k.Resolve.PlayerIdx),
 			DecisionID: k.Resolve.DecisionId,
+			Answer:     answer,
 		}, nil
 	default:
 		return nil, fmt.Errorf("service: unknown action kind %T", k)
@@ -80,7 +85,113 @@ func SnapshotFromState(s *engine.GameState, viewer int) *pb.GameStateSnapshot {
 	for _, w := range s.Winners {
 		snap.Winners = append(snap.Winners, int32(w))
 	}
+	snap.PendingDecision = DecisionToProto(s.PendingDecision)
 	return snap
+}
+
+// DecisionToProto translates an engine Decision to its proto representation.
+func DecisionToProto(d *engine.Decision) *pb.Decision {
+	if d == nil {
+		return nil
+	}
+	pd := &pb.Decision{
+		Id:        d.ID,
+		PlayerIdx: int32(d.PlayerIdx),
+		CardId:    string(d.CardID),
+		Step:      int32(d.Step),
+	}
+	switch p := d.Prompt.(type) {
+	case engine.DiscardFromHandPrompt:
+		pd.Prompt = &pb.Decision_DiscardFromHand{DiscardFromHand: &pb.DiscardFromHandPrompt{
+			Min: int32(p.Min), Max: int32(p.Max),
+		}}
+	case engine.TrashFromHandPrompt:
+		tf := make([]pb.CardType, len(p.TypeFilter))
+		for i, ct := range p.TypeFilter {
+			tf[i] = cardTypeToProto(ct)
+		}
+		cf := make([]string, len(p.CardFilter))
+		for i, c := range p.CardFilter {
+			cf[i] = string(c)
+		}
+		pd.Prompt = &pb.Decision_TrashFromHand{TrashFromHand: &pb.TrashFromHandPrompt{
+			Min: int32(p.Min), Max: int32(p.Max), TypeFilter: tf, CardFilter: cf,
+		}}
+	case engine.GainFromSupplyPrompt:
+		tf := make([]pb.CardType, len(p.TypeFilter))
+		for i, ct := range p.TypeFilter {
+			tf[i] = cardTypeToProto(ct)
+		}
+		pd.Prompt = &pb.Decision_GainFromSupply{GainFromSupply: &pb.GainFromSupplyPrompt{
+			MaxCost: int32(p.MaxCost), TypeFilter: tf, Dest: gainDestToProto(p.Dest),
+		}}
+	case engine.ChooseFromDiscardPrompt:
+		cards := make([]string, len(p.Cards))
+		for i, c := range p.Cards {
+			cards[i] = string(c)
+		}
+		pd.Prompt = &pb.Decision_ChooseFromDiscard{ChooseFromDiscard: &pb.ChooseFromDiscardPrompt{
+			Cards: cards, Optional: p.Optional,
+		}}
+	case engine.PutOnDeckPrompt:
+		pd.Prompt = &pb.Decision_PutOnDeck{PutOnDeck: &pb.PutOnDeckPrompt{}}
+	case engine.MayPlayActionPrompt:
+		pd.Prompt = &pb.Decision_MayPlayAction{MayPlayAction: &pb.MayPlayActionPrompt{
+			CardId: string(p.Card),
+		}}
+	}
+	return pd
+}
+
+// AnswerFromProto translates a proto ResolveDecision answer into an engine Answer.
+func AnswerFromProto(r *pb.ResolveDecision) (engine.Answer, error) {
+	switch a := r.Answer.(type) {
+	case *pb.ResolveDecision_CardList:
+		cards := make([]engine.CardID, len(a.CardList.Cards))
+		for i, c := range a.CardList.Cards {
+			cards[i] = engine.CardID(c)
+		}
+		return engine.CardListAnswer{Cards: cards}, nil
+	case *pb.ResolveDecision_CardChoice:
+		return engine.CardChoiceAnswer{
+			Card: engine.CardID(a.CardChoice.Card),
+			None: a.CardChoice.None,
+		}, nil
+	case *pb.ResolveDecision_YesNo:
+		return engine.YesNoAnswer{Yes: a.YesNo.Yes}, nil
+	default:
+		return nil, fmt.Errorf("service: unknown answer type %T", a)
+	}
+}
+
+func cardTypeToProto(ct engine.CardType) pb.CardType {
+	switch ct {
+	case engine.TypeTreasure:
+		return pb.CardType_CARD_TYPE_TREASURE
+	case engine.TypeVictory:
+		return pb.CardType_CARD_TYPE_VICTORY
+	case engine.TypeCurse:
+		return pb.CardType_CARD_TYPE_CURSE
+	case engine.TypeAction:
+		return pb.CardType_CARD_TYPE_ACTION
+	case engine.TypeAttack:
+		return pb.CardType_CARD_TYPE_ATTACK
+	case engine.TypeReaction:
+		return pb.CardType_CARD_TYPE_REACTION
+	}
+	return pb.CardType_CARD_TYPE_UNSPECIFIED
+}
+
+func gainDestToProto(d engine.GainDest) pb.GainDest {
+	switch d {
+	case engine.GainToDiscard:
+		return pb.GainDest_GAIN_DEST_DISCARD
+	case engine.GainToHand:
+		return pb.GainDest_GAIN_DEST_HAND
+	case engine.GainToDeck:
+		return pb.GainDest_GAIN_DEST_DECK
+	}
+	return pb.GainDest_GAIN_DEST_UNSPECIFIED
 }
 
 func phaseToProto(p engine.Phase) pb.Phase {
