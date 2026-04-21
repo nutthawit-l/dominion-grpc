@@ -46,7 +46,7 @@ var Mine = &engine.Card{
 					TypeFilter: []engine.CardType{engine.TypeTreasure},
 					Dest:       engine.GainToHand,
 				},
-				map[string]any{"trashed_cost": trashedCost})...)
+				map[engine.ContextKey]any{engine.CtxKeyTrashedCost: trashedCost})...)
 			return events, nil
 
 		case 1:
@@ -55,7 +55,7 @@ var Mine = &engine.Card{
 			if !ok {
 				return nil, fmt.Errorf("mine: unknown card %q", choice.Card)
 			}
-			maxCost := d.Context["trashed_cost"].(int) + 3
+			maxCost := d.Context[engine.CtxKeyTrashedCost].(int) + 3
 			if card.Cost > maxCost {
 				return nil, fmt.Errorf("mine: card %q costs %d, max %d", choice.Card, card.Cost, maxCost)
 			}

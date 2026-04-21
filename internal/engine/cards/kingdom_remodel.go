@@ -34,7 +34,7 @@ var Remodel = &engine.Card{
 			trashedCost := card.Cost
 			events = append(events, engine.RequestDecision(s, p, "remodel", 1,
 				engine.GainFromSupplyPrompt{MaxCost: trashedCost + 2, Dest: engine.GainToDiscard},
-				map[string]any{"trashed_cost": trashedCost})...)
+				map[engine.ContextKey]any{engine.CtxKeyTrashedCost: trashedCost})...)
 			return events, nil
 
 		case 1:
@@ -43,7 +43,7 @@ var Remodel = &engine.Card{
 			if !ok {
 				return nil, fmt.Errorf("remodel: unknown card %q", choice.Card)
 			}
-			maxCost := d.Context["trashed_cost"].(int) + 2
+			maxCost := d.Context[engine.CtxKeyTrashedCost].(int) + 2
 			if card.Cost > maxCost {
 				return nil, fmt.Errorf("remodel: card %q costs %d, max %d", choice.Card, card.Cost, maxCost)
 			}

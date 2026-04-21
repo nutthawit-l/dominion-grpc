@@ -8,6 +8,15 @@ type Prompt interface{ isPrompt() }
 // Answer is the interface for all decision answers.
 type Answer interface{ isAnswer() }
 
+// ContextKey names a value stored in Decision.Context. Using a typed
+// string prevents accidental raw-string keys at compile time.
+type ContextKey string
+
+const (
+	CtxKeyTrashedCost ContextKey = "trashed_cost"
+	CtxKeyCard        ContextKey = "card"
+)
+
 // --- Prompt types ---
 
 // DiscardFromHandPrompt asks the player to discard cards from hand.
@@ -86,7 +95,7 @@ func (YesNoAnswer) isAnswer() {}
 
 // RequestDecision sets a pending decision on the game state. The engine
 // will reject all non-ResolveDecision actions until this is resolved.
-func RequestDecision(s *GameState, playerIdx int, cardID CardID, step int, prompt Prompt, ctx map[string]any) []Event {
+func RequestDecision(s *GameState, playerIdx int, cardID CardID, step int, prompt Prompt, ctx map[ContextKey]any) []Event {
 	s.DecisionSeq++
 	s.PendingDecision = &Decision{
 		ID:        fmt.Sprintf("d%d", s.DecisionSeq),

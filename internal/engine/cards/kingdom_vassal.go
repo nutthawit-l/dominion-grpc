@@ -19,7 +19,7 @@ var Vassal = &engine.Card{
 		}
 		events = append(events, engine.RequestDecision(s, p, "vassal", 0,
 			engine.MayPlayActionPrompt{Card: card},
-			map[string]any{"card": card})...)
+			map[engine.ContextKey]any{engine.CtxKeyCard: card})...)
 		return events
 	},
 	OnResolve: func(s *engine.GameState, p int, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
@@ -27,7 +27,7 @@ var Vassal = &engine.Card{
 		if !yn.Yes {
 			return nil, nil
 		}
-		cardID := d.Context["card"].(engine.CardID)
+		cardID := d.Context[engine.CtxKeyCard].(engine.CardID)
 		return engine.PlayCardFromZone(s, p, cardID, engine.ZoneDiscard, lookup)
 	},
 }

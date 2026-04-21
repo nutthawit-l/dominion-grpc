@@ -61,7 +61,7 @@ func TestRemodel_Step1_GainsCard(t *testing.T) {
 
 	engine.RequestDecision(s, 0, "remodel", 1,
 		engine.GainFromSupplyPrompt{MaxCost: 4, Dest: engine.GainToDiscard},
-		map[string]any{"trashed_cost": 2})
+		map[engine.ContextKey]any{engine.CtxKeyTrashedCost: 2})
 
 	_, _, err := engine.Apply(s, engine.ResolveDecision{
 		PlayerIdx: 0, DecisionID: s.PendingDecision.ID,

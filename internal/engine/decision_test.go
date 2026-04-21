@@ -35,10 +35,10 @@ func TestRequestDecision_DeterministicIDs(t *testing.T) {
 
 func TestRequestDecision_WithContext(t *testing.T) {
 	s := newTestState(2)
-	ctx := map[string]any{"trashed_cost": 4}
+	ctx := map[ContextKey]any{CtxKeyTrashedCost: 4}
 
 	RequestDecision(s, 0, "remodel", 1, GainFromSupplyPrompt{MaxCost: 6}, ctx)
 
-	require.Equal(t, 4, s.PendingDecision.Context["trashed_cost"])
+	require.Equal(t, 4, s.PendingDecision.Context[CtxKeyTrashedCost])
 	require.Equal(t, 1, s.PendingDecision.Step)
 }

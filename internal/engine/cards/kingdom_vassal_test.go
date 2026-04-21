@@ -41,7 +41,7 @@ func TestVassal_OnResolve_Yes_PlaysFromDiscard(t *testing.T) {
 
 	engine.RequestDecision(s, 0, "vassal", 0,
 		engine.MayPlayActionPrompt{Card: "village"},
-		map[string]any{"card": engine.CardID("village")})
+		map[engine.ContextKey]any{engine.CtxKeyCard: engine.CardID("village")})
 
 	_, _, err := engine.Apply(s, engine.ResolveDecision{
 		PlayerIdx: 0, DecisionID: s.PendingDecision.ID,
@@ -59,7 +59,7 @@ func TestVassal_OnResolve_No_DoesNothing(t *testing.T) {
 
 	engine.RequestDecision(s, 0, "vassal", 0,
 		engine.MayPlayActionPrompt{Card: "village"},
-		map[string]any{"card": engine.CardID("village")})
+		map[engine.ContextKey]any{engine.CtxKeyCard: engine.CardID("village")})
 
 	_, _, err := engine.Apply(s, engine.ResolveDecision{
 		PlayerIdx: 0, DecisionID: s.PendingDecision.ID,

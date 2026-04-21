@@ -53,7 +53,7 @@ type Decision struct {
 	CardID    CardID
 	Step      int
 	Prompt    Prompt
-	Context   map[string]any
+	Context   map[ContextKey]any
 }
 
 // Event is an engine-level notification of something that happened.
