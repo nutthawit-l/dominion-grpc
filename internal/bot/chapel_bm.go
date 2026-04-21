@@ -4,8 +4,9 @@ import (
 	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 )
 
-// ChapelBM is Chapel + Big Money. Buys 1 Chapel early, trashes Estates
-// and excess Coppers, then follows Big Money. Keeps at least 3 Coppers.
+// ChapelBM is Chapel + Big Money. Buys 1 Chapel early, trashes excess
+// Coppers to thin the deck, then follows Big Money with endgame Duchy
+// buying. Estates are kept for VP.
 type ChapelBM struct {
 	chapelOwned  bool
 	trashedCount map[string]int
@@ -13,6 +14,11 @@ type ChapelBM struct {
 
 func NewChapelBM() *ChapelBM {
 	return &ChapelBM{trashedCount: map[string]int{}}
+}
+
+// SetTrashedCount sets the internal trash counter for testing.
+func (c *ChapelBM) SetTrashedCount(card string, n int) {
+	c.trashedCount[card] = n
 }
 
 func (c *ChapelBM) Name() string { return "chapel_bm" }
@@ -40,18 +46,20 @@ func (c *ChapelBM) PickAction(cs *ClientState) *pb.Action {
 			return endPhase(cs.Me)
 		}
 		provincesLeft := supplyCount(cs.Snapshot, "province")
-		endgame := provincesLeft <= 4
+		endgame := provincesLeft <= 5
 		switch {
-		case me.Coins >= 8:
+		case me.Coins >= 8 && provincesLeft > 0:
 			return buyCard(cs.Me, "province")
-		case me.Coins >= 6:
-			return buyCard(cs.Me, "gold")
-		case me.Coins >= 5 && endgame:
+		case endgame && me.Coins >= 5 && supplyCount(cs.Snapshot, "duchy") > 0:
 			return buyCard(cs.Me, "duchy")
+		case me.Coins >= 6 && supplyCount(cs.Snapshot, "gold") > 0:
+			return buyCard(cs.Me, "gold")
+		case endgame && me.Coins >= 2 && supplyCount(cs.Snapshot, "estate") > 0:
+			return buyCard(cs.Me, "estate")
 		case me.Coins >= 2 && !c.chapelOwned && cs.MyTurnsTaken <= 2:
 			c.chapelOwned = true
 			return buyCard(cs.Me, "chapel")
-		case me.Coins >= 3:
+		case me.Coins >= 3 && supplyCount(cs.Snapshot, "silver") > 0:
 			return buyCard(cs.Me, "silver")
 		}
 		return endPhase(cs.Me)
@@ -73,9 +81,9 @@ func (c *ChapelBM) resolveChapel(cs *ClientState, d *pb.Decision) *pb.ResolveDec
 
 	var toTrash []string
 	coppersRemaining := 7 - c.trashedCount["copper"]
-	const copperThreshold = 3
+	const copperKeep = 3
 
-	// Trash estates first.
+	// Trash estates first (they are dead cards despite their VP).
 	for _, card := range me.Hand {
 		if len(toTrash) >= max {
 			break
@@ -84,18 +92,17 @@ func (c *ChapelBM) resolveChapel(cs *ClientState, d *pb.Decision) *pb.ResolveDec
 			toTrash = append(toTrash, card)
 		}
 	}
-	// Then trash coppers down to threshold.
+	// Fill remaining slots with coppers down to threshold.
 	for _, card := range me.Hand {
 		if len(toTrash) >= max {
 			break
 		}
-		if card == "copper" && coppersRemaining > copperThreshold {
+		if card == "copper" && coppersRemaining > copperKeep {
 			toTrash = append(toTrash, card)
 			coppersRemaining--
 		}
 	}
 
-	// Track what we trashed.
 	for _, card := range toTrash {
 		c.trashedCount[card]++
 	}

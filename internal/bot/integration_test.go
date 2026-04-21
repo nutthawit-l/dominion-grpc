@@ -105,6 +105,76 @@ func TestBotVsBot_SmithyBM_Outperforms_BigMoney(t *testing.T) {
 		"SmithyBM win rate %.2f below threshold %.2f over %d games", rate, threshold, games)
 }
 
+// Chapel+BigMoney with a supply limited to Chapel is known to run roughly
+// even with pure Big Money: deck thinning helps but losing Estates costs
+// VP. This sweep is a regression check that ChapelBM stays competitive,
+// not that it strictly outperforms.
+func TestBotVsBot_ChapelBM_CompetitiveWith_BigMoney(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration sweep — skipped under -short")
+	}
+
+	const games = 200
+	const threshold = 0.48
+
+	srv := newTestServer(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	wins := 0
+	for seed := int64(0); seed < games; seed++ {
+		chapelSeat := int(seed % 2)
+		bmSeat := 1 - chapelSeat
+
+		names := make([]string, 2)
+		names[chapelSeat] = "chapel_bm"
+		names[bmSeat] = "bigmoney"
+
+		a := bot.NewClient(srv.URL)
+		b := bot.NewClient(srv.URL)
+		game, err := a.CreateGame(ctx, names, seed, []string{"chapel"})
+		require.NoError(t, err)
+
+		strategies := map[int]bot.Strategy{
+			chapelSeat: bot.NewChapelBM(),
+			bmSeat:     bot.BigMoney{},
+		}
+
+		grp, gctx := errgroup.WithContext(ctx)
+		grp.Go(func() error { return bot.Run(gctx, a, game.GameId, 0, strategies[0]) })
+		grp.Go(func() error { return bot.Run(gctx, b, game.GameId, 1, strategies[1]) })
+		require.NoError(t, grp.Wait(), "seed=%d", seed)
+
+		winners := finalWinners(t, srv, game.GameId)
+		if len(winners) == 1 && winners[0] == chapelSeat {
+			wins++
+		}
+	}
+
+	rate := float64(wins) / float64(games)
+	require.GreaterOrEqualf(t, rate, threshold,
+		"ChapelBM win rate %.2f below threshold %.2f over %d games", rate, threshold, games)
+}
+
+func TestBotVsBot_RemodelBM(t *testing.T) {
+	srv := newTestServer(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	a := bot.NewClient(srv.URL)
+	b := bot.NewClient(srv.URL)
+
+	game, err := a.CreateGame(ctx, []string{"remodel_bm", "bigmoney"}, 42, []string{"remodel"})
+	require.NoError(t, err)
+
+	grp, gctx := errgroup.WithContext(ctx)
+	grp.Go(func() error { return bot.Run(gctx, a, game.GameId, 0, bot.NewRemodelBM()) })
+	grp.Go(func() error { return bot.Run(gctx, b, game.GameId, 1, bot.BigMoney{}) })
+	require.NoError(t, grp.Wait())
+}
+
 func finalWinners(t *testing.T, srv *httptest.Server, gameID string) []int {
 	t.Helper()
 	c := bot.NewClient(srv.URL)
