@@ -9,7 +9,7 @@
       "request": "launch",
       "mode": "test",
       "program": "${workspaceFolder}/internal/engine",
-      "args": ["-test.run", "TestDrawCards|TestDiscardFromHand|TestAddCoins|TestAddBuys|TestAddActions|TestGainCard|TestEachOtherPlayer|TestTrashFromHand|TestPutOnDeck|TestRevealAndDiscardFromDeck", "-test.v"],
+      "args": ["-test.run", "TestDrawCards|TestDiscardFromHand|TestAddCoins|TestAddBuys|TestAddActions|TestGainCard|TestEachOtherPlayer|TestTrashFromHand|TestPutOnDeck|TestRevealAndDiscardFromDeck|TestPlayCardFromZone", "-test.v"],
     },
     {
       "name": "Debug: newgame_test.go (all tests)",
