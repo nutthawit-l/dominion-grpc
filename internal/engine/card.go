@@ -9,7 +9,7 @@ type Card struct {
 	Types []CardType
 
 	// OnPlay runs when a player plays the card. Nil-safe.
-	OnPlay func(s *GameState, playerIdx int) []Event
+	OnPlay func(s *GameState, p int) []Event
 
 	// VictoryPoints is called at game end. Returns 0 for non-victory cards.
 	VictoryPoints func(p PlayerState) int
