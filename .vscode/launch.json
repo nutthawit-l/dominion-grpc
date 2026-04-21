@@ -27,6 +27,14 @@
       "program": "${workspaceFolder}/internal/engine",
       "args": ["-test.run", "TestRequestDecision", "-test.v"]
     },
+    {
+      "name": "Debug: apply_test.go",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/internal/engine",
+      "args": ["-test.run", "TestApply", "-test.v"]
+    },
 
     // Service tests
     {
