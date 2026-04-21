@@ -8,15 +8,15 @@
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/dominion-grpc/internal/engine",
-      "args": ["-test.run", "TestDrawCards|TestDiscardFromHand|TestAddCoins|TestAddBuys|TestAddActions|TestGainCard|TestEachOtherPlayer", "-test.v"],
+      "program": "${workspaceFolder}/internal/engine",
+      "args": ["-test.run", "TestDrawCards|TestDiscardFromHand|TestAddCoins|TestAddBuys|TestAddActions|TestGainCard|TestEachOtherPlayer|TestTrashFromHand|TestPutOnDeck", "-test.v"],
     },
     {
       "name": "Debug: newgame_test.go (all tests)",
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/dominion-grpc/internal/engine",
+      "program": "${workspaceFolder}/internal/engine",
       "args": ["-test.run", "TestNewGame|TestIsKingdom", "-test.v"],
     },
     {
@@ -24,7 +24,7 @@
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/dominion-grpc/internal/engine",
+      "program": "${workspaceFolder}/internal/engine",
       "args": ["-test.run", "TestRequestDecision", "-test.v"]
     },
 
@@ -34,7 +34,7 @@
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/dominion-grpc/internal/service",
+      "program": "${workspaceFolder}/internal/service",
       "args": ["-test.run", "TestGameService|TestStreamGameEvents", "-test.v"]
     },
     {
