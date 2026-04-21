@@ -82,7 +82,7 @@ func PutOnDeck(s *GameState, p int, cards []CardID) []Event {
 		}
 		ps.Hand = append(ps.Hand[:idx], ps.Hand[idx+1:]...)
 		ps.Deck = append(ps.Deck, c)
-		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: p, CardID: c})
+		events = append(events, Event{Kind: EventCardPutOnDeck, PlayerIdx: p, CardID: c})
 	}
 	return events
 }

@@ -188,6 +188,7 @@ func TestPutOnDeck_MovesFromHandToTopOfDeck(t *testing.T) {
 	require.Equal(t, []CardID{"copper", "gold"}, s.Players[0].Hand)
 	require.Equal(t, []CardID{"estate", "silver"}, s.Players[0].Deck)
 	require.Len(t, events, 1)
+	require.Equal(t, EventCardPutOnDeck, events[0].Kind)
 }
 
 func TestPutOnDeck_SkipsMissingCards(t *testing.T) {

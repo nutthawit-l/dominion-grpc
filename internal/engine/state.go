@@ -82,6 +82,7 @@ const (
 	EventTurnStarted
 	EventGameEnded
 	EventDecisionRequested
+	EventCardPutOnDeck
 )
 
 // RNG exposes the per-game random source for code inside the engine
