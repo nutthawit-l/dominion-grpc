@@ -4,7 +4,7 @@
     
     // Engine tests
     {
-      "name": "Debug: primitives_test.go (all tests)",
+      "name": "Debug: primitives_test.go",
       "type": "go",
       "request": "launch",
       "mode": "test",
@@ -12,7 +12,7 @@
       "args": ["-test.run", "TestDrawCards|TestDiscardFromHand|TestAddCoins|TestAddBuys|TestAddActions|TestGainCard|TestEachOtherPlayer|TestTrashFromHand|TestPutOnDeck|TestRevealAndDiscardFromDeck|TestPlayCardFromZone", "-test.v"],
     },
     {
-      "name": "Debug: newgame_test.go (all tests)",
+      "name": "Debug: newgame_test.go",
       "type": "go",
       "request": "launch",
       "mode": "test",
@@ -20,7 +20,7 @@
       "args": ["-test.run", "TestNewGame|TestIsKingdom", "-test.v"],
     },
     {
-      "name": "Debug: decision_test.go (all tests)",
+      "name": "Debug: decision_test.go",
       "type": "go",
       "request": "launch",
       "mode": "test",
@@ -30,30 +30,22 @@
 
     // Service tests
     {
-      "name": "Debug: game_service_test.go (all tests)",
+      "name": "Debug: game_service_test.go",
       "type": "go",
       "request": "launch",
       "mode": "test",
       "program": "${workspaceFolder}/internal/service",
-      "args": ["-test.run", "TestGameService|TestStreamGameEvents", "-test.v"]
-    },
-    {
-      "name": "Debug: TestActionFromProto",
-      "type": "go",
-      "request": "launch",
-      "mode": "test",
-      "program": "${workspaceFolder}/dominion-grpc/internal/service",
-      "args": ["-test.run", "TestActionFromProto", "-test.v"]
+      "args": ["-test.run", "TestGameService|TestStreamGameEvents|TestActionFromProto", "-test.v"]
     },
 
     // Bot tests
     {
-      "name": "Debug: integration_test.go (all tests)",
+      "name": "Debug: integration_test.go",
       "type": "go",
       "request": "launch",
       "mode": "test",
       "program": "${workspaceFolder}/dominion-grpc/internal/bot",
-      "args": ["-test.run", "TestBotVsBot|", "-test.v"]
+      "args": ["-test.run", "TestBotVsBot", "-test.v"]
     },
     
     // CMD tests
