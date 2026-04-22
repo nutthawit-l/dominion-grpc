@@ -17,6 +17,12 @@ type Card struct {
 	// OnResolve is called when ResolveDecision arrives for a decision
 	// created by this card. Nil for cards without decisions.
 	OnResolve func(gs *GameState, px PlayerIdx, d *Decision, answer Answer, lookup CardLookup) ([]Event, error)
+
+	// OnReaction is called when an event fires that a reaction card can
+	// respond to. Returns (blocks, events): blocks=true means the reaction
+	// intercepted the triggering effect (e.g., Moat blocks an attack).
+	// Nil for cards without reaction behavior.
+	OnReaction func(gs *GameState, victim PlayerIdx, trigger Trigger) (blocks bool, events []Event)
 }
 
 // HasType reports whether c is tagged with t.

@@ -44,3 +44,18 @@ const (
 	GainToHand
 	GainToDeck
 )
+
+// TriggerKind identifies what event fired a reaction.
+type TriggerKind int
+
+const (
+	TriggerUnknown TriggerKind = iota
+	TriggerAttackPlayed
+)
+
+// Trigger describes why a card's OnReaction is being invoked.
+type Trigger struct {
+	Kind     TriggerKind
+	Attacker PlayerIdx
+	CardID   CardID // the attack card being played
+}
