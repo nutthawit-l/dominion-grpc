@@ -4553,9 +4553,7 @@ play both seats as bots, open a second bot in another terminal with
 
 ## Design
 
-The full design spec lives in the dev-env repo at
-`docs/superpowers/specs/2026-04-12-dominion-grpc-design.md`, with a
-newcomer-friendly Section 3 primer alongside it.
+The full design spec lives in `docs/superpowers/specs/2026-04-12-dominion-grpc-design.md`, with a newcomer-friendly Section 3 primer alongside it.
 ```
 
 - [ ] **Step 2: Update Makefile**
