@@ -36,6 +36,17 @@
       "args": ["-test.run", "TestApply", "-test.v"]
     },
 
+    // Card tests
+    {
+      "name": "Debug: engine/cards",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/internal/engine/cards",
+      "args": ["-test.run", "TestCellar", "-test.v"]
+    },
+    
+
     // Service tests
     {
       "name": "Debug: game_service_test.go",
