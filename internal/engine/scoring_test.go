@@ -7,31 +7,31 @@ import (
 )
 
 func TestIsGameOver_ProvinceEmpty(t *testing.T) {
-	s := newTestState(2)
-	s.Supply.Piles = map[CardID]int{"province": 0, "copper": 10}
-	require.True(t, IsGameOver(s))
+	gs := newTestState(2)
+	gs.Supply.Piles = map[CardID]int{"province": 0, "copper": 10}
+	require.True(t, IsGameOver(gs))
 }
 
 func TestIsGameOver_ThreePilesEmpty(t *testing.T) {
-	s := newTestState(2)
-	s.Supply.Piles = map[CardID]int{
+	gs := newTestState(2)
+	gs.Supply.Piles = map[CardID]int{
 		"province": 5,
 		"a":        0,
 		"b":        0,
 		"c":        0,
 	}
-	require.True(t, IsGameOver(s))
+	require.True(t, IsGameOver(gs))
 }
 
 func TestIsGameOver_NotYet(t *testing.T) {
-	s := newTestState(2)
-	s.Supply.Piles = map[CardID]int{
+	gs := newTestState(2)
+	gs.Supply.Piles = map[CardID]int{
 		"province": 5,
 		"a":        0,
 		"b":        0,
 		"c":        1,
 	}
-	require.False(t, IsGameOver(s))
+	require.False(t, IsGameOver(gs))
 }
 
 func TestComputeScore_SumsVictoryCardsAcrossAllZones(t *testing.T) {

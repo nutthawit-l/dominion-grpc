@@ -10,11 +10,11 @@ func TestNewGame_TwoPlayer_InitialDeckAndHand(t *testing.T) {
 	names := []string{"Alice", "Bob"}
 	lookup := func(id CardID) (*Card, bool) { return basicsLookup[id], true }
 
-	s, err := NewGame("game-1", names, nil, 42, lookup)
+	gs, err := NewGame("game-1", names, nil, 42, lookup)
 	require.NoError(t, err)
 
-	require.Len(t, s.Players, 2)
-	for i, p := range s.Players {
+	require.Len(t, gs.Players, 2)
+	for i, p := range gs.Players {
 		require.Equalf(t, 5, len(p.Hand), "player %d should start with hand of 5", i)
 		require.Equalf(t, 5, len(p.Deck), "player %d should have 5 left in deck", i)
 		// 7 Coppers + 3 Estates = 10 total.
@@ -34,27 +34,27 @@ func TestNewGame_TwoPlayer_InitialDeckAndHand(t *testing.T) {
 		require.Equal(t, 7, total("copper"))
 		require.Equal(t, 3, total("estate"))
 	}
-	cp := s.CurrentPlayer
-	require.Equal(t, PhaseAction, s.Phase)
-	require.Contains(t, []int{0, 1}, s.CurrentPlayer)
-	require.Equal(t, 1, s.Turn)
-	require.Equal(t, 1, s.Players[cp].Actions)
-	require.Equal(t, 1, s.Players[cp].Buys)
+	cp := gs.CurrentPlayer
+	require.Equal(t, PhaseAction, gs.Phase)
+	require.Contains(t, []int{0, 1}, gs.CurrentPlayer)
+	require.Equal(t, 1, gs.Turn)
+	require.Equal(t, 1, gs.Players[cp].Actions)
+	require.Equal(t, 1, gs.Players[cp].Buys)
 }
 
 func TestNewGame_TwoPlayer_SupplyCounts(t *testing.T) {
 	lookup := func(id CardID) (*Card, bool) { return basicsLookup[id], true }
-	s, err := NewGame("game-2", []string{"A", "B"}, nil, 1, lookup)
+	gs, err := NewGame("game-2", []string{"A", "B"}, nil, 1, lookup)
 	require.NoError(t, err)
 
 	// 2-player Base set counts:
-	require.Equal(t, 46, s.Supply.Piles["copper"]) // 60 - 7*2
-	require.Equal(t, 40, s.Supply.Piles["silver"])
-	require.Equal(t, 30, s.Supply.Piles["gold"])
-	require.Equal(t, 8, s.Supply.Piles["estate"]) // 14 - 3*2 = 8
-	require.Equal(t, 8, s.Supply.Piles["duchy"])
-	require.Equal(t, 8, s.Supply.Piles["province"])
-	require.Equal(t, 10, s.Supply.Piles["curse"])
+	require.Equal(t, 46, gs.Supply.Piles["copper"]) // 60 - 7*2
+	require.Equal(t, 40, gs.Supply.Piles["silver"])
+	require.Equal(t, 30, gs.Supply.Piles["gold"])
+	require.Equal(t, 8, gs.Supply.Piles["estate"]) // 14 - 3*2 = 8
+	require.Equal(t, 8, gs.Supply.Piles["duchy"])
+	require.Equal(t, 8, gs.Supply.Piles["province"])
+	require.Equal(t, 10, gs.Supply.Piles["curse"])
 }
 
 func TestIsKingdom_ActionCardsQualify(t *testing.T) {
@@ -81,10 +81,10 @@ func TestNewGame_EmptyKingdom_UsesAllRegisteredActions(t *testing.T) {
 	basics := basicCards()
 	lookup := combineLookups(basics, []*Card{action, action2})
 
-	s, err := NewGame("g", []string{"p0", "p1"}, nil, 42, lookup)
+	gs, err := NewGame("g", []string{"p0", "p1"}, nil, 42, lookup)
 	require.NoError(t, err)
-	require.Equal(t, 10, s.Supply.Piles["alpha"])
-	require.Equal(t, 10, s.Supply.Piles["beta"])
+	require.Equal(t, 10, gs.Supply.Piles["alpha"])
+	require.Equal(t, 10, gs.Supply.Piles["beta"])
 }
 
 func TestNewGame_ExplicitKingdom_OnlyRequestedCards(t *testing.T) {
@@ -94,10 +94,10 @@ func TestNewGame_ExplicitKingdom_OnlyRequestedCards(t *testing.T) {
 		OnPlay: func(*GameState, int) []Event { return nil }}
 	lookup := combineLookups(basicCards(), []*Card{action, action2})
 
-	s, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha"}, 42, lookup)
+	gs, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha"}, 42, lookup)
 	require.NoError(t, err)
-	require.Equal(t, 10, s.Supply.Piles["alpha"])
-	_, hasBeta := s.Supply.Piles["beta"]
+	require.Equal(t, 10, gs.Supply.Piles["alpha"])
+	_, hasBeta := gs.Supply.Piles["beta"]
 	require.False(t, hasBeta, "beta should not be in supply when not requested")
 }
 
@@ -112,9 +112,9 @@ func TestNewGame_DuplicateKingdomCard_SinglePile(t *testing.T) {
 		OnPlay: func(*GameState, int) []Event { return nil }}
 	lookup := combineLookups(basicCards(), []*Card{action})
 
-	s, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha", "alpha"}, 42, lookup)
+	gs, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha", "alpha"}, 42, lookup)
 	require.NoError(t, err)
-	require.Equal(t, 10, s.Supply.Piles["alpha"])
+	require.Equal(t, 10, gs.Supply.Piles["alpha"])
 }
 
 // Minimal card table used only for these tests. The cards package

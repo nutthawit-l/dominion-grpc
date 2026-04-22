@@ -8,18 +8,18 @@ import (
 )
 
 func TestMarket_OnPlay_GrantsAllFourStats(t *testing.T) {
-	s := newTestStateForCards(1)
-	s.Players[0].Deck = []engine.CardID{"copper"}
-	s.Players[0].Actions = 0
-	s.Players[0].Buys = 1
-	s.Players[0].Coins = 0
+	gs := newTestStateForCards(1)
+	gs.Players[0].Deck = []engine.CardID{"copper"}
+	gs.Players[0].Actions = 0
+	gs.Players[0].Buys = 1
+	gs.Players[0].Coins = 0
 
-	events := Market.OnPlay(s, 0)
+	events := Market.OnPlay(gs, 0)
 
-	require.Len(t, s.Players[0].Hand, 1)
-	require.Equal(t, 1, s.Players[0].Actions)
-	require.Equal(t, 2, s.Players[0].Buys)
-	require.Equal(t, 1, s.Players[0].Coins)
+	require.Len(t, gs.Players[0].Hand, 1)
+	require.Equal(t, 1, gs.Players[0].Actions)
+	require.Equal(t, 2, gs.Players[0].Buys)
+	require.Equal(t, 1, gs.Players[0].Coins)
 	require.Len(t, events, 4)
 }
 

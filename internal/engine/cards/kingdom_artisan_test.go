@@ -8,48 +8,48 @@ import (
 )
 
 func TestArtisan_OnPlay_SetsGainPrompt(t *testing.T) {
-	s := newActionPhaseState()
-	s.Players[0].Hand = []engine.CardID{"artisan"}
-	s.Players[0].Actions = 1
-	s.Supply.Piles["silver"] = 10
+	gs := newActionPhaseState()
+	gs.Players[0].Hand = []engine.CardID{"artisan"}
+	gs.Players[0].Actions = 1
+	gs.Supply.Piles["silver"] = 10
 
-	_, _, err := engine.Apply(s, engine.PlayCard{PlayerIdx: 0, Card: "artisan"}, testLookup)
+	_, _, err := engine.Apply(gs, engine.PlayCard{PlayerIdx: 0, Card: "artisan"}, testLookup)
 	require.NoError(t, err)
-	require.NotNil(t, s.PendingDecision)
-	require.Equal(t, 0, s.PendingDecision.Step)
+	require.NotNil(t, gs.PendingDecision)
+	require.Equal(t, 0, gs.PendingDecision.Step)
 
-	prompt, ok := s.PendingDecision.Prompt.(engine.GainFromSupplyPrompt)
+	prompt, ok := gs.PendingDecision.Prompt.(engine.GainFromSupplyPrompt)
 	require.True(t, ok)
 	require.Equal(t, 5, prompt.MaxCost)
 	require.Equal(t, engine.GainToHand, prompt.Dest)
 }
 
 func TestArtisan_Step0_GainToHand_Step1_PutOnDeck(t *testing.T) {
-	s := newActionPhaseState()
-	s.Players[0].Hand = []engine.CardID{"copper"}
-	s.Supply.Piles["silver"] = 10
+	gs := newActionPhaseState()
+	gs.Players[0].Hand = []engine.CardID{"copper"}
+	gs.Supply.Piles["silver"] = 10
 
-	engine.RequestDecision(s, 0, "artisan", 0,
+	engine.RequestDecision(gs, 0, "artisan", 0,
 		engine.GainFromSupplyPrompt{MaxCost: 5, Dest: engine.GainToHand}, nil)
 
-	_, _, err := engine.Apply(s, engine.ResolveDecision{
-		PlayerIdx: 0, DecisionID: s.PendingDecision.ID,
+	_, _, err := engine.Apply(gs, engine.ResolveDecision{
+		PlayerIdx: 0, DecisionID: gs.PendingDecision.ID,
 		Answer: engine.CardChoiceAnswer{Card: "silver"},
 	}, testLookup)
 	require.NoError(t, err)
-	require.Contains(t, s.Players[0].Hand, engine.CardID("silver"))
-	require.NotNil(t, s.PendingDecision)
-	require.Equal(t, 1, s.PendingDecision.Step)
+	require.Contains(t, gs.Players[0].Hand, engine.CardID("silver"))
+	require.NotNil(t, gs.PendingDecision)
+	require.Equal(t, 1, gs.PendingDecision.Step)
 
-	_, ok := s.PendingDecision.Prompt.(engine.PutOnDeckPrompt)
+	_, ok := gs.PendingDecision.Prompt.(engine.PutOnDeckPrompt)
 	require.True(t, ok)
 
-	_, _, err = engine.Apply(s, engine.ResolveDecision{
-		PlayerIdx: 0, DecisionID: s.PendingDecision.ID,
+	_, _, err = engine.Apply(gs, engine.ResolveDecision{
+		PlayerIdx: 0, DecisionID: gs.PendingDecision.ID,
 		Answer: engine.CardChoiceAnswer{Card: "copper"},
 	}, testLookup)
 	require.NoError(t, err)
-	require.NotContains(t, s.Players[0].Hand, engine.CardID("copper"))
-	require.Equal(t, engine.CardID("copper"), s.Players[0].Deck[len(s.Players[0].Deck)-1])
-	require.Nil(t, s.PendingDecision)
+	require.NotContains(t, gs.Players[0].Hand, engine.CardID("copper"))
+	require.Equal(t, engine.CardID("copper"), gs.Players[0].Deck[len(gs.Players[0].Deck)-1])
+	require.Nil(t, gs.PendingDecision)
 }

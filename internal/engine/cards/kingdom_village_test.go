@@ -8,23 +8,23 @@ import (
 )
 
 func TestVillage_OnPlay_DrawsOneAndAddsTwoActions(t *testing.T) {
-	s := newTestStateForCards(1)
-	s.Players[0].Deck = []engine.CardID{"copper"}
+	gs := newTestStateForCards(1)
+	gs.Players[0].Deck = []engine.CardID{"copper"}
 
-	events := Village.OnPlay(s, 0)
+	events := Village.OnPlay(gs, 0)
 
-	require.Equal(t, 2, s.Players[0].Actions)
-	require.Len(t, s.Players[0].Hand, 1)
-	require.Equal(t, engine.CardID("copper"), s.Players[0].Hand[0])
+	require.Equal(t, 2, gs.Players[0].Actions)
+	require.Len(t, gs.Players[0].Hand, 1)
+	require.Equal(t, engine.CardID("copper"), gs.Players[0].Hand[0])
 	require.Len(t, events, 2)
 }
 
 func TestVillage_OnPlay_EmptyDeckAndDiscard_StillGrantsActions(t *testing.T) {
-	s := newTestStateForCards(1)
-	events := Village.OnPlay(s, 0)
+	gs := newTestStateForCards(1)
+	events := Village.OnPlay(gs, 0)
 
-	require.Equal(t, 2, s.Players[0].Actions, "actions always granted even when draw fails")
-	require.Empty(t, s.Players[0].Hand)
+	require.Equal(t, 2, gs.Players[0].Actions, "actions always granted even when draw fails")
+	require.Empty(t, gs.Players[0].Hand)
 	require.Len(t, events, 1)
 }
 

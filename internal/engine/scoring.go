@@ -2,12 +2,12 @@ package engine
 
 // IsGameOver returns true if the Province pile is empty or any three
 // supply piles are empty.
-func IsGameOver(s *GameState) bool {
-	if s.Supply.Piles["province"] <= 0 {
+func IsGameOver(gs *GameState) bool {
+	if gs.Supply.Piles["province"] <= 0 {
 		return true
 	}
 	empty := 0
-	for _, n := range s.Supply.Piles {
+	for _, n := range gs.Supply.Piles {
 		if n <= 0 {
 			empty++
 		}

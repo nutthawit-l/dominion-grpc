@@ -8,12 +8,12 @@ import (
 
 // totalCards returns the sum of all cards in the game across every
 // zone. It should be invariant under any legal action.
-func totalCards(s *GameState) int {
-	total := len(s.Trash)
-	for _, p := range s.Players {
+func totalCards(gs *GameState) int {
+	total := len(gs.Trash)
+	for _, p := range gs.Players {
 		total += len(p.Hand) + len(p.Deck) + len(p.Discard) + len(p.InPlay)
 	}
-	for _, n := range s.Supply.Piles {
+	for _, n := range gs.Supply.Piles {
 		total += n
 	}
 	return total
@@ -22,27 +22,27 @@ func totalCards(s *GameState) int {
 // randomLegalAction picks a simple legal action for the current player.
 // It prefers playing treasures in buy phase, buying a silver if possible,
 // and otherwise ending the phase.
-func randomLegalAction(s *GameState) Action {
-	me := s.CurrentPlayer
-	switch s.Phase {
+func randomLegalAction(gs *GameState) Action {
+	me := gs.CurrentPlayer
+	switch gs.Phase {
 	case PhaseAction:
 		return EndPhase{PlayerIdx: me}
 	case PhaseBuy:
-		for _, c := range s.Players[me].Hand {
+		for _, c := range gs.Players[me].Hand {
 			if c == "copper" || c == "silver" || c == "gold" {
 				return PlayCard{PlayerIdx: me, Card: c}
 			}
 		}
-		if s.Players[me].Buys <= 0 {
+		if gs.Players[me].Buys <= 0 {
 			return EndPhase{PlayerIdx: me}
 		}
-		if s.Players[me].Coins >= 8 && s.Supply.Piles["province"] > 0 {
+		if gs.Players[me].Coins >= 8 && gs.Supply.Piles["province"] > 0 {
 			return BuyCard{PlayerIdx: me, Card: "province"}
 		}
-		if s.Players[me].Coins >= 6 && s.Supply.Piles["gold"] > 0 {
+		if gs.Players[me].Coins >= 6 && gs.Supply.Piles["gold"] > 0 {
 			return BuyCard{PlayerIdx: me, Card: "gold"}
 		}
-		if s.Players[me].Coins >= 3 && s.Supply.Piles["silver"] > 0 {
+		if gs.Players[me].Coins >= 3 && gs.Supply.Piles["silver"] > 0 {
 			return BuyCard{PlayerIdx: me, Card: "silver"}
 		}
 		return EndPhase{PlayerIdx: me}
@@ -57,15 +57,15 @@ func TestProperty_CardConservation(t *testing.T) {
 	const seeds = 500
 	const maxSteps = 5000
 	for i := int64(0); i < seeds; i++ {
-		s, err := NewGame("prop", []string{"A", "B"}, nil, i, basicsLookup2)
+		gs, err := NewGame("prop", []string{"A", "B"}, nil, i, basicsLookup2)
 		require.NoError(t, err)
-		start := totalCards(s)
+		start := totalCards(gs)
 
-		for step := 0; step < maxSteps && !s.Ended; step++ {
-			_, _, err := Apply(s, randomLegalAction(s), basicsLookup2)
+		for step := 0; step < maxSteps && !gs.Ended; step++ {
+			_, _, err := Apply(gs, randomLegalAction(gs), basicsLookup2)
 			require.NoErrorf(t, err, "seed=%d step=%d", i, step)
 		}
-		require.Truef(t, s.Ended, "seed=%d did not terminate within %d steps", i, maxSteps)
-		require.Equalf(t, start, totalCards(s), "seed=%d card count drifted", i)
+		require.Truef(t, gs.Ended, "seed=%d did not terminate within %d steps", i, maxSteps)
+		require.Equalf(t, start, totalCards(gs), "seed=%d card count drifted", i)
 	}
 }

@@ -54,11 +54,11 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 		kingdom[i] = engine.CardID(k)
 	}
 	id := uuid.NewString()
-	s, err := engine.NewGame(id, names, kingdom, req.Msg.Seed, g.lookup)
+	gs, err := engine.NewGame(id, names, kingdom, req.Msg.Seed, g.lookup)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
-	g.store.Put(s)
+	g.store.Put(gs)
 	return connect.NewResponse(&pb.CreateGameResponse{
 		GameId: id,
 	}), nil

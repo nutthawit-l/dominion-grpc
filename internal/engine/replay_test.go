@@ -50,16 +50,16 @@ func TestReplay_RegressionFixtures(t *testing.T) {
 			var fx replayFixture
 			require.NoError(t, json.Unmarshal(raw, &fx))
 
-			s, err := NewGame("replay", fx.PlayerNames, nil, fx.Seed, basicsLookup2)
+			gs, err := NewGame("replay", fx.PlayerNames, nil, fx.Seed, basicsLookup2)
 			require.NoError(t, err)
 			for i, step := range fx.Actions {
 				act := step.toAction()
 				require.NotNilf(t, act, "step %d has unknown kind %q", i, step.Kind)
-				_, _, err := Apply(s, act, basicsLookup2)
+				_, _, err := Apply(gs, act, basicsLookup2)
 				require.NoErrorf(t, err, "step %d (%+v)", i, step)
 			}
-			require.Equal(t, fx.ExpectedEnded, s.Ended)
-			require.Equal(t, fx.ExpectedWinners, s.Winners)
+			require.Equal(t, fx.ExpectedEnded, gs.Ended)
+			require.Equal(t, fx.ExpectedWinners, gs.Winners)
 		})
 	}
 }

@@ -8,30 +8,30 @@ import (
 )
 
 func TestFestival_OnPlay_StatChanges(t *testing.T) {
-	s := newTestStateForCards(1)
-	s.Players[0].Actions = 0
-	s.Players[0].Buys = 1
-	s.Players[0].Coins = 0
+	gs := newTestStateForCards(1)
+	gs.Players[0].Actions = 0
+	gs.Players[0].Buys = 1
+	gs.Players[0].Coins = 0
 
-	events := Festival.OnPlay(s, 0)
+	events := Festival.OnPlay(gs, 0)
 
-	require.Equal(t, 2, s.Players[0].Actions)
-	require.Equal(t, 2, s.Players[0].Buys)
-	require.Equal(t, 2, s.Players[0].Coins)
+	require.Equal(t, 2, gs.Players[0].Actions)
+	require.Equal(t, 2, gs.Players[0].Buys)
+	require.Equal(t, 2, gs.Players[0].Coins)
 	require.Len(t, events, 3)
 }
 
 func TestFestival_OnPlay_StacksWithExistingResources(t *testing.T) {
-	s := newTestStateForCards(1)
-	s.Players[0].Actions = 3
-	s.Players[0].Buys = 2
-	s.Players[0].Coins = 5
+	gs := newTestStateForCards(1)
+	gs.Players[0].Actions = 3
+	gs.Players[0].Buys = 2
+	gs.Players[0].Coins = 5
 
-	_ = Festival.OnPlay(s, 0)
+	_ = Festival.OnPlay(gs, 0)
 
-	require.Equal(t, 5, s.Players[0].Actions)
-	require.Equal(t, 3, s.Players[0].Buys)
-	require.Equal(t, 7, s.Players[0].Coins)
+	require.Equal(t, 5, gs.Players[0].Actions)
+	require.Equal(t, 3, gs.Players[0].Buys)
+	require.Equal(t, 7, gs.Players[0].Coins)
 }
 
 func TestFestival_Metadata(t *testing.T) {

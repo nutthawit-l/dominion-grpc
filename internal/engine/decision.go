@@ -95,10 +95,10 @@ func (YesNoAnswer) isAnswer() {}
 
 // RequestDecision sets a pending decision on the game state. The engine
 // will reject all non-ResolveDecision actions until this is resolved.
-func RequestDecision(s *GameState, p int, cardID CardID, step int, prompt Prompt, ctx map[ContextKey]any) []Event {
-	s.DecisionSeq++
-	s.PendingDecision = &Decision{
-		ID:        fmt.Sprintf("d%d", s.DecisionSeq),
+func RequestDecision(gs *GameState, p int, cardID CardID, step int, prompt Prompt, ctx map[ContextKey]any) []Event {
+	gs.DecisionSeq++
+	gs.PendingDecision = &Decision{
+		ID:        fmt.Sprintf("d%d", gs.DecisionSeq),
 		PlayerIdx: p,
 		CardID:    cardID,
 		Step:      step,
