@@ -7,11 +7,11 @@ var Market = &engine.Card{
 	Name:  "Market",
 	Cost:  5,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.DrawCards(s, p, 1)
-		events = append(events, engine.AddActions(s, p, 1)...)
-		events = append(events, engine.AddBuys(s, p, 1)...)
-		events = append(events, engine.AddCoins(s, p, 1)...)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.DrawCards(gs, px, 1)
+		events = append(events, engine.AddActions(gs, px, 1)...)
+		events = append(events, engine.AddBuys(gs, px, 1)...)
+		events = append(events, engine.AddCoins(gs, px, 1)...)
 		return events
 	},
 }

@@ -3,6 +3,9 @@ package engine
 // CardID is the stable string identifier for a card definition.
 type CardID string
 
+// PlayerIdx is the index of a player in GameState.Players.
+type PlayerIdx int
+
 // CardType tags a card with one or more categorical roles.
 type CardType int
 

@@ -15,15 +15,15 @@ func applyTestLookup(id CardID) (*Card, bool) {
 	switch id {
 	case "copper":
 		cc := *c
-		cc.OnPlay = func(gs *GameState, p int) []Event { return AddCoins(gs, p, 1) }
+		cc.OnPlay = func(gs *GameState, px PlayerIdx) []Event { return AddCoins(gs, px, 1) }
 		return &cc, true
 	case "silver":
 		cc := *c
-		cc.OnPlay = func(gs *GameState, p int) []Event { return AddCoins(gs, p, 2) }
+		cc.OnPlay = func(gs *GameState, px PlayerIdx) []Event { return AddCoins(gs, px, 2) }
 		return &cc, true
 	case "gold":
 		cc := *c
-		cc.OnPlay = func(gs *GameState, p int) []Event { return AddCoins(gs, p, 3) }
+		cc.OnPlay = func(gs *GameState, px PlayerIdx) []Event { return AddCoins(gs, px, 3) }
 		return &cc, true
 	}
 	return c, true
@@ -96,7 +96,7 @@ func TestApply_EndPhase_ActionToBuy(t *testing.T) {
 	_, _, err := Apply(gs, EndPhase{PlayerIdx: 0}, applyTestLookup)
 	require.NoError(t, err)
 	require.Equal(t, PhaseBuy, gs.Phase)
-	require.Equal(t, 0, gs.CurrentPlayer) // still player 0
+	require.Equal(t, PlayerIdx(0), gs.CurrentPlayer) // still player 0
 }
 
 func TestApply_EndPhase_BuyToNextPlayer(t *testing.T) {
@@ -107,7 +107,7 @@ func TestApply_EndPhase_BuyToNextPlayer(t *testing.T) {
 	_, _, err := Apply(gs, EndPhase{PlayerIdx: 0}, applyTestLookup)
 	require.NoError(t, err)
 	require.Equal(t, PhaseAction, gs.Phase)
-	require.Equal(t, 1, gs.CurrentPlayer)
+	require.Equal(t, PlayerIdx(1), gs.CurrentPlayer)
 }
 
 func TestApply_EndPhase_GameEndsAfterBuyIfProvinceGone(t *testing.T) {
@@ -163,7 +163,7 @@ func TestApply_ResolveDecision_FromDecidingPlayer_NotCurrentPlayer(t *testing.T)
 	resolved := false
 	testCard := &Card{
 		ID: "testcard", Types: []CardType{TypeAction},
-		OnResolve: func(gs *GameState, p int, d *Decision, a Answer, lookup CardLookup) ([]Event, error) {
+		OnResolve: func(gs *GameState, px PlayerIdx, d *Decision, a Answer, lookup CardLookup) ([]Event, error) {
 			resolved = true
 			return nil, nil
 		},

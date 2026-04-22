@@ -7,10 +7,10 @@ var Festival = &engine.Card{
 	Name:  "Festival",
 	Cost:  5,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.AddActions(s, p, 2)
-		events = append(events, engine.AddBuys(s, p, 1)...)
-		events = append(events, engine.AddCoins(s, p, 2)...)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.AddActions(gs, px, 2)
+		events = append(events, engine.AddBuys(gs, px, 1)...)
+		events = append(events, engine.AddCoins(gs, px, 2)...)
 		return events
 	},
 }

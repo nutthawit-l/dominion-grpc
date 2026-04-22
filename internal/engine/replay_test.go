@@ -28,11 +28,11 @@ type replayStep struct {
 func (r replayStep) toAction() Action {
 	switch r.Kind {
 	case "play":
-		return PlayCard{PlayerIdx: r.Player, Card: CardID(r.Card)}
+		return PlayCard{PlayerIdx: PlayerIdx(r.Player), Card: CardID(r.Card)}
 	case "buy":
-		return BuyCard{PlayerIdx: r.Player, Card: CardID(r.Card)}
+		return BuyCard{PlayerIdx: PlayerIdx(r.Player), Card: CardID(r.Card)}
 	case "end_phase":
-		return EndPhase{PlayerIdx: r.Player}
+		return EndPhase{PlayerIdx: PlayerIdx(r.Player)}
 	}
 	return nil
 }

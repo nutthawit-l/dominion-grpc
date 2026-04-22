@@ -7,9 +7,9 @@ var Village = &engine.Card{
 	Name:  "Village",
 	Cost:  3,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.DrawCards(s, p, 1)
-		events = append(events, engine.AddActions(s, p, 2)...)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.DrawCards(gs, px, 1)
+		events = append(events, engine.AddActions(gs, px, 2)...)
 		return events
 	},
 }

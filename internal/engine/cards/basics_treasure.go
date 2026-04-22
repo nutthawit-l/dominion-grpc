@@ -7,8 +7,8 @@ var Copper = &engine.Card{
 	Name:  "Copper",
 	Cost:  0,
 	Types: []engine.CardType{engine.TypeTreasure},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		return engine.AddCoins(s, p, 1)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		return engine.AddCoins(gs, px, 1)
 	},
 }
 
@@ -17,8 +17,8 @@ var Silver = &engine.Card{
 	Name:  "Silver",
 	Cost:  3,
 	Types: []engine.CardType{engine.TypeTreasure},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		return engine.AddCoins(s, p, 2)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		return engine.AddCoins(gs, px, 2)
 	},
 }
 
@@ -27,8 +27,8 @@ var Gold = &engine.Card{
 	Name:  "Gold",
 	Cost:  6,
 	Types: []engine.CardType{engine.TypeTreasure},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		return engine.AddCoins(s, p, 3)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		return engine.AddCoins(gs, px, 3)
 	},
 }
 

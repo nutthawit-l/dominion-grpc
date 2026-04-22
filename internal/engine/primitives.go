@@ -3,9 +3,9 @@ package engine
 // DrawCards draws up to n cards from player p's deck into their hand.
 // If the deck runs out, the discard pile is shuffled and becomes the
 // new deck. If both are empty, the draw stops short.
-func DrawCards(gs *GameState, p int, n int) []Event {
+func DrawCards(gs *GameState, px PlayerIdx, n int) []Event {
 	events := make([]Event, 0, n)
-	ps := &gs.Players[p]
+	ps := &gs.Players[px]
 	for i := 0; i < n; i++ {
 		if len(ps.Deck) == 0 {
 			if len(ps.Discard) == 0 {
@@ -19,7 +19,7 @@ func DrawCards(gs *GameState, p int, n int) []Event {
 		card := ps.Deck[top]
 		ps.Deck = ps.Deck[:top]
 		ps.Hand = append(ps.Hand, card)
-		events = append(events, Event{Kind: EventCardDrawn, PlayerIdx: p, CardID: card})
+		events = append(events, Event{Kind: EventCardDrawn, PlayerIdx: px, CardID: card})
 	}
 	return events
 }
@@ -27,8 +27,8 @@ func DrawCards(gs *GameState, p int, n int) []Event {
 // DiscardFromHand moves the named cards from hand to discard. Cards
 // not present in hand are silently skipped; the returned events reflect
 // only cards that were actually moved.
-func DiscardFromHand(gs *GameState, p int, cards []CardID) []Event {
-	ps := &gs.Players[p]
+func DiscardFromHand(gs *GameState, px PlayerIdx, cards []CardID) []Event {
+	ps := &gs.Players[px]
 	var events []Event
 	for _, c := range cards {
 		idx := indexOf(ps.Hand, c)
@@ -37,7 +37,7 @@ func DiscardFromHand(gs *GameState, p int, cards []CardID) []Event {
 		}
 		ps.Hand = append(ps.Hand[:idx], ps.Hand[idx+1:]...)
 		ps.Discard = append(ps.Discard, c)
-		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: p, CardID: c})
+		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: px, CardID: c})
 	}
 	return events
 }
@@ -55,8 +55,8 @@ func indexOf(cards []CardID, c CardID) int {
 
 // TrashFromHand moves the named cards from hand to the trash pile.
 // Cards not present in hand are silently skipped.
-func TrashFromHand(gs *GameState, p int, cards []CardID) []Event {
-	ps := &gs.Players[p]
+func TrashFromHand(gs *GameState, px PlayerIdx, cards []CardID) []Event {
+	ps := &gs.Players[px]
 	var events []Event
 	for _, c := range cards {
 		idx := indexOf(ps.Hand, c)
@@ -65,15 +65,15 @@ func TrashFromHand(gs *GameState, p int, cards []CardID) []Event {
 		}
 		ps.Hand = append(ps.Hand[:idx], ps.Hand[idx+1:]...)
 		gs.Trash = append(gs.Trash, c)
-		events = append(events, Event{Kind: EventCardTrashed, PlayerIdx: p, CardID: c})
+		events = append(events, Event{Kind: EventCardTrashed, PlayerIdx: px, CardID: c})
 	}
 	return events
 }
 
 // PutOnDeck moves the named cards from hand to the top of the player's
 // deck. Cards not present in hand are silently skipped.
-func PutOnDeck(gs *GameState, p int, cards []CardID) []Event {
-	ps := &gs.Players[p]
+func PutOnDeck(gs *GameState, px PlayerIdx, cards []CardID) []Event {
+	ps := &gs.Players[px]
 	var events []Event
 	for _, c := range cards {
 		idx := indexOf(ps.Hand, c)
@@ -82,7 +82,7 @@ func PutOnDeck(gs *GameState, p int, cards []CardID) []Event {
 		}
 		ps.Hand = append(ps.Hand[:idx], ps.Hand[idx+1:]...)
 		ps.Deck = append(ps.Deck, c)
-		events = append(events, Event{Kind: EventCardPutOnDeck, PlayerIdx: p, CardID: c})
+		events = append(events, Event{Kind: EventCardPutOnDeck, PlayerIdx: px, CardID: c})
 	}
 	return events
 }
@@ -90,8 +90,8 @@ func PutOnDeck(gs *GameState, p int, cards []CardID) []Event {
 // RevealAndDiscardFromDeck reveals the top n cards of the player's deck
 // and moves them to discard. If the deck is empty, the discard is
 // shuffled into the deck first. Returns the revealed card IDs.
-func RevealAndDiscardFromDeck(gs *GameState, p int, n int) ([]CardID, []Event) {
-	ps := &gs.Players[p]
+func RevealAndDiscardFromDeck(gs *GameState, px PlayerIdx, n int) ([]CardID, []Event) {
+	ps := &gs.Players[px]
 	var revealed []CardID
 	var events []Event
 	for i := 0; i < n; i++ {
@@ -108,7 +108,7 @@ func RevealAndDiscardFromDeck(gs *GameState, p int, n int) ([]CardID, []Event) {
 		ps.Deck = ps.Deck[:top]
 		ps.Discard = append(ps.Discard, card)
 		revealed = append(revealed, card)
-		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: p, CardID: card})
+		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: px, CardID: card})
 	}
 	return revealed, events
 }
@@ -116,12 +116,12 @@ func RevealAndDiscardFromDeck(gs *GameState, p int, n int) ([]CardID, []Event) {
 // PlayCardFromZone moves a card from the specified zone to in-play and
 // calls its OnPlay. Does NOT consume an Action — the caller decides
 // whether to decrement actions.
-func PlayCardFromZone(gs *GameState, p int, cardID CardID, from Zone, lookup CardLookup) ([]Event, error) {
+func PlayCardFromZone(gs *GameState, px PlayerIdx, cardID CardID, from Zone, lookup CardLookup) ([]Event, error) {
 	card, ok := lookup(cardID)
 	if !ok {
 		return nil, ErrUnknownCard
 	}
-	ps := &gs.Players[p]
+	ps := &gs.Players[px]
 	switch from {
 	case ZoneHand:
 		idx := indexOf(ps.Hand, cardID)
@@ -137,9 +137,9 @@ func PlayCardFromZone(gs *GameState, p int, cardID CardID, from Zone, lookup Car
 		ps.Discard = append(ps.Discard[:idx], ps.Discard[idx+1:]...)
 	}
 	ps.InPlay = append(ps.InPlay, cardID)
-	events := []Event{{Kind: EventCardPlayed, PlayerIdx: p, CardID: cardID}}
+	events := []Event{{Kind: EventCardPlayed, PlayerIdx: px, CardID: cardID}}
 	if card.OnPlay != nil {
-		events = append(events, card.OnPlay(gs, p)...)
+		events = append(events, card.OnPlay(gs, px)...)
 	}
 	return events, nil
 }
@@ -151,30 +151,30 @@ func IndexOf(cards []CardID, c CardID) int {
 }
 
 // AddCoins adds n to the player's Coins total and emits one event.
-func AddCoins(gs *GameState, p int, n int) []Event {
-	gs.Players[p].Coins += n
-	return []Event{{Kind: EventCoinsAdded, PlayerIdx: p, Count: n}}
+func AddCoins(gs *GameState, px PlayerIdx, n int) []Event {
+	gs.Players[px].Coins += n
+	return []Event{{Kind: EventCoinsAdded, PlayerIdx: px, Count: n}}
 }
 
 // AddBuys adds n to the player's Buys total and emits one event.
-func AddBuys(gs *GameState, p int, n int) []Event {
-	gs.Players[p].Buys += n
-	return []Event{{Kind: EventBuysAdded, PlayerIdx: p, Count: n}}
+func AddBuys(gs *GameState, px PlayerIdx, n int) []Event {
+	gs.Players[px].Buys += n
+	return []Event{{Kind: EventBuysAdded, PlayerIdx: px, Count: n}}
 }
 
 // AddActions adds n to the player's Actions total and emits one event.
-func AddActions(gs *GameState, p int, n int) []Event {
-	gs.Players[p].Actions += n
-	return []Event{{Kind: EventActionsAdded, PlayerIdx: p, Count: n}}
+func AddActions(gs *GameState, px PlayerIdx, n int) []Event {
+	gs.Players[px].Actions += n
+	return []Event{{Kind: EventActionsAdded, PlayerIdx: px, Count: n}}
 }
 
 // EachOtherPlayer calls fn(idx) for every player except `except`, in
 // turn order starting at the next seat, wrapping around. Returns the
 // concatenation of all events fn returns.
-func EachOtherPlayer(gs *GameState, except int, fn func(idx int) []Event) []Event {
-	n := len(gs.Players)
+func EachOtherPlayer(gs *GameState, except PlayerIdx, fn func(idx PlayerIdx) []Event) []Event {
+	n := PlayerIdx(len(gs.Players))
 	var events []Event
-	for step := 1; step < n; step++ {
+	for step := PlayerIdx(1); step < n; step++ {
 		idx := (except + step) % n
 		events = append(events, fn(idx)...)
 	}
@@ -184,12 +184,12 @@ func EachOtherPlayer(gs *GameState, except int, fn func(idx int) []Event) []Even
 // GainCard gains one copy of card from the supply to the given destination
 // for player p. If the supply pile is empty, nothing happens and no event
 // is emitted.
-func GainCard(gs *GameState, p int, card CardID, dest GainDest) []Event {
+func GainCard(gs *GameState, px PlayerIdx, card CardID, dest GainDest) []Event {
 	if gs.Supply.Piles[card] <= 0 {
 		return nil
 	}
 	gs.Supply.Piles[card]--
-	ps := &gs.Players[p]
+	ps := &gs.Players[px]
 	switch dest {
 	case GainToHand:
 		ps.Hand = append(ps.Hand, card)
@@ -198,5 +198,5 @@ func GainCard(gs *GameState, p int, card CardID, dest GainDest) []Event {
 	default:
 		ps.Discard = append(ps.Discard, card)
 	}
-	return []Event{{Kind: EventCardGained, PlayerIdx: p, CardID: card}}
+	return []Event{{Kind: EventCardGained, PlayerIdx: px, CardID: card}}
 }

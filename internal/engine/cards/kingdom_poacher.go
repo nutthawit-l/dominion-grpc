@@ -7,13 +7,13 @@ var Poacher = &engine.Card{
 	Name:  "Poacher",
 	Cost:  4,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.DrawCards(s, p, 1)
-		events = append(events, engine.AddActions(s, p, 1)...)
-		events = append(events, engine.AddCoins(s, p, 1)...)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.DrawCards(gs, px, 1)
+		events = append(events, engine.AddActions(gs, px, 1)...)
+		events = append(events, engine.AddCoins(gs, px, 1)...)
 
 		emptyPiles := 0
-		for _, n := range s.Supply.Piles {
+		for _, n := range gs.Supply.Piles {
 			if n <= 0 {
 				emptyPiles++
 			}
@@ -21,13 +21,13 @@ var Poacher = &engine.Card{
 		if emptyPiles == 0 {
 			return events
 		}
-		events = append(events, engine.RequestDecision(s, p, "poacher", 0,
+		events = append(events, engine.RequestDecision(gs, px, "poacher", 0,
 			engine.DiscardFromHandPrompt{Min: emptyPiles, Max: emptyPiles}, nil)...)
 		return events
 	},
-	OnResolve: func(s *engine.GameState, p int, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
+	OnResolve: func(gs *engine.GameState, px engine.PlayerIdx, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
 		cards := answer.(engine.CardListAnswer).Cards
-		return engine.DiscardFromHand(s, p, cards), nil
+		return engine.DiscardFromHand(gs, px, cards), nil
 	},
 }
 

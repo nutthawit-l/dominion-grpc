@@ -93,12 +93,12 @@ func NewGame(gameID string, playerNames []string, kingdom []CardID, seed int64, 
 
 	// Draw each player's opening hand.
 	for i := range s.Players {
-		DrawCards(s, i, 5)
+		DrawCards(s, PlayerIdx(i), 5)
 	}
 
 	// Pick starting player after all shuffles/draws so existing
 	// deterministic shuffle results with a given seed are preserved.
-	s.CurrentPlayer = s.rng.Intn(len(playerNames))
+	s.CurrentPlayer = PlayerIdx(s.rng.Intn(len(playerNames)))
 	s.StartingPlayer = s.CurrentPlayer
 
 	// First player's Action phase resources.

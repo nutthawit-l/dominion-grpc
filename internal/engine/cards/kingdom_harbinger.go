@@ -7,24 +7,24 @@ var Harbinger = &engine.Card{
 	Name:  "Harbinger",
 	Cost:  3,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.DrawCards(s, p, 1)
-		events = append(events, engine.AddActions(s, p, 1)...)
-		if len(s.Players[p].Discard) == 0 {
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.DrawCards(gs, px, 1)
+		events = append(events, engine.AddActions(gs, px, 1)...)
+		if len(gs.Players[px].Discard) == 0 {
 			return events
 		}
-		discardCopy := make([]engine.CardID, len(s.Players[p].Discard))
-		copy(discardCopy, s.Players[p].Discard)
-		events = append(events, engine.RequestDecision(s, p, "harbinger", 0,
+		discardCopy := make([]engine.CardID, len(gs.Players[px].Discard))
+		copy(discardCopy, gs.Players[px].Discard)
+		events = append(events, engine.RequestDecision(gs, px, "harbinger", 0,
 			engine.ChooseFromDiscardPrompt{Cards: discardCopy, Optional: true}, nil)...)
 		return events
 	},
-	OnResolve: func(s *engine.GameState, p int, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
+	OnResolve: func(gs *engine.GameState, px engine.PlayerIdx, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
 		choice := answer.(engine.CardChoiceAnswer)
 		if choice.None {
 			return nil, nil
 		}
-		ps := &s.Players[p]
+		ps := &gs.Players[px]
 		idx := engine.IndexOf(ps.Discard, choice.Card)
 		if idx < 0 {
 			return nil, nil

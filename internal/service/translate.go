@@ -16,23 +16,23 @@ func ActionFromProto(a *pb.Action) (engine.Action, error) {
 	switch k := a.Kind.(type) {
 	case *pb.Action_PlayCard:
 		return engine.PlayCard{
-			PlayerIdx: int(k.PlayCard.PlayerIdx),
+			PlayerIdx: engine.PlayerIdx(k.PlayCard.PlayerIdx),
 			Card:      engine.CardID(k.PlayCard.CardId),
 		}, nil
 	case *pb.Action_BuyCard:
 		return engine.BuyCard{
-			PlayerIdx: int(k.BuyCard.PlayerIdx),
+			PlayerIdx: engine.PlayerIdx(k.BuyCard.PlayerIdx),
 			Card:      engine.CardID(k.BuyCard.CardId),
 		}, nil
 	case *pb.Action_EndPhase:
-		return engine.EndPhase{PlayerIdx: int(k.EndPhase.PlayerIdx)}, nil
+		return engine.EndPhase{PlayerIdx: engine.PlayerIdx(k.EndPhase.PlayerIdx)}, nil
 	case *pb.Action_Resolve:
 		answer, err := AnswerFromProto(k.Resolve)
 		if err != nil {
 			return nil, err
 		}
 		return engine.ResolveDecision{
-			PlayerIdx:  int(k.Resolve.PlayerIdx),
+			PlayerIdx:  engine.PlayerIdx(k.Resolve.PlayerIdx),
 			DecisionID: k.Resolve.DecisionId,
 			Answer:     answer,
 		}, nil
@@ -44,17 +44,17 @@ func ActionFromProto(a *pb.Action) (engine.Action, error) {
 // SnapshotFromState produces a proto snapshot scrubbed to the given
 // viewer. The viewer sees their own hand contents; opponents' hand
 // contents are omitted (but HandSize is still reported).
-func SnapshotFromState(s *engine.GameState, viewer int) *pb.GameStateSnapshot {
+func SnapshotFromState(gs *engine.GameState, viewer engine.PlayerIdx) *pb.GameStateSnapshot {
 	snap := &pb.GameStateSnapshot{
-		GameId:        s.GameID,
-		Seed:          s.Seed,
-		Turn:          int32(s.Turn),
-		CurrentPlayer: int32(s.CurrentPlayer),
-		Phase:         phaseToProto(s.Phase),
-		TrashSize:     int32(len(s.Trash)),
-		Ended:         s.Ended,
+		GameId:        gs.GameID,
+		Seed:          gs.Seed,
+		Turn:          int32(gs.Turn),
+		CurrentPlayer: int32(gs.CurrentPlayer),
+		Phase:         phaseToProto(gs.Phase),
+		TrashSize:     int32(len(gs.Trash)),
+		Ended:         gs.Ended,
 	}
-	for i, p := range s.Players {
+	for i, p := range gs.Players {
 		pv := &pb.PlayerView{
 			PlayerIdx:   int32(i),
 			Name:        p.Name,
@@ -66,7 +66,7 @@ func SnapshotFromState(s *engine.GameState, viewer int) *pb.GameStateSnapshot {
 			Buys:        int32(p.Buys),
 			Coins:       int32(p.Coins),
 		}
-		if i == viewer {
+		if engine.PlayerIdx(i) == viewer {
 			for _, c := range p.Hand {
 				pv.Hand = append(pv.Hand, string(c))
 			}
@@ -76,16 +76,16 @@ func SnapshotFromState(s *engine.GameState, viewer int) *pb.GameStateSnapshot {
 		}
 		snap.Players = append(snap.Players, pv)
 	}
-	for id, n := range s.Supply.Piles {
+	for id, n := range gs.Supply.Piles {
 		snap.Supply = append(snap.Supply, &pb.SupplyPile{
 			CardId: string(id),
 			Count:  int32(n),
 		})
 	}
-	for _, w := range s.Winners {
+	for _, w := range gs.Winners {
 		snap.Winners = append(snap.Winners, int32(w))
 	}
-	snap.PendingDecision = DecisionToProto(s.PendingDecision)
+	snap.PendingDecision = DecisionToProto(gs.PendingDecision)
 	return snap
 }
 

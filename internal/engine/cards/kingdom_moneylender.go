@@ -7,20 +7,20 @@ var Moneylender = &engine.Card{
 	Name:  "Moneylender",
 	Cost:  4,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		if engine.IndexOf(s.Players[p].Hand, "copper") < 0 {
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		if engine.IndexOf(gs.Players[px].Hand, "copper") < 0 {
 			return nil
 		}
-		return engine.RequestDecision(s, p, "moneylender", 0,
+		return engine.RequestDecision(gs, px, "moneylender", 0,
 			engine.TrashFromHandPrompt{Min: 0, Max: 1, CardFilter: []engine.CardID{"copper"}}, nil)
 	},
-	OnResolve: func(s *engine.GameState, p int, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
+	OnResolve: func(gs *engine.GameState, px engine.PlayerIdx, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
 		cards := answer.(engine.CardListAnswer).Cards
 		if len(cards) == 0 {
 			return nil, nil
 		}
-		events := engine.TrashFromHand(s, p, cards)
-		events = append(events, engine.AddCoins(s, p, 3)...)
+		events := engine.TrashFromHand(gs, px, cards)
+		events = append(events, engine.AddCoins(gs, px, 3)...)
 		return events, nil
 	},
 }

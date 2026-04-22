@@ -124,33 +124,33 @@ func TestGainCard_ToHand(t *testing.T) {
 
 func TestEachOtherPlayer_IterationOrderAndEventOrdering(t *testing.T) {
 	gs := newTestState(4)
-	var visited []int
-	events := EachOtherPlayer(gs, gs.CurrentPlayer, func(idx int) []Event {
+	var visited []PlayerIdx
+	events := EachOtherPlayer(gs, gs.CurrentPlayer, func(idx PlayerIdx) []Event {
 		visited = append(visited, idx)
 		return []Event{{Kind: EventCardDrawn, PlayerIdx: idx, Count: 1}}
 	})
 	// Starting from next seat after CurrentPlayer (1), wrapping: 2, 3, 0.
-	require.Equal(t, []int{1, 2, 3}, visited)
+	require.Equal(t, []PlayerIdx{1, 2, 3}, visited)
 	// Events are concatenated in visit order.
 	require.Len(t, events, 3)
-	require.Equal(t, 1, events[0].PlayerIdx)
-	require.Equal(t, 2, events[1].PlayerIdx)
-	require.Equal(t, 3, events[2].PlayerIdx)
+	require.Equal(t, PlayerIdx(1), events[0].PlayerIdx)
+	require.Equal(t, PlayerIdx(2), events[1].PlayerIdx)
+	require.Equal(t, PlayerIdx(3), events[2].PlayerIdx)
 }
 
 func TestEachOtherPlayer_TwoPlayers(t *testing.T) {
 	gs := newTestState(2)
-	var visited []int
-	_ = EachOtherPlayer(gs, gs.CurrentPlayer, func(idx int) []Event {
+	var visited []PlayerIdx
+	_ = EachOtherPlayer(gs, gs.CurrentPlayer, func(idx PlayerIdx) []Event {
 		visited = append(visited, idx)
 		return nil
 	})
-	require.Equal(t, []int{1}, visited)
+	require.Equal(t, []PlayerIdx{1}, visited)
 }
 
 func TestEachOtherPlayer_NilCallbackEvents(t *testing.T) {
 	gs := newTestState(3)
-	events := EachOtherPlayer(gs, gs.CurrentPlayer, func(idx int) []Event { return nil })
+	events := EachOtherPlayer(gs, gs.CurrentPlayer, func(idx PlayerIdx) []Event { return nil })
 	require.Nil(t, events)
 }
 
@@ -242,9 +242,9 @@ func TestPlayCardFromZone_Hand(t *testing.T) {
 		if id == "smithy" {
 			return &Card{
 				ID: "smithy", Types: []CardType{TypeAction},
-				OnPlay: func(gs *GameState, p int) []Event {
+				OnPlay: func(gs *GameState, px PlayerIdx) []Event {
 					called = true
-					return []Event{{Kind: EventCardDrawn, PlayerIdx: p, Count: 3}}
+					return []Event{{Kind: EventCardDrawn, PlayerIdx: px, Count: 3}}
 				},
 			}, true
 		}
@@ -268,7 +268,7 @@ func TestPlayCardFromZone_Discard(t *testing.T) {
 		if id == "village" {
 			return &Card{
 				ID: "village", Types: []CardType{TypeAction},
-				OnPlay: func(gs *GameState, p int) []Event { return nil },
+				OnPlay: func(gs *GameState, px PlayerIdx) []Event { return nil },
 			}, true
 		}
 		return nil, false

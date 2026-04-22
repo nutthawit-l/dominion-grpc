@@ -7,18 +7,18 @@ import (
 // GameState is the complete authoritative game state. It is the only
 // input/output of the engine.
 type GameState struct {
-	GameID        string
-	Seed          int64
-	rng           *rand.Rand
-	Players       []PlayerState
-	CurrentPlayer  int
-	StartingPlayer int
+	GameID         string
+	Seed           int64
+	rng            *rand.Rand
+	Players        []PlayerState
+	CurrentPlayer  PlayerIdx
+	StartingPlayer PlayerIdx
 	Phase          Phase
-	Supply        Supply
-	Trash         []CardID
-	Turn          int
-	Ended         bool
-	Winners       []int
+	Supply         Supply
+	Trash          []CardID
+	Turn           int
+	Ended          bool
+	Winners        []PlayerIdx
 
 	// PendingDecision is set by RequestDecision when a card needs
 	// player input. While set, only ResolveDecision is legal.
@@ -49,7 +49,7 @@ type Supply struct {
 // Decision is a server-generated prompt requiring player input.
 type Decision struct {
 	ID        string
-	PlayerIdx int
+	PlayerIdx PlayerIdx
 	CardID    CardID
 	Step      int
 	Prompt    Prompt
@@ -60,7 +60,7 @@ type Decision struct {
 // The service layer translates these into protobuf GameEvents.
 type Event struct {
 	Kind      EventKind
-	PlayerIdx int
+	PlayerIdx PlayerIdx
 	CardID    CardID
 	Count     int
 	Phase     Phase

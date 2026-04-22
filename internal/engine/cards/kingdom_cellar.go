@@ -7,17 +7,17 @@ var Cellar = &engine.Card{
 	Name:  "Cellar",
 	Cost:  2,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.AddActions(s, p, 1)
-		handSize := len(s.Players[p].Hand)
-		events = append(events, engine.RequestDecision(s, p, "cellar", 0,
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.AddActions(gs, px, 1)
+		handSize := len(gs.Players[px].Hand)
+		events = append(events, engine.RequestDecision(gs, px, "cellar", 0,
 			engine.DiscardFromHandPrompt{Min: 0, Max: handSize}, nil)...)
 		return events
 	},
-	OnResolve: func(s *engine.GameState, p int, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
+	OnResolve: func(gs *engine.GameState, px engine.PlayerIdx, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
 		cards := answer.(engine.CardListAnswer).Cards
-		events := engine.DiscardFromHand(s, p, cards)
-		events = append(events, engine.DrawCards(s, p, len(cards))...)
+		events := engine.DiscardFromHand(gs, px, cards)
+		events = append(events, engine.DrawCards(gs, px, len(cards))...)
 		return events, nil
 	},
 }

@@ -23,9 +23,9 @@ func newTestState(numPlayers int) *GameState {
 	}
 }
 
-// fillDeck pushes n copies of card onto player p's deck.
-func fillDeck(gs *GameState, p int, card CardID, n int) {
+// fillDeck pushes n copies of card onto player px's deck.
+func fillDeck(gs *GameState, px PlayerIdx, card CardID, n int) {
 	for i := 0; i < n; i++ {
-		gs.Players[p].Deck = append(gs.Players[p].Deck, card)
+		gs.Players[px].Deck = append(gs.Players[px].Deck, card)
 	}
 }

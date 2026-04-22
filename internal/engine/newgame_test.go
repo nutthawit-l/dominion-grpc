@@ -36,7 +36,7 @@ func TestNewGame_TwoPlayer_InitialDeckAndHand(t *testing.T) {
 	}
 	cp := gs.CurrentPlayer
 	require.Equal(t, PhaseAction, gs.Phase)
-	require.Contains(t, []int{0, 1}, gs.CurrentPlayer)
+	require.Contains(t, []PlayerIdx{0, 1}, gs.CurrentPlayer)
 	require.Equal(t, 1, gs.Turn)
 	require.Equal(t, 1, gs.Players[cp].Actions)
 	require.Equal(t, 1, gs.Players[cp].Buys)
@@ -75,9 +75,9 @@ func TestIsKingdom_ActionCardsQualify(t *testing.T) {
 
 func TestNewGame_EmptyKingdom_UsesAllRegisteredActions(t *testing.T) {
 	action := &Card{ID: "alpha", Name: "Alpha", Cost: 3, Types: []CardType{TypeAction},
-		OnPlay: func(*GameState, int) []Event { return nil }}
+		OnPlay: func(*GameState, PlayerIdx) []Event { return nil }}
 	action2 := &Card{ID: "beta", Name: "Beta", Cost: 4, Types: []CardType{TypeAction},
-		OnPlay: func(*GameState, int) []Event { return nil }}
+		OnPlay: func(*GameState, PlayerIdx) []Event { return nil }}
 	basics := basicCards()
 	lookup := combineLookups(basics, []*Card{action, action2})
 
@@ -89,9 +89,9 @@ func TestNewGame_EmptyKingdom_UsesAllRegisteredActions(t *testing.T) {
 
 func TestNewGame_ExplicitKingdom_OnlyRequestedCards(t *testing.T) {
 	action := &Card{ID: "alpha", Name: "Alpha", Cost: 3, Types: []CardType{TypeAction},
-		OnPlay: func(*GameState, int) []Event { return nil }}
+		OnPlay: func(*GameState, PlayerIdx) []Event { return nil }}
 	action2 := &Card{ID: "beta", Name: "Beta", Cost: 4, Types: []CardType{TypeAction},
-		OnPlay: func(*GameState, int) []Event { return nil }}
+		OnPlay: func(*GameState, PlayerIdx) []Event { return nil }}
 	lookup := combineLookups(basicCards(), []*Card{action, action2})
 
 	gs, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha"}, 42, lookup)
@@ -109,7 +109,7 @@ func TestNewGame_UnknownKingdomCard_ReturnsError(t *testing.T) {
 
 func TestNewGame_DuplicateKingdomCard_SinglePile(t *testing.T) {
 	action := &Card{ID: "alpha", Name: "Alpha", Cost: 3, Types: []CardType{TypeAction},
-		OnPlay: func(*GameState, int) []Event { return nil }}
+		OnPlay: func(*GameState, PlayerIdx) []Event { return nil }}
 	lookup := combineLookups(basicCards(), []*Card{action})
 
 	gs, err := NewGame("g", []string{"p0", "p1"}, []CardID{"alpha", "alpha"}, 42, lookup)

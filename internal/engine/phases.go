@@ -8,34 +8,34 @@ package engine
 //
 // Next player's resources are reset to 1 action, 1 buy, 0 coins.
 func cleanupAndEndTurn(gs *GameState) []Event {
-	p := gs.CurrentPlayer
+	px := gs.CurrentPlayer
 	var events []Event
 
 	// Discard in-play.
-	for _, c := range gs.Players[p].InPlay {
-		gs.Players[p].Discard = append(gs.Players[p].Discard, c)
-		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: p, CardID: c})
+	for _, c := range gs.Players[px].InPlay {
+		gs.Players[px].Discard = append(gs.Players[px].Discard, c)
+		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: px, CardID: c})
 	}
-	gs.Players[p].InPlay = nil
+	gs.Players[px].InPlay = nil
 
 	// Discard hand.
-	for _, c := range gs.Players[p].Hand {
-		gs.Players[p].Discard = append(gs.Players[p].Discard, c)
-		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: p, CardID: c})
+	for _, c := range gs.Players[px].Hand {
+		gs.Players[px].Discard = append(gs.Players[px].Discard, c)
+		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: px, CardID: c})
 	}
-	gs.Players[p].Hand = nil
+	gs.Players[px].Hand = nil
 
 	// Draw 5.
-	events = append(events, DrawCards(gs, p, 5)...)
+	events = append(events, DrawCards(gs, px, 5)...)
 
 	// Reset resources — they only apply to the current player's turn
 	// and are re-set below for the NEXT player.
-	gs.Players[p].Actions = 0
-	gs.Players[p].Buys = 0
-	gs.Players[p].Coins = 0
+	gs.Players[px].Actions = 0
+	gs.Players[px].Buys = 0
+	gs.Players[px].Coins = 0
 
 	// Advance to next player.
-	next := (p + 1) % len(gs.Players)
+	next := (px + 1) % PlayerIdx(len(gs.Players))
 	gs.CurrentPlayer = next
 	if next == gs.StartingPlayer {
 		gs.Turn++

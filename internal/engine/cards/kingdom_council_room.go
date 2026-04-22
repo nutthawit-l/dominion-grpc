@@ -7,11 +7,11 @@ var CouncilRoom = &engine.Card{
 	Name:  "Council Room",
 	Cost:  5,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		events := engine.DrawCards(s, p, 4)
-		events = append(events, engine.AddBuys(s, p, 1)...)
-		events = append(events, engine.EachOtherPlayer(s, p, func(idx int) []engine.Event {
-			return engine.DrawCards(s, idx, 1)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		events := engine.DrawCards(gs, px, 4)
+		events = append(events, engine.AddBuys(gs, px, 1)...)
+		events = append(events, engine.EachOtherPlayer(gs, px, func(idx engine.PlayerIdx) []engine.Event {
+			return engine.DrawCards(gs, idx, 1)
 		})...)
 		return events
 	},

@@ -7,8 +7,8 @@ var Smithy = &engine.Card{
 	Name:  "Smithy",
 	Cost:  4,
 	Types: []engine.CardType{engine.TypeAction},
-	OnPlay: func(s *engine.GameState, p int) []engine.Event {
-		return engine.DrawCards(s, p, 3)
+	OnPlay: func(gs *engine.GameState, px engine.PlayerIdx) []engine.Event {
+		return engine.DrawCards(gs, px, 3)
 	},
 }
 

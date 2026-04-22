@@ -37,17 +37,17 @@ func ComputeScore(ps PlayerState, lookup CardLookup) int {
 
 // DetermineWinners returns the indices of all players tied for the
 // highest score.
-func DetermineWinners(scores []int) []int {
+func DetermineWinners(scores []int) []PlayerIdx {
 	best := scores[0]
 	for _, s := range scores[1:] {
 		if s > best {
 			best = s
 		}
 	}
-	var winners []int
+	var winners []PlayerIdx
 	for i, s := range scores {
 		if s == best {
-			winners = append(winners, i)
+			winners = append(winners, PlayerIdx(i))
 		}
 	}
 	return winners

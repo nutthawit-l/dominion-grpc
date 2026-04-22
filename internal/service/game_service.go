@@ -15,7 +15,7 @@ import (
 // subscriber carries the per-stream metadata used during fanout.
 type subscriber struct {
 	ch     chan *pb.StreamGameEventsResponse
-	viewer int
+	viewer engine.PlayerIdx
 }
 
 // GameService implements the Connect GameServiceHandler interface.
@@ -125,7 +125,7 @@ func (g *GameService) fanOut(gameID string, s *engine.GameState, events []engine
 
 	// Build one snapshot response per distinct viewer seat, then send each
 	// subscriber the snapshot for their own seat.
-	snapByViewer := map[int]*pb.StreamGameEventsResponse{}
+	snapByViewer := map[engine.PlayerIdx]*pb.StreamGameEventsResponse{}
 	for _, sub := range g.subs[gameID] {
 		if _, ok := snapByViewer[sub.viewer]; ok {
 			continue
@@ -158,7 +158,7 @@ func (g *GameService) StreamGameEvents(ctx context.Context, req *connect.Request
 
 func (g *GameService) streamGameEventsInto(ctx context.Context, req *connect.Request[pb.StreamGameEventsRequest], sink eventSink) error {
 	gameID := req.Msg.GameId
-	viewer := int(req.Msg.PlayerIdx)
+	viewer := engine.PlayerIdx(req.Msg.PlayerIdx)
 
 	// Send an initial snapshot so the client can render the board immediately.
 	s, ok := g.store.Get(gameID)

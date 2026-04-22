@@ -57,10 +57,10 @@ func TestComputeScore_SumsVictoryCardsAcrossAllZones(t *testing.T) {
 
 func TestDetermineWinners_Ties(t *testing.T) {
 	scores := []int{10, 10, 5}
-	require.Equal(t, []int{0, 1}, DetermineWinners(scores))
+	require.Equal(t, []PlayerIdx{0, 1}, DetermineWinners(scores))
 }
 
 func TestDetermineWinners_SoloWinner(t *testing.T) {
 	scores := []int{5, 10, 5}
-	require.Equal(t, []int{1}, DetermineWinners(scores))
+	require.Equal(t, []PlayerIdx{1}, DetermineWinners(scores))
 }

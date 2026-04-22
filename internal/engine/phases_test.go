@@ -23,7 +23,7 @@ func TestCleanupAndEndTurn_MovesInPlayAndHandToDiscard(t *testing.T) {
 	require.Len(t, gs.Players[0].InPlay, 0)
 	require.Contains(t, gs.Players[0].Discard, CardID("estate"))
 	require.Contains(t, gs.Players[0].Discard, CardID("silver"))
-	require.Equal(t, 1, gs.CurrentPlayer)
+	require.Equal(t, PlayerIdx(1), gs.CurrentPlayer)
 	require.Equal(t, PhaseAction, gs.Phase)
 	require.Equal(t, 1, gs.Players[1].Actions)
 	require.Equal(t, 1, gs.Players[1].Buys)
@@ -42,6 +42,6 @@ func TestCleanupAndEndTurn_WrapsToFirstPlayerAndIncrementsTurn(t *testing.T) {
 
 	cleanupAndEndTurn(gs)
 
-	require.Equal(t, 0, gs.CurrentPlayer)
+	require.Equal(t, PlayerIdx(0), gs.CurrentPlayer)
 	require.Equal(t, 2, gs.Turn)
 }

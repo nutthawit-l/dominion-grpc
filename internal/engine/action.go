@@ -4,43 +4,43 @@ package engine
 // translates protobuf actions into these before calling Apply.
 type Action interface {
 	isAction()
-	Player() int
+	Player() PlayerIdx
 }
 
 // PlayCard plays a specific card from hand.
 type PlayCard struct {
-	PlayerIdx int
+	PlayerIdx PlayerIdx
 	Card      CardID
 }
 
-func (PlayCard) isAction()       {}
-func (act PlayCard) Player() int { return act.PlayerIdx }
+func (PlayCard) isAction()             {}
+func (act PlayCard) Player() PlayerIdx { return act.PlayerIdx }
 
 // BuyCard buys a specific card from the supply.
 type BuyCard struct {
-	PlayerIdx int
+	PlayerIdx PlayerIdx
 	Card      CardID
 }
 
-func (BuyCard) isAction()       {}
-func (act BuyCard) Player() int { return act.PlayerIdx }
+func (BuyCard) isAction()            {}
+func (act BuyCard) Player() PlayerIdx { return act.PlayerIdx }
 
 // EndPhase ends the current phase (Action → Buy, or Buy → Cleanup).
 // Cleanup auto-advances to the next player; EndPhase cannot be called
 // during Cleanup.
 type EndPhase struct {
-	PlayerIdx int
+	PlayerIdx PlayerIdx
 }
 
-func (EndPhase) isAction()       {}
-func (act EndPhase) Player() int { return act.PlayerIdx }
+func (EndPhase) isAction()             {}
+func (act EndPhase) Player() PlayerIdx { return act.PlayerIdx }
 
 // ResolveDecision answers a pending Decision.
 type ResolveDecision struct {
-	PlayerIdx  int
+	PlayerIdx  PlayerIdx
 	DecisionID string
 	Answer     Answer
 }
 
-func (ResolveDecision) isAction()       {}
-func (act ResolveDecision) Player() int { return act.PlayerIdx }
+func (ResolveDecision) isAction()             {}
+func (act ResolveDecision) Player() PlayerIdx { return act.PlayerIdx }

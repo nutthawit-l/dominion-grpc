@@ -13,7 +13,7 @@ func TestRequestDecision_SetsPendingDecision(t *testing.T) {
 	events := RequestDecision(gs, 0, "cellar", 0, prompt, nil)
 
 	require.NotNil(t, gs.PendingDecision)
-	require.Equal(t, 0, gs.PendingDecision.PlayerIdx)
+	require.Equal(t, PlayerIdx(0), gs.PendingDecision.PlayerIdx)
 	require.Equal(t, CardID("cellar"), gs.PendingDecision.CardID)
 	require.Equal(t, 0, gs.PendingDecision.Step)
 	require.Equal(t, prompt, gs.PendingDecision.Prompt)
