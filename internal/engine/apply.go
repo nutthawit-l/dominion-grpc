@@ -24,7 +24,7 @@ var (
 // returns the events that resulted. On an illegal action it returns an
 // error and leaves s in a consistent pre-action state (because the
 // handlers validate before mutating).
-func Apply(s *GameState, a Action, lookup CardLookup) (*GameState, []Event, error) {
+func Apply(s *GameState, act Action, lookup CardLookup) (*GameState, []Event, error) {
 	if s.Ended {
 		return s, nil, ErrGameEnded
 	}
@@ -32,7 +32,7 @@ func Apply(s *GameState, a Action, lookup CardLookup) (*GameState, []Event, erro
 	// Decision-pending guard: only ResolveDecision is legal while a
 	// decision is pending.
 	if s.PendingDecision != nil {
-		resolve, ok := a.(ResolveDecision)
+		resolve, ok := act.(ResolveDecision)
 		if !ok {
 			return s, nil, ErrDecisionPending
 		}
@@ -40,10 +40,10 @@ func Apply(s *GameState, a Action, lookup CardLookup) (*GameState, []Event, erro
 		return s, ev, err
 	}
 
-	if a.Player() != s.CurrentPlayer {
+	if act.Player() != s.CurrentPlayer {
 		return s, nil, ErrNotYourTurn
 	}
-	switch act := a.(type) {
+	switch act := act.(type) {
 	case PlayCard:
 		ev, err := applyPlayCard(s, act, lookup)
 		return s, ev, err
@@ -82,8 +82,8 @@ func applyResolveDecision(s *GameState, act ResolveDecision, lookup CardLookup) 
 	return card.OnResolve(s, d.PlayerIdx, d, act.Answer, lookup)
 }
 
-func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error) {
-	card, ok := lookup(a.Card)
+func applyPlayCard(s *GameState, act PlayCard, lookup CardLookup) ([]Event, error) {
+	card, ok := lookup(act.Card)
 	if !ok {
 		return nil, ErrUnknownCard
 	}
@@ -92,10 +92,10 @@ func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error)
 		if !card.HasType(TypeAction) {
 			return nil, ErrWrongPhase
 		}
-		if s.Players[a.PlayerIdx].Actions <= 0 {
+		if s.Players[act.PlayerIdx].Actions <= 0 {
 			return nil, ErrNoActions
 		}
-		s.Players[a.PlayerIdx].Actions--
+		s.Players[act.PlayerIdx].Actions--
 	case PhaseBuy:
 		if !card.HasType(TypeTreasure) {
 			return nil, ErrWrongPhase
@@ -103,29 +103,29 @@ func applyPlayCard(s *GameState, a PlayCard, lookup CardLookup) ([]Event, error)
 	default:
 		return nil, ErrWrongPhase
 	}
-	return PlayCardFromZone(s, a.PlayerIdx, a.Card, ZoneHand, lookup)
+	return PlayCardFromZone(s, act.PlayerIdx, act.Card, ZoneHand, lookup)
 }
 
-func applyBuyCard(s *GameState, a BuyCard, lookup CardLookup) ([]Event, error) {
+func applyBuyCard(s *GameState, act BuyCard, lookup CardLookup) ([]Event, error) {
 	if s.Phase != PhaseBuy {
 		return nil, ErrWrongPhase
 	}
-	card, ok := lookup(a.Card)
+	card, ok := lookup(act.Card)
 	if !ok {
 		return nil, ErrUnknownCard
 	}
-	if s.Supply.Piles[a.Card] <= 0 {
+	if s.Supply.Piles[act.Card] <= 0 {
 		return nil, ErrCardNotInSupply
 	}
-	if s.Players[a.PlayerIdx].Buys <= 0 {
+	if s.Players[act.PlayerIdx].Buys <= 0 {
 		return nil, ErrNoBuys
 	}
-	if s.Players[a.PlayerIdx].Coins < card.Cost {
+	if s.Players[act.PlayerIdx].Coins < card.Cost {
 		return nil, ErrInsufficientCoins
 	}
-	s.Players[a.PlayerIdx].Coins -= card.Cost
-	s.Players[a.PlayerIdx].Buys--
-	events := GainCard(s, a.PlayerIdx, a.Card, GainToDiscard)
+	s.Players[act.PlayerIdx].Coins -= card.Cost
+	s.Players[act.PlayerIdx].Buys--
+	events := GainCard(s, act.PlayerIdx, act.Card, GainToDiscard)
 	return events, nil
 }
 

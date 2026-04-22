@@ -13,8 +13,8 @@ type PlayCard struct {
 	Card      CardID
 }
 
-func (PlayCard) isAction()     {}
-func (a PlayCard) Player() int { return a.PlayerIdx }
+func (PlayCard) isAction()       {}
+func (act PlayCard) Player() int { return act.PlayerIdx }
 
 // BuyCard buys a specific card from the supply.
 type BuyCard struct {
@@ -22,8 +22,8 @@ type BuyCard struct {
 	Card      CardID
 }
 
-func (BuyCard) isAction()     {}
-func (a BuyCard) Player() int { return a.PlayerIdx }
+func (BuyCard) isAction()       {}
+func (act BuyCard) Player() int { return act.PlayerIdx }
 
 // EndPhase ends the current phase (Action → Buy, or Buy → Cleanup).
 // Cleanup auto-advances to the next player; EndPhase cannot be called
@@ -32,8 +32,8 @@ type EndPhase struct {
 	PlayerIdx int
 }
 
-func (EndPhase) isAction()     {}
-func (a EndPhase) Player() int { return a.PlayerIdx }
+func (EndPhase) isAction()       {}
+func (act EndPhase) Player() int { return act.PlayerIdx }
 
 // ResolveDecision answers a pending Decision.
 type ResolveDecision struct {
@@ -42,5 +42,5 @@ type ResolveDecision struct {
 	Answer     Answer
 }
 
-func (ResolveDecision) isAction()     {}
-func (a ResolveDecision) Player() int { return a.PlayerIdx }
+func (ResolveDecision) isAction()       {}
+func (act ResolveDecision) Player() int { return act.PlayerIdx }
