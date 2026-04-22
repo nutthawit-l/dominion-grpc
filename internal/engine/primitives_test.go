@@ -294,3 +294,95 @@ func TestPlayCardFromZone_CardNotInZone_Error(t *testing.T) {
 	_, err = PlayCardFromZone(gs, 0, "smithy", ZoneDiscard, lookup)
 	require.ErrorIs(t, err, ErrCardNotInDiscard)
 }
+
+func TestRevealFromDeck_TopCardsRemainOnDeck(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper", "silver", "gold"}, // gold is top
+	}})
+
+	revealed, events := RevealFromDeck(gs, 0, 2)
+
+	require.Equal(t, []CardID{"gold", "silver"}, revealed)
+	require.Equal(t, []CardID{"copper", "silver", "gold"}, gs.Players[0].Deck,
+		"revealed cards must remain physically on top of the deck")
+	require.Empty(t, events, "RevealFromDeck emits no events by itself; caller emits EventCardRevealed")
+}
+
+func TestRevealFromDeck_ShufflesDiscardWhenDeckEmpty(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name:    "a",
+		Discard: []CardID{"estate", "copper"},
+	}})
+
+	revealed, _ := RevealFromDeck(gs, 0, 2)
+
+	require.Len(t, revealed, 2)
+	require.Empty(t, gs.Players[0].Discard, "discard must be moved into deck before reveal")
+	require.Len(t, gs.Players[0].Deck, 2)
+}
+
+func TestRevealFromDeck_DeckAndDiscardEmpty_ReturnsEmpty(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{Name: "a"}})
+	revealed, _ := RevealFromDeck(gs, 0, 2)
+	require.Empty(t, revealed)
+}
+
+func TestRevealFromDeck_RequestMoreThanAvailable_ReturnsWhatExists(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper"},
+	}})
+	revealed, _ := RevealFromDeck(gs, 0, 2)
+	require.Equal(t, []CardID{"copper"}, revealed)
+}
+
+func TestTrashFromDeck_RemovesCardAndEmitsEvent(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper", "silver", "gold"},
+	}})
+
+	events := TrashFromDeck(gs, 0, "gold")
+
+	require.Equal(t, []CardID{"copper", "silver"}, gs.Players[0].Deck)
+	require.Equal(t, []CardID{"gold"}, gs.Trash)
+	require.Len(t, events, 1)
+	require.Equal(t, EventCardTrashed, events[0].Kind)
+	require.Equal(t, CardID("gold"), events[0].CardID)
+}
+
+func TestTrashFromDeck_CardAbsent_NoOp(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper"},
+	}})
+	events := TrashFromDeck(gs, 0, "gold")
+	require.Empty(t, events)
+	require.Equal(t, []CardID{"copper"}, gs.Players[0].Deck)
+	require.Empty(t, gs.Trash)
+}
+
+func TestDiscardFromDeck_RemovesCardAndEmitsEvent(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper", "silver", "gold"},
+	}})
+
+	events := DiscardFromDeck(gs, 0, "silver")
+
+	require.Equal(t, []CardID{"copper", "gold"}, gs.Players[0].Deck)
+	require.Equal(t, []CardID{"silver"}, gs.Players[0].Discard)
+	require.Len(t, events, 1)
+	require.Equal(t, EventCardDiscarded, events[0].Kind)
+}
+
+func TestDiscardFromDeck_CardAbsent_NoOp(t *testing.T) {
+	gs := NewTestStateWithRNG("t", 1, []PlayerState{{
+		Name: "a",
+		Deck: []CardID{"copper"},
+	}})
+	events := DiscardFromDeck(gs, 0, "gold")
+	require.Empty(t, events)
+	require.Equal(t, []CardID{"copper"}, gs.Players[0].Deck)
+}

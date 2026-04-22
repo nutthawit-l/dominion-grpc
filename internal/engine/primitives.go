@@ -200,3 +200,61 @@ func GainCard(gs *GameState, px PlayerIdx, card CardID, dest GainDest) []Event {
 	}
 	return []Event{{Kind: EventCardGained, PlayerIdx: px, CardID: card}}
 }
+
+// RevealFromDeck reveals the top n cards WITHOUT moving them. If the
+// deck is empty it shuffles the discard into the deck first. Returns
+// the revealed card IDs in reveal order (top-of-deck first). The cards
+// remain physically on top of the deck; the caller is responsible for
+// moving each one to its final zone via TrashFromDeck / DiscardFromDeck
+// / PutOnDeck.
+func RevealFromDeck(gs *GameState, px PlayerIdx, n int) ([]CardID, []Event) {
+	ps := &gs.Players[px]
+	if len(ps.Deck) < n {
+		if len(ps.Discard) > 0 {
+			// Move discard into deck and shuffle, then continue.
+			ps.Deck = append(ps.Deck, ps.Discard...)
+			ps.Discard = nil
+			shuffleCards(gs.rng, ps.Deck)
+		}
+	}
+	available := len(ps.Deck)
+	if available > n {
+		available = n
+	}
+	if available == 0 {
+		return nil, nil
+	}
+	revealed := make([]CardID, 0, available)
+	// Top of deck is end of slice. Reveal from end downward.
+	for i := 0; i < available; i++ {
+		revealed = append(revealed, ps.Deck[len(ps.Deck)-1-i])
+	}
+	return revealed, nil
+}
+
+// TrashFromDeck moves a specific card from the top region of the deck
+// to the trash. If the card is not present in the deck, this is a no-op
+// (no events, no error).
+func TrashFromDeck(gs *GameState, px PlayerIdx, card CardID) []Event {
+	ps := &gs.Players[px]
+	idx := indexOf(ps.Deck, card)
+	if idx < 0 {
+		return nil
+	}
+	ps.Deck = append(ps.Deck[:idx], ps.Deck[idx+1:]...)
+	gs.Trash = append(gs.Trash, card)
+	return []Event{{Kind: EventCardTrashed, PlayerIdx: px, CardID: card}}
+}
+
+// DiscardFromDeck moves a specific card from the top region of the deck
+// to the player's discard pile. No-op if the card is not present.
+func DiscardFromDeck(gs *GameState, px PlayerIdx, card CardID) []Event {
+	ps := &gs.Players[px]
+	idx := indexOf(ps.Deck, card)
+	if idx < 0 {
+		return nil
+	}
+	ps.Deck = append(ps.Deck[:idx], ps.Deck[idx+1:]...)
+	ps.Discard = append(ps.Discard, card)
+	return []Event{{Kind: EventCardDiscarded, PlayerIdx: px, CardID: card}}
+}
