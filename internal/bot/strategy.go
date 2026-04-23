@@ -47,8 +47,28 @@ func safeRefusal(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
 	case *pb.Decision_ChooseFromDiscard:
 		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{None: true}}
 	case *pb.Decision_PutOnDeck:
-		card := firstInHand(cs)
-		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: card}}
+		put := d.GetPutOnDeck()
+		if len(put.TypeFilter) > 0 {
+			card := firstInHandMatching(cs, put.TypeFilter)
+			r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: []string{card}}}
+		} else {
+			card := firstInHand(cs)
+			r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: card}}
+		}
+	case *pb.Decision_TrashFromRevealed:
+		tfr := d.GetTrashFromRevealed()
+		if len(tfr.Cards) == 0 {
+			r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{None: true}}
+			break
+		}
+		best := tfr.Cards[0]
+		bestCost := cardCost(best)
+		for _, c := range tfr.Cards[1:] {
+			if cost := cardCost(c); cost < bestCost {
+				best, bestCost = c, cost
+			}
+		}
+		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: best}}
 	case *pb.Decision_MayPlayAction:
 		r.Answer = &pb.ResolveDecision_YesNo{YesNo: &pb.YesNoAnswer{Yes: false}}
 	default:
@@ -98,21 +118,60 @@ func firstInHand(cs *ClientState) string {
 	return me.Hand[0]
 }
 
+// firstInHandMatching returns the first card in hand matching any of the
+// given type filters. If filter is empty, returns the first card. If no
+// match, returns the first card as a fallback.
+func firstInHandMatching(cs *ClientState, filter []pb.CardType) string {
+	me := cs.MyPlayer()
+	if me == nil || len(me.Hand) == 0 {
+		return ""
+	}
+	if len(filter) == 0 {
+		return me.Hand[0]
+	}
+	for _, c := range me.Hand {
+		if cardHasAnyType(c, filter) {
+			return c
+		}
+	}
+	return me.Hand[0] // fallback
+}
+
+func cardHasAnyType(id string, filter []pb.CardType) bool {
+	for _, t := range filter {
+		if t == pb.CardType_CARD_TYPE_VICTORY && isVictory(id) {
+			return true
+		}
+		if t == pb.CardType_CARD_TYPE_TREASURE && isTreasure(id) {
+			return true
+		}
+	}
+	return false
+}
+
+func isVictory(id string) bool {
+	switch id {
+	case "estate", "duchy", "province":
+		return true
+	}
+	return false
+}
+
 // cardCost returns the known cost of a card by ID. This is a simple
 // lookup for the base set; it avoids importing the engine package.
 func cardCost(id string) int {
 	switch id {
 	case "copper", "curse":
 		return 0
-	case "estate":
+	case "estate", "moat":
 		return 2
 	case "silver", "cellar", "chapel":
 		return 3
 	case "harbinger", "vassal", "workshop":
 		return 3
-	case "moneylender", "poacher", "remodel", "smithy":
+	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy":
 		return 4
-	case "mine", "laboratory", "market", "festival":
+	case "mine", "witch", "bandit", "laboratory", "market", "festival":
 		return 5
 	case "gold", "artisan", "council_room":
 		return 6
