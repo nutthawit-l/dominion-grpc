@@ -134,7 +134,11 @@ func DecisionToProto(d *engine.Decision) *pb.Decision {
 			Cards: cards, Optional: p.Optional,
 		}}
 	case engine.PutOnDeckPrompt:
-		pd.Prompt = &pb.Decision_PutOnDeck{PutOnDeck: &pb.PutOnDeckPrompt{}}
+		proto := &pb.PutOnDeckPrompt{}
+		for _, t := range p.TypeFilter {
+			proto.TypeFilter = append(proto.TypeFilter, cardTypeToProto(t))
+		}
+		pd.Prompt = &pb.Decision_PutOnDeck{PutOnDeck: proto}
 	case engine.MayPlayActionPrompt:
 		pd.Prompt = &pb.Decision_MayPlayAction{MayPlayAction: &pb.MayPlayActionPrompt{
 			CardId: string(p.Card),
