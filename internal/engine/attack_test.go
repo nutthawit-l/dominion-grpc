@@ -6,8 +6,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// fakeReaction helpers for wiring a lookup that the
+// fakeAttack and fakeReaction are helpers for wiring a lookup that the
 // tests in this file can control without registering real cards.
+type fakeAttack struct{ id CardID }
 
 func fakeLookupWith(cards ...*Card) CardLookup {
 	byID := map[CardID]*Card{}
@@ -87,7 +88,7 @@ func TestResolveAttackVictims_AllBlocked_EmptyVictimList(t *testing.T) {
 	require.Empty(t, victims)
 }
 
-func TestResolveAttackVictims_ReactionFires_NoBlock_VictimIncluded(t *testing.T) {
+func TestResolveAttackVictims_NonReactionTriggerIgnored(t *testing.T) {
 	nonBlocker := &Card{
 		ID: "non_blocker", Name: "X",
 		OnReaction: func(gs *GameState, victim PlayerIdx, trigger Trigger) (bool, []Event) {
@@ -104,3 +105,6 @@ func TestResolveAttackVictims_ReactionFires_NoBlock_VictimIncluded(t *testing.T)
 	require.Equal(t, []PlayerIdx{1}, victims)
 }
 
+// Silence unused-struct warning on fakeAttack since it's part of the shared
+// helper surface for upcoming card tests.
+var _ = fakeAttack{}
