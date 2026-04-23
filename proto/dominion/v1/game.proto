@@ -124,7 +124,9 @@ message ChooseFromDiscardPrompt {
     bool optional = 2;
 }
 
-message PutOnDeckPrompt {}
+message PutOnDeckPrompt {
+    repeated CardType type_filter = 1;  // empty = any card
+}
 
 message MayPlayActionPrompt {
     string card_id = 1;

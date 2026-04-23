@@ -56,8 +56,11 @@ type ChooseFromDiscardPrompt struct {
 func (ChooseFromDiscardPrompt) isPrompt() {}
 
 // PutOnDeckPrompt asks the player to put one card from hand on top of
-// their deck.
-type PutOnDeckPrompt struct{}
+// their deck. TypeFilter narrows which hand cards are legal choices;
+// an empty/nil filter means "any card."
+type PutOnDeckPrompt struct {
+	TypeFilter []CardType
+}
 
 func (PutOnDeckPrompt) isPrompt() {}
 

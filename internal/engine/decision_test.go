@@ -42,3 +42,13 @@ func TestRequestDecision_WithContext(t *testing.T) {
 	require.Equal(t, 4, gs.PendingDecision.Context[CtxKeyTrashedCost])
 	require.Equal(t, 1, gs.PendingDecision.Step)
 }
+
+func TestPutOnDeckPrompt_EmptyFilter_MeansAnyCard(t *testing.T) {
+	p := PutOnDeckPrompt{}
+	require.Empty(t, p.TypeFilter, "default zero-value TypeFilter must be empty")
+}
+
+func TestPutOnDeckPrompt_WithTypeFilter(t *testing.T) {
+	p := PutOnDeckPrompt{TypeFilter: []CardType{TypeVictory}}
+	require.Equal(t, []CardType{TypeVictory}, p.TypeFilter)
+}

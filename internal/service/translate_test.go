@@ -57,3 +57,33 @@ func TestSnapshotFromState_ScrubsOpponentHand(t *testing.T) {
 	require.Empty(t, snap.Players[1].Hand)
 	require.Equal(t, int32(1), snap.Players[1].HandSize)
 }
+
+func TestPromptToProto_PutOnDeck_WithTypeFilter(t *testing.T) {
+	d := &engine.Decision{
+		ID:        "d1",
+		PlayerIdx: 0,
+		CardID:    "bureaucrat",
+		Step:      0,
+		Prompt:    engine.PutOnDeckPrompt{TypeFilter: []engine.CardType{engine.TypeVictory}},
+	}
+	pd := DecisionToProto(d)
+	require.NotNil(t, pd)
+	put := pd.GetPutOnDeck()
+	require.NotNil(t, put)
+	require.Equal(t, []pb.CardType{pb.CardType_CARD_TYPE_VICTORY}, put.TypeFilter)
+}
+
+func TestPromptToProto_PutOnDeck_EmptyFilter(t *testing.T) {
+	d := &engine.Decision{
+		ID:        "d1",
+		PlayerIdx: 0,
+		CardID:    "artisan",
+		Step:      1,
+		Prompt:    engine.PutOnDeckPrompt{},
+	}
+	pd := DecisionToProto(d)
+	require.NotNil(t, pd)
+	put := pd.GetPutOnDeck()
+	require.NotNil(t, put)
+	require.Empty(t, put.TypeFilter)
+}

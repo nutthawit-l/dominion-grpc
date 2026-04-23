@@ -945,6 +945,7 @@ func (x *ChooseFromDiscardPrompt) GetOptional() bool {
 
 type PutOnDeckPrompt struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	TypeFilter    []CardType             `protobuf:"varint,1,rep,packed,name=type_filter,json=typeFilter,proto3,enum=dominion.v1.CardType" json:"type_filter,omitempty"` // empty = any card
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -977,6 +978,13 @@ func (x *PutOnDeckPrompt) ProtoReflect() protoreflect.Message {
 // Deprecated: Use PutOnDeckPrompt.ProtoReflect.Descriptor instead.
 func (*PutOnDeckPrompt) Descriptor() ([]byte, []int) {
 	return file_dominion_v1_game_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *PutOnDeckPrompt) GetTypeFilter() []CardType {
+	if x != nil {
+		return x.TypeFilter
+	}
+	return nil
 }
 
 type MayPlayActionPrompt struct {
@@ -2036,8 +2044,10 @@ const file_dominion_v1_game_proto_rawDesc = "" +
 	"\x04dest\x18\x03 \x01(\x0e2\x15.dominion.v1.GainDestR\x04dest\"K\n" +
 	"\x17ChooseFromDiscardPrompt\x12\x14\n" +
 	"\x05cards\x18\x01 \x03(\tR\x05cards\x12\x1a\n" +
-	"\boptional\x18\x02 \x01(\bR\boptional\"\x11\n" +
-	"\x0fPutOnDeckPrompt\".\n" +
+	"\boptional\x18\x02 \x01(\bR\boptional\"I\n" +
+	"\x0fPutOnDeckPrompt\x126\n" +
+	"\vtype_filter\x18\x01 \x03(\x0e2\x15.dominion.v1.CardTypeR\n" +
+	"typeFilter\".\n" +
 	"\x13MayPlayActionPrompt\x12\x17\n" +
 	"\acard_id\x18\x01 \x01(\tR\x06cardId\"\x8c\x02\n" +
 	"\x0fResolveDecision\x12\x1f\n" +
@@ -2179,33 +2189,34 @@ var file_dominion_v1_game_proto_depIdxs = []int32{
 	31, // 14: dominion.v1.TrashFromHandPrompt.type_filter:type_name -> dominion.v1.CardType
 	31, // 15: dominion.v1.GainFromSupplyPrompt.type_filter:type_name -> dominion.v1.CardType
 	32, // 16: dominion.v1.GainFromSupplyPrompt.dest:type_name -> dominion.v1.GainDest
-	14, // 17: dominion.v1.ResolveDecision.card_list:type_name -> dominion.v1.CardListAnswer
-	15, // 18: dominion.v1.ResolveDecision.card_choice:type_name -> dominion.v1.CardChoiceAnswer
-	16, // 19: dominion.v1.ResolveDecision.yes_no:type_name -> dominion.v1.YesNoAnswer
-	2,  // 20: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
-	33, // 21: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
-	1,  // 22: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
-	23, // 23: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
-	24, // 24: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
-	25, // 25: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
-	26, // 26: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
-	27, // 27: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
-	2,  // 28: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
-	1,  // 29: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
-	29, // 30: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
-	6,  // 31: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
-	28, // 32: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
-	17, // 33: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
-	19, // 34: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
-	20, // 35: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
-	18, // 36: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
-	22, // 37: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
-	21, // 38: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
-	36, // [36:39] is the sub-list for method output_type
-	33, // [33:36] is the sub-list for method input_type
-	33, // [33:33] is the sub-list for extension type_name
-	33, // [33:33] is the sub-list for extension extendee
-	0,  // [0:33] is the sub-list for field type_name
+	31, // 17: dominion.v1.PutOnDeckPrompt.type_filter:type_name -> dominion.v1.CardType
+	14, // 18: dominion.v1.ResolveDecision.card_list:type_name -> dominion.v1.CardListAnswer
+	15, // 19: dominion.v1.ResolveDecision.card_choice:type_name -> dominion.v1.CardChoiceAnswer
+	16, // 20: dominion.v1.ResolveDecision.yes_no:type_name -> dominion.v1.YesNoAnswer
+	2,  // 21: dominion.v1.SubmitActionRequest.action:type_name -> dominion.v1.Action
+	33, // 22: dominion.v1.StreamGameEventsResponse.at:type_name -> google.protobuf.Timestamp
+	1,  // 23: dominion.v1.StreamGameEventsResponse.snapshot:type_name -> dominion.v1.GameStateSnapshot
+	23, // 24: dominion.v1.StreamGameEventsResponse.action_applied:type_name -> dominion.v1.PlayerActionApplied
+	24, // 25: dominion.v1.StreamGameEventsResponse.phase_changed:type_name -> dominion.v1.PhaseChanged
+	25, // 26: dominion.v1.StreamGameEventsResponse.turn_started:type_name -> dominion.v1.TurnStarted
+	26, // 27: dominion.v1.StreamGameEventsResponse.decision:type_name -> dominion.v1.DecisionRequested
+	27, // 28: dominion.v1.StreamGameEventsResponse.ended:type_name -> dominion.v1.GameEnded
+	2,  // 29: dominion.v1.PlayerActionApplied.action:type_name -> dominion.v1.Action
+	1,  // 30: dominion.v1.PlayerActionApplied.state_after:type_name -> dominion.v1.GameStateSnapshot
+	29, // 31: dominion.v1.PhaseChanged.new_phase:type_name -> dominion.v1.Phase
+	6,  // 32: dominion.v1.DecisionRequested.decision:type_name -> dominion.v1.Decision
+	28, // 33: dominion.v1.GameEnded.final_scores:type_name -> dominion.v1.GameEnded.FinalScoresEntry
+	17, // 34: dominion.v1.GameService.CreateGame:input_type -> dominion.v1.CreateGameRequest
+	19, // 35: dominion.v1.GameService.StreamGameEvents:input_type -> dominion.v1.StreamGameEventsRequest
+	20, // 36: dominion.v1.GameService.SubmitAction:input_type -> dominion.v1.SubmitActionRequest
+	18, // 37: dominion.v1.GameService.CreateGame:output_type -> dominion.v1.CreateGameResponse
+	22, // 38: dominion.v1.GameService.StreamGameEvents:output_type -> dominion.v1.StreamGameEventsResponse
+	21, // 39: dominion.v1.GameService.SubmitAction:output_type -> dominion.v1.SubmitActionResponse
+	37, // [37:40] is the sub-list for method output_type
+	34, // [34:37] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_dominion_v1_game_proto_init() }
