@@ -1,12 +1,12 @@
 package engine
 
-// ResolveAttackVictims iterates opponents in turn order (next seat from
+// ResolveAttackVictims iterates opponents in turn order (next playerIdx from
 // attacker, wrapping), scans each victim's hand for cards with a
 // non-nil OnReaction, calls each such reaction, and collects the set
 // of victims that were NOT blocked.
 //
 // Returns:
-//   - victims: seats that did not block, in turn order
+//   - victims: playerIdx that did not block, in turn order
 //   - events: one EventAttackPlayed followed by one event per reaction
 //     event returned by any card's OnReaction
 //
