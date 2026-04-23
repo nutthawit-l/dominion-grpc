@@ -13,8 +13,11 @@ type Answer interface{ isAnswer() }
 type ContextKey string
 
 const (
-	CtxKeyTrashedCost ContextKey = "trashed_cost"
-	CtxKeyCard        ContextKey = "card"
+	CtxKeyTrashedCost      ContextKey = "trashed_cost"
+	CtxKeyCard             ContextKey = "card"
+	CtxKeyAttacker         ContextKey = "attacker"
+	CtxKeyRemainingVictims ContextKey = "remaining_victims"
+	CtxKeyRevealedCards    ContextKey = "revealed_cards"
 )
 
 // --- Prompt types ---
@@ -71,6 +74,14 @@ type MayPlayActionPrompt struct {
 }
 
 func (MayPlayActionPrompt) isPrompt() {}
+
+// TrashFromRevealedPrompt asks the player to choose one card to trash
+// from a pre-revealed list (e.g., Bandit's top-2 deck reveal).
+type TrashFromRevealedPrompt struct {
+	Cards []CardID
+}
+
+func (TrashFromRevealedPrompt) isPrompt() {}
 
 // --- Answer types ---
 

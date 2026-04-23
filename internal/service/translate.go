@@ -143,6 +143,12 @@ func DecisionToProto(d *engine.Decision) *pb.Decision {
 		pd.Prompt = &pb.Decision_MayPlayAction{MayPlayAction: &pb.MayPlayActionPrompt{
 			CardId: string(p.Card),
 		}}
+	case engine.TrashFromRevealedPrompt:
+		proto := &pb.TrashFromRevealedPrompt{}
+		for _, c := range p.Cards {
+			proto.Cards = append(proto.Cards, string(c))
+		}
+		pd.Prompt = &pb.Decision_TrashFromRevealed{TrashFromRevealed: proto}
 	}
 	return pd
 }

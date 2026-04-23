@@ -98,6 +98,7 @@ message Decision {
         ChooseFromDiscardPrompt choose_from_discard = 8;
         PutOnDeckPrompt put_on_deck = 9;
         MayPlayActionPrompt may_play_action = 10;
+        TrashFromRevealedPrompt trash_from_revealed = 11;  // NEW
     }
 }
 
@@ -130,6 +131,10 @@ message PutOnDeckPrompt {
 
 message MayPlayActionPrompt {
     string card_id = 1;
+}
+
+message TrashFromRevealedPrompt {
+    repeated string cards = 1;  // the revealed cards the player may choose from
 }
 
 message ResolveDecision {
