@@ -52,3 +52,15 @@ func TestPutOnDeckPrompt_WithTypeFilter(t *testing.T) {
 	p := PutOnDeckPrompt{TypeFilter: []CardType{TypeVictory}}
 	require.Equal(t, []CardType{TypeVictory}, p.TypeFilter)
 }
+
+func TestTrashFromRevealedPrompt_Shape(t *testing.T) {
+	p := TrashFromRevealedPrompt{Cards: []CardID{"silver", "gold"}}
+	require.Equal(t, []CardID{"silver", "gold"}, p.Cards)
+	var _ Prompt = p // compile-time check that it implements Prompt
+}
+
+func TestContextKeys_NewInTier3(t *testing.T) {
+	require.Equal(t, ContextKey("attacker"), CtxKeyAttacker)
+	require.Equal(t, ContextKey("remaining_victims"), CtxKeyRemainingVictims)
+	require.Equal(t, ContextKey("revealed_cards"), CtxKeyRevealedCards)
+}

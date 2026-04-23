@@ -3,9 +3,9 @@ package service
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActionFromProto_PlayCard(t *testing.T) {
@@ -86,4 +86,19 @@ func TestPromptToProto_PutOnDeck_EmptyFilter(t *testing.T) {
 	put := pd.GetPutOnDeck()
 	require.NotNil(t, put)
 	require.Empty(t, put.TypeFilter)
+}
+
+func TestPromptToProto_TrashFromRevealed(t *testing.T) {
+	d := &engine.Decision{
+		ID:        "d1",
+		PlayerIdx: 1,
+		CardID:    "bandit",
+		Step:      0,
+		Prompt:    engine.TrashFromRevealedPrompt{Cards: []engine.CardID{"silver", "gold"}},
+	}
+	pd := DecisionToProto(d)
+	require.NotNil(t, pd)
+	tfr := pd.GetTrashFromRevealed()
+	require.NotNil(t, tfr)
+	require.Equal(t, []string{"silver", "gold"}, tfr.Cards)
 }
