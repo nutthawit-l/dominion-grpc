@@ -18,3 +18,8 @@ server
 
 # Debug files
 **/*__debug*
+
+# Claude
+.claude.json
+/.claude
+.worktrees/
