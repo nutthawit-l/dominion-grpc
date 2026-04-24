@@ -13,10 +13,13 @@ type MilitiaBM struct {
 	militiaOwned bool
 }
 
+// NewMilitiaBM constructs a MilitiaBM strategy.
 func NewMilitiaBM() *MilitiaBM { return &MilitiaBM{} }
 
+// Name implements Strategy.
 func (m *MilitiaBM) Name() string { return "militia_bm" }
 
+// PickAction implements Strategy.
 func (m *MilitiaBM) PickAction(cs *ClientState) *pb.Action {
 	me := cs.MyPlayer()
 	if me == nil {
@@ -56,6 +59,7 @@ func (m *MilitiaBM) PickAction(cs *ClientState) *pb.Action {
 	return endPhase(cs.Me)
 }
 
+// Resolve implements Strategy.
 func (m *MilitiaBM) Resolve(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
 	if d.GetDiscardFromHand() != nil && d.CardId == "militia" {
 		return m.resolveMilitiaDiscard(cs, d)
