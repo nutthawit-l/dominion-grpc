@@ -223,6 +223,52 @@ func TestBotVsBot_WitchBM_Outperforms_BigMoney(t *testing.T) {
 		"WitchBM win rate %.2f below threshold %.2f over %d games", rate, threshold, games)
 }
 
+func TestBotVsBot_MilitiaBM_CompletesNormally(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration sweep — skipped under -short")
+	}
+
+	const games = 50
+
+	srv := newTestServer(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	wins := 0
+	for seed := int64(0); seed < games; seed++ {
+		militiaSeat := int(seed % 2)
+		bmSeat := 1 - militiaSeat
+
+		names := make([]string, 2)
+		names[militiaSeat] = "militia_bm"
+		names[bmSeat] = "bigmoney"
+
+		a := bot.NewClient(srv.URL)
+		b := bot.NewClient(srv.URL)
+		game, err := a.CreateGame(ctx, names, seed, []string{"militia"})
+		require.NoError(t, err)
+
+		strategies := map[int]bot.Strategy{
+			militiaSeat: bot.NewMilitiaBM(),
+			bmSeat:      bot.BigMoney{},
+		}
+
+		grp, gctx := errgroup.WithContext(ctx)
+		grp.Go(func() error { return bot.Run(gctx, a, game.GameId, 0, strategies[0]) })
+		grp.Go(func() error { return bot.Run(gctx, b, game.GameId, 1, strategies[1]) })
+		require.NoError(t, grp.Wait(), "seed=%d", seed)
+
+		winners := finalWinners(t, srv, game.GameId)
+		if len(winners) == 1 && winners[0] == militiaSeat {
+			wins++
+		}
+	}
+
+	require.GreaterOrEqualf(t, wins, 1,
+		"MilitiaBM lost every one of %d games — indicative of engine bug, not strategy weakness", games)
+}
+
 func finalWinners(t *testing.T, srv *httptest.Server, gameID string) []int {
 	t.Helper()
 	c := bot.NewClient(srv.URL)
