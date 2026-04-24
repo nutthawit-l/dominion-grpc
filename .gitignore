@@ -21,5 +21,8 @@ server
 
 # Claude
 .claude.json
-/.claude
+/.claude/*
+!/.claude/settings.local.json
+!/.claude/statusline-command.sh
 .worktrees/
+.superpowers/
