@@ -31,7 +31,6 @@
     * { box-sizing: border-box; }
     body { background-color: #fdf6e3; color: #657b83; margin: 0; overflow: hidden; }
 
-    /* Card base */
     .card {
       border-radius: 6px;
       border: 2px solid rgba(88,110,117,0.18);
@@ -61,7 +60,6 @@
       box-shadow: 0 0 12px rgba(38,139,210,0.4);
     }
 
-    /* Supply pile card */
     .supply-card { width: 58px; }
     .supply-card .card-count {
       position: absolute;
@@ -73,16 +71,13 @@
       padding: 1px 4px; border-radius: 3px; line-height: 1.3;
     }
 
-    /* Hand cards */
     .hand-card { width: 80px; }
     .hand-fan { display: flex; justify-content: center; padding: 0 20px; }
     .hand-fan .hand-card { margin-left: -16px; }
     .hand-fan .hand-card:first-child { margin-left: 0; }
 
-    /* Play area cards */
-    .play-card { width: 70px; opacity: 0.9; }
+    .play-card { width: 70px; opacity: 0.92; }
 
-    /* Empty supply pile */
     .supply-empty {
       width: 58px; height: 80px;
       border-radius: 6px;
@@ -91,16 +86,14 @@
       color: rgba(88,110,117,0.2); font-size: 10px;
     }
 
-    /* Phase indicator */
     .phase-pill {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: bold;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 10px; font-weight: bold;
       letter-spacing: 1px; text-transform: uppercase;
       font-family: Georgia, serif;
     }
 
-    /* Stat counter */
     .stat-box {
       display: flex; flex-direction: column; align-items: center;
       padding: 4px 12px; border-radius: 8px; min-width: 56px;
@@ -113,26 +106,22 @@
       opacity: 0.7; font-family: SFMono-Regular, Menlo, monospace;
     }
 
-    /* Log panel */
     .log-panel { scrollbar-width: thin; scrollbar-color: rgba(147,161,161,0.3) transparent; }
     .log-panel::-webkit-scrollbar { width: 4px; }
     .log-panel::-webkit-scrollbar-thumb { background: rgba(147,161,161,0.3); border-radius: 2px; }
 
-    /* Deck / discard stacks */
     .stack-indicator {
       width: 48px; height: 66px; border-radius: 5px;
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 2px; font-family: Georgia, serif;
     }
 
-    /* Opponent hand card (face-down) */
     .opp-card {
-      width: 40px; height: 56px; border-radius: 4px;
+      width: 14px; height: 20px; border-radius: 3px;
       background: linear-gradient(135deg, #d3cbb7 0%, #c4bca8 100%);
       border: 1px solid rgba(88,110,117,0.15);
     }
 
-    /* Action buttons */
     .action-btn {
       padding: 7px 18px; border-radius: 8px;
       font-size: 11px; font-weight: bold;
@@ -142,7 +131,6 @@
     }
     .action-btn:hover { filter: brightness(1.08); }
 
-    /* Trash pile */
     .trash-zone {
       width: 48px; height: 66px; border-radius: 5px;
       border: 2px dashed rgba(220,50,47,0.3);
@@ -155,92 +143,64 @@
 </head>
 <body class="font-serif">
 
-  <!-- Full viewport layout -->
-  <div id="app" style="width:100vw;height:100vh;display:grid;grid-template-rows:auto 1fr;grid-template-columns:1fr 220px;">
+  <div id="app" style="width:100vw;height:100vh;display:grid;grid-template-rows:auto 1fr;grid-template-columns:1fr 260px;">
 
     <!-- ═══ TOP BAR ═══ -->
     <header style="grid-column:1/-1;background:#eee8d5;border-bottom:1px solid rgba(88,110,117,0.15);padding:6px 16px;display:flex;align-items:center;gap:12px;">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;">
-        <div style="width:26px;height:26px;border-radius:50%;background:rgba(181,137,0,0.15);border:1px solid rgba(181,137,0,0.4);display:flex;align-items:center;justify-content:center;">
-          <span style="color:#b58900;font-size:13px;">♛</span>
-        </div>
-        <span style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#073642;">Dominion</span>
-        <span style="color:rgba(147,161,161,0.4);margin:0 6px;">·</span>
-        <span style="font-size:11px;color:#93a1a1;font-family:SFMono-Regular,Menlo,monospace;">gm_4f2a9b1c</span>
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(181,137,0,0.15);border:1px solid rgba(181,137,0,0.4);display:flex;align-items:center;justify-content:center;">
+        <span style="color:#b58900;font-size:13px;">♛</span>
       </div>
-
-      <!-- Opponent info -->
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(7,54,66,0.04);border:1px solid rgba(88,110,117,0.15);border-radius:8px;padding:4px 12px;">
-        <div style="width:22px;height:22px;border-radius:50%;background:#cb4b16;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:10px;color:#fdf6e3;font-weight:bold;">B</span>
-        </div>
-        <div>
-          <div style="font-size:10px;color:#073642;">BigMoney Bot</div>
-          <div style="font-size:8px;color:#93a1a1;font-family:monospace;">VP: 6 · Deck: 14</div>
-        </div>
-        <div style="display:flex;gap:2px;margin-left:4px;">
-          <div class="opp-card"></div>
-          <div class="opp-card"></div>
-          <div class="opp-card"></div>
-          <div class="opp-card"></div>
-          <div class="opp-card"></div>
-        </div>
+      <span style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#073642;">Dominion</span>
+      <span style="color:rgba(147,161,161,0.4);margin:0 6px;">·</span>
+      <span style="font-size:11px;color:#93a1a1;font-family:SFMono-Regular,Menlo,monospace;">gm_4f2a9b1c</span>
+      <span style="flex:1;"></span>
+      <div class="phase-pill" style="background:rgba(181,137,0,0.15);color:#b58900;border:1px solid rgba(181,137,0,0.3);">
+        <span style="width:6px;height:6px;border-radius:50%;background:#b58900;"></span>
+        Buy Phase
       </div>
-
-      <!-- Player info -->
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(38,139,210,0.08);border:1px solid rgba(38,139,210,0.25);border-radius:8px;padding:4px 12px;">
-        <div style="width:22px;height:22px;border-radius:50%;background:#268bd2;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:10px;color:#fdf6e3;font-weight:bold;">Y</span>
-        </div>
-        <div>
-          <div style="font-size:10px;color:#073642;">You</div>
-          <div style="font-size:8px;color:#93a1a1;font-family:monospace;">VP: 3 · Deck: 12</div>
-        </div>
-      </div>
-
-      <span style="font-size:10px;color:#93a1a1;">Turn 7</span>
+      <span style="font-size:11px;color:#93a1a1;text-transform:uppercase;letter-spacing:2px;">Turn 7</span>
     </header>
 
     <!-- ═══ MAIN PLAY AREA ═══ -->
-    <main style="grid-column:1;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto auto;padding:0;">
+    <main style="grid-column:1;grid-row:2;overflow:hidden;display:grid;grid-template-rows:1fr auto auto;grid-template-columns:auto 1fr;">
 
-      <!-- Supply Area -->
-      <div style="padding:6px 10px 4px;display:flex;gap:8px;align-items:start;">
+      <!-- Supply Area — left column -->
+      <div style="grid-row:1;grid-column:1;padding:6px 6px 4px 10px;display:flex;gap:8px;align-self:start;align-items:start;overflow-y:auto;max-height:100%;">
 
-        <!-- Base piles (left group) -->
-        <div style="display:flex;flex-direction:column;gap:3px;">
-          <!-- Treasures -->
-          <div style="display:flex;gap:3px;">
-            <div class="card supply-card" onclick="buyCard(this,'Copper',0)" title="Copper — +1 Coin">
-              <img src="cards/copper.jpg">
-              <div class="card-count">46</div>
-            </div>
-            <div class="card supply-card" onclick="buyCard(this,'Silver',3)" title="Silver — +2 Coins">
-              <img src="cards/silver.jpg">
-              <div class="card-count">37</div>
-            </div>
-            <div class="card supply-card" onclick="buyCard(this,'Gold',6)" title="Gold — +3 Coins">
-              <img src="cards/gold.jpg">
-              <div class="card-count">30</div>
-            </div>
-          </div>
-          <!-- Victory + Curse -->
-          <div style="display:flex;gap:3px;">
-            <div class="card supply-card" onclick="buyCard(this,'Estate',2)" title="Estate — 1 VP">
-              <img src="cards/estate.jpg">
-              <div class="card-count">5</div>
+        <!-- Basics: 2 columns -->
+        <div style="display:flex;gap:3px;">
+          <!-- Col 1: Province, Duchy, Estate, Curse -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div class="card supply-card" onclick="buyCard(this,'Province',8)" title="Province — 6 VP">
+              <img src="cards/province.jpg">
+              <div class="card-count">8</div>
             </div>
             <div class="card supply-card" onclick="buyCard(this,'Duchy',5)" title="Duchy — 3 VP">
               <img src="cards/duchy.jpg">
               <div class="card-count">8</div>
             </div>
-            <div class="card supply-card" onclick="buyCard(this,'Province',8)" title="Province — 6 VP">
-              <img src="cards/province.jpg">
-              <div class="card-count">8</div>
+            <div class="card supply-card" onclick="buyCard(this,'Estate',2)" title="Estate — 1 VP">
+              <img src="cards/estate.jpg">
+              <div class="card-count">5</div>
             </div>
             <div class="card supply-card" title="Curse — −1 VP">
               <img src="cards/curse.jpg">
               <div class="card-count">10</div>
+            </div>
+          </div>
+          <!-- Col 2: Gold, Silver, Copper -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div class="card supply-card" onclick="buyCard(this,'Gold',6)" title="Gold — +3 Coins">
+              <img src="cards/gold.jpg">
+              <div class="card-count">30</div>
+            </div>
+            <div class="card supply-card" onclick="buyCard(this,'Silver',3)" title="Silver — +2 Coins">
+              <img src="cards/silver.jpg">
+              <div class="card-count">37</div>
+            </div>
+            <div class="card supply-card" onclick="buyCard(this,'Copper',0)" title="Copper — +1 Coin">
+              <img src="cards/copper.jpg">
+              <div class="card-count">46</div>
             </div>
           </div>
         </div>
@@ -248,9 +208,10 @@
         <!-- Divider -->
         <div style="width:1px;background:rgba(88,110,117,0.12);align-self:stretch;margin:4px 0;"></div>
 
-        <!-- Kingdom piles (2 rows of 5) -->
-        <div style="display:flex;flex-direction:column;gap:3px;flex:1;">
-          <div style="display:flex;gap:3px;">
+        <!-- Kingdom: 2 columns of 5 -->
+        <div style="display:flex;gap:3px;">
+          <!-- Col 1: Cellar, Moat, Village, Workshop, Militia -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
             <div class="card supply-card" onclick="buyCard(this,'Cellar',2)" title="Cellar — +1 Action. Discard any, draw that many.">
               <img src="cards/cellar.jpg">
               <div class="card-count">10</div>
@@ -272,7 +233,8 @@
               <div class="card-count">9</div>
             </div>
           </div>
-          <div style="display:flex;gap:3px;">
+          <!-- Col 2: Smithy, Remodel, Market, Mine, Witch -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
             <div class="card supply-card" onclick="buyCard(this,'Smithy',4)" title="Smithy — +3 Cards.">
               <img src="cards/smithy.jpg">
               <div class="card-count">10</div>
@@ -297,23 +259,30 @@
         </div>
       </div>
 
-      <!-- ═══ PLAY AREA (center) ═══ -->
-      <div style="display:flex;align-items:center;justify-content:center;position:relative;">
-        <div id="play-zone" style="min-height:100px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:16px;background:rgba(238,232,213,0.6);border:1px dashed rgba(88,110,117,0.15);min-width:300px;">
-          <div class="card play-card"><img src="cards/village.jpg"></div>
-          <div class="card play-card"><img src="cards/smithy.jpg"></div>
-        </div>
-        <!-- Phase label floating -->
-        <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);">
-          <div class="phase-pill" style="background:rgba(181,137,0,0.15);color:#b58900;border:1px solid rgba(181,137,0,0.3);">
-            <span style="width:6px;height:6px;border-radius:50%;background:#b58900;"></span>
-            Buy Phase
-          </div>
-        </div>
+      <!-- ═══ PLAY ZONE — right of supply; cards chain LTR, wrap down ═══ -->
+      <div id="play-zone" style="grid-row:1;grid-column:2;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:flex-start;gap:8px;padding:14px 18px;margin:8px 16px 8px 8px;border-radius:12px;background:rgba(238,232,213,0.6);border:1px dashed rgba(88,110,117,0.15);overflow:auto;">
+        <div class="card play-card"><img src="cards/village.jpg"></div>
+        <div class="card play-card"><img src="cards/smithy.jpg"></div>
+        <div class="card play-card"><img src="cards/market.jpg"></div>
+        <div class="card play-card"><img src="cards/laboratory.jpg"></div>
+        <div class="card play-card"><img src="cards/festival.jpg"></div>
+        <div class="card play-card"><img src="cards/council_room.jpg"></div>
+        <div class="card play-card"><img src="cards/copper.jpg"></div>
+        <div class="card play-card"><img src="cards/silver.jpg"></div>
+        <div class="card play-card"><img src="cards/village.jpg"></div>
+        <div class="card play-card"><img src="cards/smithy.jpg"></div>
+        <div class="card play-card"><img src="cards/market.jpg"></div>
+        <div class="card play-card"><img src="cards/village.jpg"></div>
+        <div class="card play-card"><img src="cards/laboratory.jpg"></div>
+        <div class="card play-card"><img src="cards/copper.jpg"></div>
+        <div class="card play-card"><img src="cards/copper.jpg"></div>
+        <div class="card play-card"><img src="cards/silver.jpg"></div>
+        <div class="card play-card"><img src="cards/silver.jpg"></div>
+        <div class="card play-card"><img src="cards/gold.jpg"></div>
       </div>
 
       <!-- ═══ STATUS BAR ═══ -->
-      <div style="padding:4px 14px;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(238,232,213,0.8);border-top:1px solid rgba(88,110,117,0.1);">
+      <div style="grid-row:2;grid-column:1/-1;padding:4px 14px;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(238,232,213,0.8);border-top:1px solid rgba(88,110,117,0.1);">
         <div class="stat-box" style="background:rgba(133,153,0,0.12);border:1px solid rgba(133,153,0,0.25);">
           <span class="stat-val" style="color:#859900;">0</span>
           <span class="stat-label" style="color:#859900;">Actions</span>
@@ -326,16 +295,14 @@
           <span class="stat-val" style="color:#268bd2;">5</span>
           <span class="stat-label" style="color:#268bd2;">Coins</span>
         </div>
-
         <div style="width:1px;height:32px;background:rgba(88,110,117,0.12);margin:0 8px;"></div>
-
         <button class="action-btn" style="background:rgba(7,54,66,0.04);color:#93a1a1;border:1px solid rgba(88,110,117,0.15);">Undo</button>
         <button class="action-btn" style="background:rgba(7,54,66,0.06);color:#586e75;border:1px solid rgba(88,110,117,0.2);" onclick="playAllTreasures()">Play All Treasures</button>
         <button class="action-btn" style="background:#b58900;color:#002b36;" onclick="endPhase()">End Buy Phase</button>
       </div>
 
       <!-- ═══ HAND ═══ -->
-      <div style="padding:6px 14px 8px;background:rgba(238,232,213,0.9);border-top:1px solid rgba(88,110,117,0.1);display:flex;align-items:end;justify-content:center;gap:12px;">
+      <div style="grid-row:3;grid-column:1/-1;padding:6px 14px 8px;background:rgba(238,232,213,0.9);border-top:1px solid rgba(88,110,117,0.1);display:flex;align-items:end;justify-content:center;gap:12px;">
 
         <!-- Deck -->
         <div class="stack-indicator" style="background:rgba(38,139,210,0.08);border:1px solid rgba(38,139,210,0.2);">
@@ -379,9 +346,45 @@
       </div>
     </main>
 
-    <!-- ═══ RIGHT SIDEBAR: LOG ═══ -->
-    <aside style="grid-row:2/3;grid-column:2;background:#eee8d5;border-left:1px solid rgba(88,110,117,0.12);display:flex;flex-direction:column;">
-      <div style="padding:10px 12px 8px;border-bottom:1px solid rgba(88,110,117,0.1);display:flex;align-items:center;justify-content:space-between;">
+    <!-- ═══ RIGHT SIDEBAR: PLAYERS + LOG ═══ -->
+    <aside style="grid-row:2;grid-column:2;background:#eee8d5;border-left:1px solid rgba(88,110,117,0.12);display:flex;flex-direction:column;overflow:hidden;">
+
+      <!-- Players section -->
+      <div style="padding:10px 12px;border-bottom:1px solid rgba(88,110,117,0.1);display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#586e75;">Players</div>
+
+        <!-- Opponent -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(7,54,66,0.04);border:1px solid rgba(88,110,117,0.15);border-radius:8px;padding:6px 8px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:#cb4b16;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="font-size:10px;color:#fdf6e3;font-weight:bold;">B</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:10px;color:#073642;">BigMoney Bot</div>
+            <div style="font-size:8px;color:#93a1a1;font-family:monospace;">VP: 6 · Deck: 14</div>
+            <div style="display:flex;gap:2px;margin-top:3px;">
+              <div class="opp-card"></div>
+              <div class="opp-card"></div>
+              <div class="opp-card"></div>
+              <div class="opp-card"></div>
+              <div class="opp-card"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- You -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(38,139,210,0.08);border:1px solid rgba(38,139,210,0.25);border-radius:8px;padding:6px 8px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:#268bd2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="font-size:10px;color:#fdf6e3;font-weight:bold;">Y</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:10px;color:#073642;">You</div>
+            <div style="font-size:8px;color:#93a1a1;font-family:monospace;">VP: 3 · Deck: 12</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Log header -->
+      <div style="padding:10px 12px 8px;border-bottom:1px solid rgba(88,110,117,0.1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
         <span style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#586e75;">Game Log</span>
         <span style="font-size:9px;color:rgba(88,110,117,0.6);font-family:monospace;">Turn 7</span>
       </div>
@@ -428,10 +431,8 @@
       entry.innerHTML = `<span style="color:#268bd2;">You</span> buy <span style="color:#073642;font-weight:600;">${name}</span>`;
       logPanel.prepend(entry);
       logPanel.scrollTop = 0;
-
       el.style.transform = 'scale(0.95)';
       setTimeout(() => el.style.transform = '', 150);
-
       const countEl = el.querySelector('.card-count');
       if (countEl) {
         const n = parseInt(countEl.textContent) - 1;
