@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dominion — Game Table</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sol: {
+              base03:'#002b36', base02:'#073642', base01:'#586e75',
+              base00:'#657b83', base0:'#839496', base1:'#93a1a1',
+              base2:'#eee8d5', base3:'#fdf6e3',
+              yellow:'#b58900', orange:'#cb4b16', red:'#dc322f',
+              blue:'#268bd2', cyan:'#2aa198', green:'#859900',
+            },
+          },
+          fontFamily: {
+            serif:['Georgia','Cambria','Times New Roman','serif'],
+            mono: ['SFMono-Regular','Menlo','Consolas','monospace'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      overflow: hidden;
+      font-family: Georgia, serif;
+      background: #0f0d09;
+      color: #e8d9b0;
+    }
+
+    /* ── Atmospheric background ── */
+    .bg-table {
+      background:
+        radial-gradient(ellipse 20% 70% at 100% 50%, rgba(210,130,15,0.32) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 50% 0%,   rgba(180,150,80,0.16) 0%, transparent 70%),
+        radial-gradient(ellipse 20% 70% at 0%   50%, rgba(140,100,20,0.15) 0%, transparent 60%),
+        linear-gradient(175deg, #24180a 0%, #181208 45%, #0e0b06 100%);
+    }
+
+    /* ── Supply pile ── */
+    .pile {
+      position: relative; cursor: pointer; flex-shrink: 0;
+      border-radius: 5px; overflow: hidden;
+      border: 1px solid rgba(255,220,100,0.18);
+      transition: transform .14s ease, box-shadow .14s ease;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    }
+    .pile:hover { transform: translateY(-5px); box-shadow: 0 10px 24px rgba(0,0,0,0.7); }
+    .pile.empty { opacity: 0.22; pointer-events: none; }
+    .pile img { display: block; width: 100%; height: auto; }
+    .pile-count {
+      position: absolute; bottom: 3px; right: 3px;
+      background: rgba(0,0,0,0.80); color: #ffd97a;
+      font-size: 9px; font-weight: 900; font-family: monospace;
+      padding: 1px 4px; border-radius: 3px; line-height: 1.3;
+    }
+
+    /* ── Basic pile (left column) ── */
+    .basic-pile {
+      position: relative; cursor: pointer; flex-shrink: 0;
+      border-radius: 4px; overflow: hidden;
+      border: 1px solid rgba(255,220,100,0.14);
+      transition: transform .14s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .basic-pile:hover { transform: translateX(3px); }
+    .basic-pile img { display: block; width: 100%; height: auto; }
+    .basic-pile .pile-count { font-size: 8px; }
+
+    /* ── Hand cards ── */
+    .hand-card {
+      position: relative; cursor: pointer; flex-shrink: 0;
+      border-radius: 8px; overflow: hidden;
+      border: 1px solid rgba(255,220,100,0.22);
+      margin-left: -28px;
+      transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+    .hand-card:first-child { margin-left: 0; }
+    .hand-card img { display: block; width: 100%; height: auto; }
+    .hand-card:hover {
+      transform: translateY(-36px) scale(1.08);
+      z-index: 30 !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.75);
+    }
+
+    /* ── Stat badge (circular) ── */
+    .stat-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 900; font-family: monospace;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .stat-badge .lbl {
+      position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%);
+      font-size: 7px; text-transform: uppercase; letter-spacing: 0.08em;
+      white-space: nowrap; color: rgba(232,217,176,0.45); font-family: monospace;
+    }
+    .badge-actions { background: rgba(38,139,210,0.30); border: 1.5px solid rgba(38,139,210,0.7); color: #7dc8f0; }
+    .badge-buys    { background: rgba(133,153,0,0.30);  border: 1.5px solid rgba(133,153,0,0.7);  color: #b8d446; }
+    .badge-coins   { background: rgba(181,137,0,0.30);  border: 1.5px solid rgba(181,137,0,0.7);  color: #f0c84a; }
+
+    /* ── VP badge (green leaf style) ── */
+    .vp-badge {
+      display: flex; align-items: center; gap: 3px;
+      background: rgba(133,153,0,0.25); border: 1px solid rgba(133,153,0,0.5);
+      border-radius: 20px; padding: 3px 8px;
+    }
+    .vp-badge .vp-num { font-size: 14px; font-weight: 900; color: #b8d446; font-family: monospace; }
+    .vp-badge .vp-lbl { font-size: 8px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(184,212,70,0.65); font-family: monospace; }
+
+    /* ── Action buttons (right panel) ── */
+    .btn-green {
+      background: linear-gradient(165deg, #3d8f2a 0%, #2b6818 60%, #1f4d10 100%);
+      border: 1px solid rgba(100,200,60,0.45);
+      color: #d8f5b8; font-weight: 900; font-size: 15px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      font-family: Georgia, serif;
+      border-radius: 12px; padding: 14px 20px;
+      cursor: pointer; width: 100%; text-align: center;
+      transition: filter .12s ease, transform .1s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .btn-green:hover { filter: brightness(1.18); transform: translateY(-1px); }
+    .btn-green:active { transform: translateY(1px); }
+    .btn-green.dim {
+      background: linear-gradient(165deg, #252220 0%, #1a1815 100%);
+      border-color: rgba(255,255,255,0.07); color: rgba(255,255,255,0.25);
+      cursor: not-allowed; filter: none; transform: none; box-shadow: none;
+    }
+
+    /* ── Top bar ── */
+    .top-bar { background: rgba(0,0,0,0.58); border-bottom: 1px solid rgba(255,220,100,0.10); }
+
+    /* ── In-play zone ── */
+    .inplay-card {
+      border-radius: 4px; overflow: hidden;
+      border: 1px solid rgba(255,220,100,0.18);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .inplay-card img { display: block; width: 100%; height: auto; }
+
+    /* ── Log panel ── */
+    .log-panel { background: rgba(8,6,3,0.88); border-left: 1px solid rgba(255,220,100,0.10); }
+    .log-scroll::-webkit-scrollbar { width: 3px; }
+    .log-scroll::-webkit-scrollbar-thumb { background: rgba(255,220,100,0.18); border-radius: 2px; }
+
+  </style>
+</head>
+<body class="bg-table flex flex-col" style="height:100vh;">
+
+  <!-- ── Top bar ── -->
+  <div class="top-bar flex items-center px-3 py-1.5 gap-3 shrink-0">
+
+    <!-- My stats: circular badges -->
+    <div class="flex items-end gap-3 mr-1" style="padding-bottom:14px;">
+      <div class="stat-badge badge-actions">1<span class="lbl">Actions</span></div>
+      <div class="stat-badge badge-buys">1<span class="lbl">Buys</span></div>
+      <div class="stat-badge badge-coins">2<span class="lbl">Coins</span></div>
+    </div>
+
+    <!-- My VP -->
+    <div class="vp-badge">
+      <span class="vp-num">6</span>
+      <span class="vp-lbl">VP</span>
+    </div>
+
+    <!-- Turn counter -->
+    <div class="flex-1 flex items-center justify-center gap-2">
+      <span class="text-[10px] uppercase tracking-widest text-amber-200/35 font-mono">Turn</span>
+      <span class="text-xl font-bold text-amber-200" style="text-shadow:0 0 12px rgba(255,200,80,0.4);">5</span>
+    </div>
+
+    <!-- Opponent name + VP -->
+    <div class="flex items-center gap-3">
+      <div class="text-right">
+        <div class="text-sm font-bold text-amber-200/90">Hard AI</div>
+        <div class="flex gap-2 justify-end text-[9px] text-amber-200/40 font-mono">
+          <span>Hand <span class="text-amber-200/70">5</span></span>
+          <span>Deck <span class="text-amber-200/70">8</span></span>
+        </div>
+      </div>
+      <div class="vp-badge">
+        <span class="vp-num">3</span>
+        <span class="vp-lbl">VP</span>
+      </div>
+    </div>
+
+    <!-- Log toggle -->
+    <button onclick="document.getElementById('log-panel').classList.toggle('hidden')"
+      class="ml-2 text-[9px] uppercase tracking-wider text-amber-200/35 hover:text-amber-200/70 border border-amber-200/12 hover:border-amber-200/30 px-3 py-1 rounded transition-colors font-mono">
+      Log
+    </button>
+  </div>
+
+  <!-- ── Main area ── -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Left: basic piles column -->
+    <div class="flex flex-col items-center gap-1.5 px-2 py-3 shrink-0 justify-center"
+         style="width:60px; background:rgba(0,0,0,0.28); border-right:1px solid rgba(255,220,100,0.08);">
+      <div class="basic-pile" style="width:44px;"><img src="cards/copper.jpg"><span class="pile-count">46</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/silver.jpg"><span class="pile-count">40</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/gold.jpg"><span class="pile-count">30</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/estate.jpg"><span class="pile-count">8</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/duchy.jpg"><span class="pile-count">8</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/province.jpg"><span class="pile-count">8</span></div>
+      <div class="basic-pile" style="width:44px;"><img src="cards/curse.jpg"><span class="pile-count">10</span></div>
+    </div>
+
+    <!-- Center: kingdom supply + in-play + hand -->
+    <div class="flex-1 flex flex-col overflow-hidden px-3 py-2 gap-2">
+
+      <!-- Kingdom supply grid: 2 × 5 -->
+      <div class="flex-1 flex flex-col gap-1.5 justify-center">
+        <div class="flex gap-1.5 justify-center">
+          <div class="pile" style="width:80px;"><img src="cards/smithy.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/village.jpg"><span class="pile-count">8</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/militia.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/chapel.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/workshop.jpg"><span class="pile-count">10</span></div>
+        </div>
+        <div class="flex gap-1.5 justify-center">
+          <div class="pile" style="width:80px;"><img src="cards/moat.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/witch.jpg"><span class="pile-count">7</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/festival.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/market.jpg"><span class="pile-count">10</span></div>
+          <div class="pile" style="width:80px;"><img src="cards/laboratory.jpg"><span class="pile-count">10</span></div>
+        </div>
+      </div>
+
+      <!-- In-play zone -->
+      <div class="flex items-center gap-1.5 shrink-0 px-1" style="min-height:36px;">
+        <span class="text-[9px] uppercase tracking-widest text-amber-200/25 font-mono shrink-0">In Play</span>
+        <div class="inplay-card" style="width:28px;"><img src="cards/village.jpg"></div>
+        <div class="inplay-card" style="width:28px;"><img src="cards/smithy.jpg"></div>
+        <span class="ml-2 text-sm text-amber-200/50 italic" style="font-size:13px;">Play Treasures.</span>
+      </div>
+
+      <!-- Hand -->
+      <div class="shrink-0 flex items-end justify-center pb-2" style="padding-left:28px;">
+        <div class="hand-card" style="width:96px; z-index:1;"><img src="cards/copper.jpg"></div>
+        <div class="hand-card" style="width:96px; z-index:2;"><img src="cards/copper.jpg"></div>
+        <div class="hand-card" style="width:96px; z-index:3;"><img src="cards/estate.jpg"></div>
+        <div class="hand-card" style="width:96px; z-index:4;"><img src="cards/estate.jpg"></div>
+        <div class="hand-card" style="width:96px; z-index:5;"><img src="cards/estate.jpg"></div>
+      </div>
+
+    </div>
+
+    <!-- Right: action buttons -->
+    <div class="flex flex-col items-center gap-4 px-3 py-4 shrink-0 justify-center"
+         style="width:140px; background:rgba(0,0,0,0.28); border-left:1px solid rgba(255,220,100,0.08);">
+      <button class="btn-green">Play<br>Treasures</button>
+      <button class="btn-green dim">End<br>Buys</button>
+    </div>
+
+    <!-- Log panel (hidden by default) -->
+    <div id="log-panel" class="hidden log-panel flex flex-col shrink-0" style="width:210px;">
+      <div class="px-4 py-2.5 flex items-center justify-between" style="border-bottom:1px solid rgba(255,220,100,0.09);">
+        <span class="text-[9px] uppercase tracking-widest text-amber-200/45 font-mono font-bold">Game Log</span>
+        <button onclick="document.getElementById('log-panel').classList.add('hidden')" class="text-amber-200/35 hover:text-amber-200/75 text-sm">✕</button>
+      </div>
+      <div class="log-scroll flex-1 overflow-y-auto px-3 py-2 space-y-1.5" style="font-size:11px; color:rgba(232,217,176,0.65);">
+        <div class="py-0.5 text-center text-[8px] uppercase tracking-widest text-amber-200/28 font-mono" style="border-bottom:1px solid rgba(255,220,100,0.07);">Turn 5 — You</div>
+        <div>You played <span class="text-amber-200 font-semibold">Village</span> → +1 card, +2 actions</div>
+        <div>You played <span class="text-amber-200 font-semibold">Smithy</span> → +3 cards</div>
+        <div class="py-0.5 text-center text-[8px] uppercase tracking-widest text-amber-200/28 font-mono" style="border-bottom:1px solid rgba(255,220,100,0.07);">Turn 4 — Bot</div>
+        <div>Bot played <span class="text-amber-200 font-semibold">Copper</span> ×3 → +3 coins</div>
+        <div>Bot bought <span class="text-amber-200 font-semibold">Silver</span></div>
+        <div class="py-0.5 text-center text-[8px] uppercase tracking-widest text-amber-200/28 font-mono" style="border-bottom:1px solid rgba(255,220,100,0.07);">Turn 3 — You</div>
+        <div>You played <span class="text-amber-200 font-semibold">Copper</span> ×4 → +4 coins</div>
+        <div>You bought <span class="text-amber-200 font-semibold">Smithy</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
