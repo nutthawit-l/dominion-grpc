@@ -26,3 +26,6 @@ server
 !/.claude/statusline-command.sh
 .worktrees/
 .superpowers/
+
+# NodeJS
+**/node_modules
