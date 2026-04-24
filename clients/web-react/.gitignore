@@ -1,5 +1,6 @@
 node_modules/
 dist/
+src/gen/
 .pnpm-debug.log
 playwright-report/
 test-results/

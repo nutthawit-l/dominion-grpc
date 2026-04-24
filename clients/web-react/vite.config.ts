@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@@gen': path.resolve(__dirname, '../../gen/ts'),
+      '@@gen': path.resolve(__dirname, './src/gen'),
     },
   },
   server: {

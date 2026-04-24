@@ -16,7 +16,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@@gen/*": ["../../gen/ts/*"]
+      "@@gen/*": ["./src/gen/*"]
     }
   },
   "include": ["src", "e2e"]
