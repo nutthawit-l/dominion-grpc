@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dominion — Lobby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Solarized Light palette
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sol: {
+              base03: '#002b36',
+              base02: '#073642',
+              base01: '#586e75',
+              base00: '#657b83',
+              base0:  '#839496',
+              base1:  '#93a1a1',
+              base2:  '#eee8d5',
+              base3:  '#fdf6e3',
+              yellow: '#b58900',
+              orange: '#cb4b16',
+              red:    '#dc322f',
+              magenta:'#d33682',
+              violet: '#6c71c4',
+              blue:   '#268bd2',
+              cyan:   '#2aa198',
+              green:  '#859900',
+            },
+          },
+          fontFamily: {
+            serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
+            mono:  ['SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background-color: #fdf6e3; color: #657b83; }
+    .shadow-sol  { box-shadow: 0 1px 4px rgba(0,43,54,0.10), 0 2px 10px rgba(0,43,54,0.07); }
+    .shadow-sol-lg { box-shadow: 0 4px 24px rgba(0,43,54,0.14), 0 1px 6px rgba(0,43,54,0.08); }
+    .game-row:hover { background-color: rgba(0,43,54,0.035); }
+  </style>
+</head>
+<body class="min-h-screen font-serif">
+
+  <!-- Header — base2, just one warm step darker than base3 body -->
+  <header class="bg-sol-base2 border-b border-sol-base1/30 sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-sol-yellow/15 border border-sol-yellow/40 flex items-center justify-center">
+          <span class="text-sol-yellow text-base leading-none">♛</span>
+        </div>
+        <h1 class="text-xl font-serif tracking-widest text-sol-base02 uppercase">Dominion</h1>
+      </div>
+      <span class="text-xs tracking-widest uppercase text-sol-base1">Phase 1b</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-5xl mx-auto px-6 py-10">
+
+    <!-- Title row -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
+      <div>
+        <h2 class="text-2xl text-sol-base02 font-serif mb-1">Lobby</h2>
+        <p class="text-sol-base0 text-sm">Start a new game or join an existing one.</p>
+      </div>
+      <button
+        onclick="document.getElementById('create-modal').classList.remove('hidden')"
+        class="inline-flex items-center gap-2 bg-sol-blue hover:bg-sol-blue/90 text-white font-serif font-bold px-6 py-2.5 rounded-lg transition-colors shadow-sol text-sm uppercase tracking-widest whitespace-nowrap"
+      >
+        <span>+</span> Create Game
+      </button>
+    </div>
+
+    <!-- Games list -->
+    <div class="rounded-xl border border-sol-base1/25 bg-sol-base3 shadow-sol overflow-hidden">
+
+      <!-- Table header -->
+      <div class="bg-sol-base2 px-5 py-3 grid grid-cols-12 text-xs uppercase tracking-widest text-sol-base1 border-b border-sol-base1/25">
+        <div class="col-span-4">Game ID</div>
+        <div class="col-span-3">Status</div>
+        <div class="col-span-3">Kingdom</div>
+        <div class="col-span-2 text-right">Action</div>
+      </div>
+
+      <div class="divide-y divide-sol-base2">
+
+        <!-- Row 1 — waiting -->
+        <div class="game-row px-5 py-4 grid grid-cols-12 items-center transition-colors">
+          <div class="col-span-4">
+            <span class="font-mono text-sm text-sol-base01">gm_4f2a9b1c</span>
+            <div class="text-xs text-sol-base1 mt-0.5">Created 2 min ago</div>
+          </div>
+          <div class="col-span-3 flex items-center gap-2">
+            <span class="text-sm font-semibold text-sol-green">● Waiting</span>
+            <span class="text-xs text-sol-base1">1 / 2</span>
+          </div>
+          <div class="col-span-3 flex gap-1 flex-wrap">
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Smithy</span>
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Village</span>
+            <span class="text-xs text-sol-base1">+8</span>
+          </div>
+          <div class="col-span-2 flex justify-end">
+            <button class="bg-sol-blue hover:bg-sol-blue/90 text-white text-xs font-bold px-4 py-1.5 rounded transition-colors uppercase tracking-wider">
+              Join
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 2 — in progress (dimmed) -->
+        <div class="game-row px-5 py-4 grid grid-cols-12 items-center transition-colors opacity-50">
+          <div class="col-span-4">
+            <span class="font-mono text-sm text-sol-base01">gm_7c8d3e2f</span>
+            <div class="text-xs text-sol-base1 mt-0.5">Started 8 min ago</div>
+          </div>
+          <div class="col-span-3 flex items-center gap-2">
+            <span class="text-sm font-semibold text-sol-yellow">● In Progress</span>
+            <span class="text-xs text-sol-base1">2 / 2</span>
+          </div>
+          <div class="col-span-3 flex gap-1 flex-wrap">
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Witch</span>
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Militia</span>
+            <span class="text-xs text-sol-base1">+8</span>
+          </div>
+          <div class="col-span-2 flex justify-end">
+            <button disabled class="bg-sol-base2 text-sol-base1 text-xs font-bold px-4 py-1.5 rounded uppercase tracking-wider cursor-not-allowed border border-sol-base1/30">
+              Full
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 3 — waiting -->
+        <div class="game-row px-5 py-4 grid grid-cols-12 items-center transition-colors">
+          <div class="col-span-4">
+            <span class="font-mono text-sm text-sol-base01">gm_1a5b0c9d</span>
+            <div class="text-xs text-sol-base1 mt-0.5">Created 15 min ago</div>
+          </div>
+          <div class="col-span-3 flex items-center gap-2">
+            <span class="text-sm font-semibold text-sol-green">● Waiting</span>
+            <span class="text-xs text-sol-base1">1 / 2</span>
+          </div>
+          <div class="col-span-3 flex gap-1 flex-wrap">
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Chapel</span>
+            <span class="text-xs bg-sol-base2 border border-sol-base1/30 text-sol-base01 px-2 py-0.5 rounded">Moat</span>
+            <span class="text-xs text-sol-base1">+8</span>
+          </div>
+          <div class="col-span-2 flex justify-end">
+            <button class="bg-sol-blue hover:bg-sol-blue/90 text-white text-xs font-bold px-4 py-1.5 rounded transition-colors uppercase tracking-wider">
+              Join
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Join by ID -->
+    <div class="mt-5 flex items-center gap-3">
+      <input
+        type="text"
+        placeholder="Enter Game ID to join directly…"
+        class="flex-1 bg-sol-base3 border border-sol-base1/35 text-sol-base01 placeholder-sol-base1 text-sm px-4 py-2.5 rounded-lg focus:outline-none focus:border-sol-blue/60 font-mono shadow-sol"
+      />
+      <button class="border border-sol-base1/40 hover:border-sol-blue/60 hover:text-sol-blue text-sol-base01 text-sm px-5 py-2.5 rounded-lg transition-colors uppercase tracking-wider font-serif">
+        Join
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ── Create Game Modal ── -->
+  <div id="create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-sol-base03/40 backdrop-blur-sm">
+    <div class="bg-sol-base3 border border-sol-base1/30 rounded-2xl w-full max-w-lg mx-4 shadow-sol-lg overflow-hidden">
+
+      <div class="px-7 pt-7 pb-4 border-b border-sol-base2 flex items-center justify-between">
+        <h3 class="text-xl font-serif text-sol-base02 tracking-wide">New Game</h3>
+        <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="text-sol-base1 hover:text-sol-base00 transition-colors text-lg leading-none">✕</button>
+      </div>
+
+      <div class="px-7 py-6 space-y-6">
+
+        <!-- Opponent -->
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-sol-base1 mb-2">Opponent</label>
+          <div class="flex gap-3">
+            <button id="opp-bm" onclick="selectOpponent('bm')"
+              class="flex-1 border-2 border-sol-blue bg-sol-blue/10 text-sol-blue text-sm py-2.5 rounded-lg font-serif font-semibold tracking-wide">
+              BigMoney Bot
+            </button>
+            <button id="opp-sbm" onclick="selectOpponent('sbm')"
+              class="flex-1 border border-sol-base1/30 text-sol-base1 text-sm py-2.5 rounded-lg font-serif tracking-wide hover:border-sol-blue/40 transition-colors">
+              SmithyBM Bot
+            </button>
+          </div>
+        </div>
+
+        <!-- Kingdom -->
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-sol-base1 mb-2">Kingdom Cards</label>
+          <div class="flex gap-3">
+            <button id="btn-random" onclick="selectKingdom('random')"
+              class="flex-1 border-2 border-sol-blue bg-sol-blue/10 text-sol-blue text-sm py-2.5 rounded-lg font-serif font-semibold tracking-wide">
+              Random 10
+            </button>
+            <button id="btn-pick" onclick="selectKingdom('pick')"
+              class="flex-1 border border-sol-base1/30 text-sol-base1 text-sm py-2.5 rounded-lg font-serif tracking-wide hover:border-sol-blue/40 transition-colors">
+              Pick Cards
+            </button>
+          </div>
+        </div>
+
+        <!-- Seed -->
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-sol-base1 mb-2">
+            Seed <span class="normal-case text-sol-base1/60">(optional)</span>
+          </label>
+          <input
+            type="number"
+            placeholder="Leave blank for random"
+            class="w-full bg-sol-base2 border border-sol-base1/30 text-sol-base01 placeholder-sol-base1 text-sm px-4 py-2.5 rounded-lg focus:outline-none focus:border-sol-blue/50 font-mono"
+          />
+        </div>
+
+      </div>
+
+      <div class="px-7 pb-7 flex justify-end gap-3">
+        <button onclick="document.getElementById('create-modal').classList.add('hidden')"
+          class="text-sol-base1 hover:text-sol-base00 text-sm px-5 py-2.5 transition-colors font-serif">
+          Cancel
+        </button>
+        <button class="bg-sol-blue hover:bg-sol-blue/90 text-white font-bold text-sm px-7 py-2.5 rounded-lg transition-colors uppercase tracking-widest font-serif shadow-sol">
+          Create →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectKingdom(mode) {
+      const on  = 'flex-1 border-2 border-sol-blue bg-sol-blue/10 text-sol-blue text-sm py-2.5 rounded-lg font-serif font-semibold tracking-wide';
+      const off = 'flex-1 border border-sol-base1/30 text-sol-base1 text-sm py-2.5 rounded-lg font-serif tracking-wide hover:border-sol-blue/40 transition-colors';
+      document.getElementById('btn-random').className = mode === 'random' ? on : off;
+      document.getElementById('btn-pick').className   = mode === 'pick'   ? on : off;
+    }
+    function selectOpponent(opp) {
+      const on  = 'flex-1 border-2 border-sol-blue bg-sol-blue/10 text-sol-blue text-sm py-2.5 rounded-lg font-serif font-semibold tracking-wide';
+      const off = 'flex-1 border border-sol-base1/30 text-sol-base1 text-sm py-2.5 rounded-lg font-serif tracking-wide hover:border-sol-blue/40 transition-colors';
+      document.getElementById('opp-bm').className  = opp === 'bm'  ? on : off;
+      document.getElementById('opp-sbm').className = opp === 'sbm' ? on : off;
+    }
+  </script>
+
+</body>
+</html>
