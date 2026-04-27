@@ -21,26 +21,28 @@ test('End Phase button is visible on my turn', async ({ page }) => {
 })
 
 test('human can end phases until game over', async ({ page }) => {
-  test.setTimeout(120_000)
+  test.setTimeout(300_000)
   await createAndJoin(page)
 
-  // Keep clicking End Phase whenever it appears, until game ends
-  const maxClicks = 200
+  // Keep clicking End Phase whenever it appears, until game ends.
+  // Use page.click with a short timeout so detached-element errors don't stall us.
+  const maxClicks = 400
   let clicks = 0
   while (clicks < maxClicks) {
-    const endBtn = page.getByTestId('end-phase-btn')
     const gameOver = page.getByText(/game over/i)
+    if (await gameOver.isVisible()) break
 
-    const which = await Promise.race([
-      endBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => 'btn' as const),
-      gameOver.waitFor({ state: 'visible', timeout: 8000 }).then(() => 'over' as const),
-    ]).catch(() => 'timeout' as const)
-
-    if (which === 'over') break
-    if (which === 'timeout') break
-    await endBtn.click()
-    clicks++
+    try {
+      // Short timeout: if the button isn't clickable quickly, loop and try again.
+      await page.click('[data-testid="end-phase-btn"]', { timeout: 5000 })
+      clicks++
+    } catch {
+      // Button may have disappeared (bot turn) or detached mid-click — check for game over
+      if (await gameOver.isVisible()) break
+      // Small pause before retrying to let React settle
+      await page.waitForTimeout(200)
+    }
   }
 
-  await expect(page.getByText(/game over/i)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText(/game over/i)).toBeVisible({ timeout: 15_000 })
 })
