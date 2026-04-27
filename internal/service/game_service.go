@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
+	"github.com/nutthawit-l/dominion-grpc/internal/bot"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
@@ -59,6 +60,16 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	g.store.Put(gs)
+
+	// Spawn a server-side bot goroutine for any player named "bigmoney".
+	for i, name := range names {
+		if name == "bigmoney" {
+			botIdx := i
+			gameID := id
+			go g.runBigMoneyBot(gameID, botIdx)
+		}
+	}
+
 	return connect.NewResponse(&pb.CreateGameResponse{
 		GameId: id,
 	}), nil
@@ -85,6 +96,107 @@ func (g *GameService) SubmitAction(ctx context.Context, req *connect.Request[pb.
 		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
 	}
 	return connect.NewResponse(&pb.SubmitActionResponse{}), nil
+}
+
+// playBotTurnBatch executes the bot's entire turn inside a single store lock,
+// then emits exactly one fanOut event. This keeps SSE traffic to one update
+// per bot turn so the frontend renders once instead of once per bot action.
+func (g *GameService) playBotTurnBatch(gameID string, botIdx int, strat bot.BigMoney) {
+	_ = g.store.WithLock(gameID, func(s *engine.GameState) error {
+		if int(s.CurrentPlayer) != botIdx || s.Ended {
+			return nil
+		}
+		var gameEnded bool
+		for int(s.CurrentPlayer) == botIdx && !s.Ended {
+			cs := &bot.ClientState{Me: botIdx}
+			_ = cs.Apply(&pb.StreamGameEventsResponse{
+				Kind: &pb.StreamGameEventsResponse_Snapshot{
+					Snapshot: SnapshotFromState(s, engine.PlayerIdx(botIdx)),
+				},
+			})
+			var pbAct *pb.Action
+			if cs.PendingDecision != nil && int(cs.PendingDecision.PlayerIdx) == botIdx {
+				pbAct = &pb.Action{Kind: &pb.Action_Resolve{Resolve: strat.Resolve(cs, cs.PendingDecision)}}
+			} else {
+				pbAct = strat.PickAction(cs)
+			}
+			if pbAct == nil {
+				break
+			}
+			act, err := ActionFromProto(pbAct)
+			if err != nil {
+				break
+			}
+			_, events, err := engine.Apply(s, act, g.lookup)
+			if err != nil {
+				break
+			}
+			for _, ev := range events {
+				if ev.Kind == engine.EventGameEnded {
+					gameEnded = true
+				}
+			}
+		}
+		// Emit exactly one fanOut for the entire bot turn.
+		var finalEvents []engine.Event
+		if gameEnded {
+			finalEvents = []engine.Event{{Kind: engine.EventGameEnded}}
+		}
+		g.fanOut(gameID, s, finalEvents)
+		return nil
+	})
+}
+
+// runBigMoneyBot subscribes to the game as botIdx, waits for its turns, and
+// plays each turn atomically via playBotTurnBatch.
+func (g *GameService) runBigMoneyBot(gameID string, botIdx int) {
+	strat := bot.BigMoney{}
+	cs := &bot.ClientState{Me: botIdx}
+
+	ch := make(chan *pb.StreamGameEventsResponse, 64)
+	sub := subscriber{ch: ch, viewer: engine.PlayerIdx(botIdx)}
+
+	s, ok := g.store.Get(gameID)
+	if !ok {
+		return
+	}
+	initEvt := &pb.StreamGameEventsResponse{
+		Sequence: 0,
+		Kind:     &pb.StreamGameEventsResponse_Snapshot{Snapshot: SnapshotFromState(s, engine.PlayerIdx(botIdx))},
+	}
+
+	g.subsMu.Lock()
+	g.subs[gameID] = append(g.subs[gameID], sub)
+	g.subsMu.Unlock()
+
+	defer func() {
+		g.subsMu.Lock()
+		subs := g.subs[gameID]
+		for i, s := range subs {
+			if s.ch == ch {
+				g.subs[gameID] = append(subs[:i], subs[i+1:]...)
+				break
+			}
+		}
+		g.subsMu.Unlock()
+	}()
+
+	_ = cs.Apply(initEvt)
+	if cs.IsMyTurn() {
+		g.playBotTurnBatch(gameID, botIdx, strat)
+	}
+
+	for evt := range ch {
+		if err := cs.Apply(evt); err != nil {
+			continue
+		}
+		if cs.Ended {
+			return
+		}
+		if cs.IsMyTurn() {
+			g.playBotTurnBatch(gameID, botIdx, strat)
+		}
+	}
 }
 
 // fanOut sends one snapshot per SubmitAction call to every subscriber.

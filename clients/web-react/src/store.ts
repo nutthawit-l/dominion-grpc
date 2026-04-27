@@ -72,7 +72,8 @@ export const gameStore = createZustandStore<GameStoreState>((set, get) => ({
   selectedCards: [],
   decisionModalOpen: false,
 
-  setGame: (gameId, myIdx) => set({ gameId, myIdx }),
+  setGame: (gameId, myIdx) =>
+    set({ gameId, myIdx, snapshot: null, log: [], streamSeq: 0n, selectedCards: [], decisionModalOpen: false }),
 
   applyEvent: (evt) => {
     const seq = evt.sequence

@@ -43,7 +43,7 @@ export default function KingdomPicker() {
     try {
       const res = await client.createGame({
         players: ['human', 'bigmoney'],
-        seed: BigInt(Date.now()),
+        seed: 0n,
         kingdom: Array.from(selected),
       })
       gameStore.getState().setGame(res.gameId, 0)

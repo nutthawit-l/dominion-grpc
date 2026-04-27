@@ -20,6 +20,9 @@ func main() {
 	mux := http.NewServeMux()
 	path, h := dominionv1connect.NewGameServiceHandler(svc)
 	mux.Handle(path, h)
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
 	log.Println("dominion-grpc server listening on :8080")
 	if err := http.ListenAndServe(":8080", h2cMux(mux)); err != nil {

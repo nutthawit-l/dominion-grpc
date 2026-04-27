@@ -24,6 +24,7 @@ export default function GameTable() {
     async function subscribe() {
       const ac = new AbortController()
       abortRef.current = ac
+      streamSeqRef.current = 0n
       try {
         const stream = client.streamGameEvents(
           { gameId: gameId!, playerIdx: myIdx! },
@@ -31,7 +32,10 @@ export default function GameTable() {
         )
         for await (const evt of stream) {
           const seq = evt.sequence
-          if (seq > streamSeqRef.current + 1n) {
+          // Only gap-check after the first non-initial event establishes a
+          // baseline. The initial snapshot always carries seq=0; the first
+          // subsequent event may be at any seq if the bot acted first.
+          if (streamSeqRef.current > 0n && seq > streamSeqRef.current + 1n) {
             console.warn('[stream] sequence gap — resubscribing')
             ac.abort()
             subscribe()
@@ -51,7 +55,6 @@ export default function GameTable() {
 
     return () => {
       abortRef.current?.abort()
-      gameStore.getState().clearGame()
     }
   }, [gameId, myIdx])
 

@@ -10,7 +10,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'make -C ../.. server',
-      url: 'http://localhost:8080',
+      url: 'http://localhost:8080/healthz',
       reuseExistingServer: true,
       timeout: 10_000,
     },
