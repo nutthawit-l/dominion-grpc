@@ -3,8 +3,8 @@ package cards
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/stretchr/testify/require"
 )
 
 func TestVassal_OnPlay_DiscardsTopCard_NonAction_NoDecision(t *testing.T) {

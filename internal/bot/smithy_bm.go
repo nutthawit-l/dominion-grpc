@@ -87,4 +87,3 @@ func handContains(hand []string, id string) bool {
 	}
 	return false
 }
-

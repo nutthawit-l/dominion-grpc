@@ -103,4 +103,3 @@ func TestResolveAttackVictims_ReactionFires_NoBlock_VictimIncluded(t *testing.T)
 	victims, _ := ResolveAttackVictims(gs, 0, "witch", lookup)
 	require.Equal(t, []PlayerIdx{1}, victims)
 }
-

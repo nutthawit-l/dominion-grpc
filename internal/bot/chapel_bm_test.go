@@ -3,8 +3,8 @@ package bot
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChapelBM_BuysChapelOnEarlyTurn(t *testing.T) {
