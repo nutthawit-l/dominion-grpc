@@ -289,16 +289,20 @@ func TestApply_StopsUnwindingWhenReplaySetsDecision(t *testing.T) {
 }
 
 func TestApply_NoUnwindWhenStackEmpty(t *testing.T) {
-	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, basicsLookup2)
-	gs.PendingDecision = &Decision{ID: "d1", PlayerIdx: 0, CardID: "chapel",
-		Prompt: TrashFromHandPrompt{}}
+	stub := stubResolveCard("stub", nil)
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "stub" {
+			return stub, true
+		}
+		return basicsLookup2(id)
+	}
+	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, lookup)
+	gs.PendingDecision = &Decision{ID: "d1", PlayerIdx: 0, CardID: "stub",
+		Prompt: DiscardFromHandPrompt{}}
 	gs.PendingPlays = nil
 
 	_, _, err := Apply(gs, ResolveDecision{PlayerIdx: 0, DecisionID: "d1",
-		Answer: CardListAnswer{}}, basicsLookup2)
-	// Chapel's OnResolve is wired up; the chapel CardID must resolve to
-	// a real card. We use chapel from basicsLookup2 only if it's there;
-	// otherwise pick another. Here we just assert no panic and no plays.
-	_ = err
+		Answer: CardListAnswer{}}, lookup)
+	require.NoError(t, err)
 	require.Empty(t, gs.PendingPlays)
 }

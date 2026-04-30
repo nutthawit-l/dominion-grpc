@@ -67,7 +67,7 @@ type Decision struct {
 type PendingPlay struct {
 	PlayerIdx PlayerIdx
 	CardID    CardID
-	Source    CardID // e.g., "throne_room" — for events / observability.
+	Source    CardID // e.g., "throne_room" — internal bookkeeping; not yet surfaced in Event.
 }
 
 // Event is an engine-level notification of something that happened.
