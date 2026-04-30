@@ -3,8 +3,8 @@ package store
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMemory_PutAndGet(t *testing.T) {

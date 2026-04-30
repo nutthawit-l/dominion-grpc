@@ -27,18 +27,25 @@ type GameState struct {
 	// DecisionSeq is a monotonic counter for generating deterministic
 	// decision IDs. Incremented by RequestDecision.
 	DecisionSeq uint64
+
+	// PendingPlays is a LIFO stack of card replays owed to the current
+	// player (e.g., Throne Room queues a second play here). Apply pops
+	// one entry after every ResolveDecision that leaves no new
+	// PendingDecision. Empty when no replay is pending.
+	PendingPlays []PendingPlay
 }
 
 // PlayerState tracks one player's zones and resources.
 type PlayerState struct {
-	Name    string
-	Hand    []CardID
-	Deck    []CardID // top of deck = end of slice
-	Discard []CardID
-	InPlay  []CardID
-	Actions int
-	Buys    int
-	Coins   int
+	Name     string
+	Hand     []CardID
+	Deck     []CardID // top of deck = end of slice
+	Discard  []CardID
+	InPlay   []CardID
+	SetAside []CardID // Library / Sentry inspecting zone; cleared by their resolve and by cleanup.
+	Actions  int
+	Buys     int
+	Coins    int
 }
 
 // Supply tracks pile counts by card ID.
@@ -54,6 +61,14 @@ type Decision struct {
 	Step      int
 	Prompt    Prompt
 	Context   map[ContextKey]any
+}
+
+// PendingPlay is a card whose OnPlay is owed a replay. Throne Room
+// pushes one entry per replay it owes; Apply pops them LIFO.
+type PendingPlay struct {
+	PlayerIdx PlayerIdx
+	CardID    CardID
+	Source    CardID // e.g., "throne_room" — internal bookkeeping; not yet surfaced in Event.
 }
 
 // Event is an engine-level notification of something that happened.
@@ -86,6 +101,7 @@ const (
 	EventAttackPlayed
 	EventReactionTriggered
 	EventCardRevealed
+	EventCardThroned
 )
 
 // RNG exposes the per-game random source for code inside the engine

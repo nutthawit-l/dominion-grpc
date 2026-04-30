@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/stretchr/testify/require"
 	pb "github.com/nutthawit-l/dominion-grpc/gen/go/dominion/v1"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine/cards"
 	"github.com/nutthawit-l/dominion-grpc/internal/store"
+	"github.com/stretchr/testify/require"
 )
 
 func newTestService() *GameService {

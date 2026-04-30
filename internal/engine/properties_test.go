@@ -11,7 +11,7 @@ import (
 func totalCards(gs *GameState) int {
 	total := len(gs.Trash)
 	for _, p := range gs.Players {
-		total += len(p.Hand) + len(p.Deck) + len(p.Discard) + len(p.InPlay)
+		total += len(p.Hand) + len(p.Deck) + len(p.Discard) + len(p.InPlay) + len(p.SetAside)
 	}
 	for _, n := range gs.Supply.Piles {
 		total += n

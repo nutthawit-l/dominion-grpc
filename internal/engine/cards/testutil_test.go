@@ -5,11 +5,15 @@ import (
 )
 
 func newTestStateForCards(numPlayers int) *engine.GameState {
+	return newTestStateForCardsWithRNG(numPlayers, 1)
+}
+
+func newTestStateForCardsWithRNG(numPlayers int, seed int64) *engine.GameState {
 	players := make([]engine.PlayerState, numPlayers)
 	for i := range players {
 		players[i] = engine.PlayerState{Name: "p" + string(rune('0'+i))}
 	}
-	gs := engine.NewTestStateWithRNG("test", 1, players)
+	gs := engine.NewTestStateWithRNG("test", seed, players)
 	gs.Phase = engine.PhaseBuy
 	return gs
 }

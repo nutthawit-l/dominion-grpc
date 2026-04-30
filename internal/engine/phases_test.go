@@ -45,3 +45,23 @@ func TestCleanupAndEndTurn_WrapsToFirstPlayerAndIncrementsTurn(t *testing.T) {
 	require.Equal(t, PlayerIdx(0), gs.CurrentPlayer)
 	require.Equal(t, 2, gs.Turn)
 }
+
+func TestCleanup_FlushesSetAsideToDiscard(t *testing.T) {
+	gs := newTestState(2)
+	gs.CurrentPlayer = 0
+	gs.StartingPlayer = 0
+	gs.Phase = PhaseCleanup
+	gs.Players[0].SetAside = []CardID{"copper", "estate"}
+	gs.Players[0].Deck = []CardID{"silver", "silver", "silver", "silver", "silver"}
+
+	cleanupAndEndTurn(gs)
+
+	require.Empty(t, gs.Players[0].SetAside, "SetAside must be empty after cleanup")
+	// Discard now contains the original SetAside cards.
+	discardSet := map[CardID]int{}
+	for _, c := range gs.Players[0].Discard {
+		discardSet[c]++
+	}
+	require.Equal(t, 1, discardSet["copper"])
+	require.Equal(t, 1, discardSet["estate"])
+}

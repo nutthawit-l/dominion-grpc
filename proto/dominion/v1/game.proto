@@ -98,7 +98,11 @@ message Decision {
         ChooseFromDiscardPrompt choose_from_discard = 8;
         PutOnDeckPrompt put_on_deck = 9;
         MayPlayActionPrompt may_play_action = 10;
-        TrashFromRevealedPrompt trash_from_revealed = 11;  // NEW
+        TrashFromRevealedPrompt trash_from_revealed = 11;
+        ChooseActionFromHandPrompt choose_action_from_hand = 12;  // Throne Room
+        SetAsideActionPrompt set_aside_action = 13;               // Library
+        DiscardFromRevealedPrompt discard_from_revealed = 14;     // Sentry
+        ReorderCardsPrompt reorder_cards = 15;                    // Sentry
     }
 }
 
@@ -135,6 +139,22 @@ message MayPlayActionPrompt {
 
 message TrashFromRevealedPrompt {
     repeated string cards = 1;  // the revealed cards the player may choose from
+}
+
+message ChooseActionFromHandPrompt {
+    // No fields — the type filter (Action) is implicit and engine-enforced.
+}
+
+message SetAsideActionPrompt {
+    string card_id = 1;  // the just-drawn Action card the player may set aside.
+}
+
+message DiscardFromRevealedPrompt {
+    repeated string cards = 1;  // candidate cards to discard.
+}
+
+message ReorderCardsPrompt {
+    repeated string cards = 1;  // cards to reorder; engine sets length 2 in Tier 4.
 }
 
 message ResolveDecision {

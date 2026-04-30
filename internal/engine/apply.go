@@ -79,7 +79,25 @@ func applyResolveDecision(gs *GameState, act ResolveDecision, lookup CardLookup)
 		return nil, ErrNoResolveHandler
 	}
 	gs.PendingDecision = nil
-	return card.OnResolve(gs, d.PlayerIdx, d, act.Answer, lookup)
+	events, err := card.OnResolve(gs, d.PlayerIdx, d, act.Answer, lookup)
+	if err != nil {
+		return events, err
+	}
+	// Unwind any pending plays that don't park a new decision.
+	for gs.PendingDecision == nil && len(gs.PendingPlays) > 0 {
+		last := len(gs.PendingPlays) - 1
+		pp := gs.PendingPlays[last]
+		gs.PendingPlays = gs.PendingPlays[:last]
+		events = append(events, Event{
+			Kind: EventCardThroned, PlayerIdx: pp.PlayerIdx, CardID: pp.CardID,
+		})
+		replayEvents, err := PlayCardInPlace(gs, pp.PlayerIdx, pp.CardID, lookup)
+		events = append(events, replayEvents...)
+		if err != nil {
+			return events, err
+		}
+	}
+	return events, nil
 }
 
 func applyPlayCard(gs *GameState, act PlayCard, lookup CardLookup) ([]Event, error) {

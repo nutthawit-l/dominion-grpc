@@ -71,6 +71,33 @@ func safeRefusal(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
 		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: best}}
 	case *pb.Decision_MayPlayAction:
 		r.Answer = &pb.ResolveDecision_YesNo{YesNo: &pb.YesNoAnswer{Yes: false}}
+	case *pb.Decision_ChooseActionFromHand:
+		// Engine guarantees ≥ 1 Action in hand; pick the first Action we see.
+		me := cs.MyPlayer()
+		pick := ""
+		if me != nil {
+			for _, c := range me.Hand {
+				if isAction(c) {
+					pick = c
+					break
+				}
+			}
+			if pick == "" && len(me.Hand) > 0 {
+				pick = me.Hand[0] // fallback — shouldn't be reached.
+			}
+		}
+		r.Answer = &pb.ResolveDecision_CardChoice{CardChoice: &pb.CardChoiceAnswer{Card: pick}}
+	case *pb.Decision_SetAsideAction:
+		// Default: keep in hand (don't set aside) — preserves drawn cards.
+		r.Answer = &pb.ResolveDecision_YesNo{YesNo: &pb.YesNoAnswer{Yes: false}}
+	case *pb.Decision_DiscardFromRevealed:
+		// Default: discard nothing.
+		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: nil}}
+	case *pb.Decision_ReorderCards:
+		// Default: identity reorder — return the cards in the order received.
+		p := d.GetReorderCards()
+		cards := append([]string(nil), p.Cards...)
+		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: cards}}
 	default:
 		r.Answer = &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{}}
 	}
@@ -157,6 +184,21 @@ func isVictory(id string) bool {
 	return false
 }
 
+// isAction reports whether the given card ID is an Action card. The
+// list mirrors the kingdom cards registered by Tier 0 through Tier 4
+// — bots compile-pin this rather than importing the engine.
+func isAction(id string) bool {
+	switch id {
+	case "smithy", "village", "festival", "laboratory", "market",
+		"council_room", "moat", "harbinger", "vassal", "workshop",
+		"moneylender", "poacher", "remodel", "mine", "artisan",
+		"cellar", "chapel", "witch", "militia", "bureaucrat",
+		"bandit", "throne_room", "library", "sentry":
+		return true
+	}
+	return false
+}
+
 // cardCost returns the known cost of a card by ID. This is a simple
 // lookup for the base set; it avoids importing the engine package.
 func cardCost(id string) int {
@@ -165,13 +207,13 @@ func cardCost(id string) int {
 		return 0
 	case "estate", "moat":
 		return 2
-	case "silver", "cellar", "chapel":
+	case "silver", "cellar", "chapel", "village":
 		return 3
 	case "harbinger", "vassal", "workshop":
 		return 3
-	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy":
+	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy", "throne_room":
 		return 4
-	case "mine", "witch", "bandit", "laboratory", "market", "festival":
+	case "mine", "witch", "bandit", "laboratory", "market", "festival", "library", "sentry":
 		return 5
 	case "gold", "artisan", "council_room":
 		return 6

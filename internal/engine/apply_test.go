@@ -184,3 +184,125 @@ func TestApply_ResolveDecision_FromDecidingPlayer_NotCurrentPlayer(t *testing.T)
 	require.True(t, resolved)
 	require.Nil(t, gs.PendingDecision)
 }
+
+// stubResolveCard is a minimal card whose OnResolve does nothing —
+// used to exercise Apply's pending-play unwinding.
+func stubResolveCard(id CardID, onPlay func(*GameState, PlayerIdx) []Event) *Card {
+	return &Card{
+		ID: id, Name: string(id), Cost: 0,
+		Types:  []CardType{TypeAction},
+		OnPlay: onPlay,
+		OnResolve: func(gs *GameState, px PlayerIdx, d *Decision, a Answer, l CardLookup) ([]Event, error) {
+			return nil, nil
+		},
+	}
+}
+
+func TestApply_UnwindsPendingPlays_AfterResolve(t *testing.T) {
+	plays := 0
+	bumper := stubResolveCard("bumper", func(gs *GameState, px PlayerIdx) []Event {
+		plays++
+		return nil
+	})
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "bumper" {
+			return bumper, true
+		}
+		return basicsLookup2(id)
+	}
+
+	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, lookup)
+	// Park a pending decision and queue a replay; resolving the
+	// decision should pop the pending play.
+	gs.PendingDecision = &Decision{
+		ID: "d1", PlayerIdx: 0, CardID: "bumper", Step: 0,
+		Prompt: DiscardFromHandPrompt{Min: 0, Max: 0},
+	}
+	gs.PendingPlays = append(gs.PendingPlays, PendingPlay{
+		PlayerIdx: 0, CardID: "bumper", Source: "throne_room",
+	})
+
+	_, _, err := Apply(gs, ResolveDecision{
+		PlayerIdx: 0, DecisionID: "d1",
+		Answer: CardListAnswer{},
+	}, lookup)
+	require.NoError(t, err)
+	require.Equal(t, 1, plays, "Apply should pop the queued play exactly once")
+	require.Empty(t, gs.PendingPlays, "stack must be empty after pop")
+}
+
+func TestApply_UnwindsAllWhenNoNewDecision(t *testing.T) {
+	plays := 0
+	bumper := stubResolveCard("bumper", func(gs *GameState, px PlayerIdx) []Event {
+		plays++
+		return nil
+	})
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "bumper" {
+			return bumper, true
+		}
+		return basicsLookup2(id)
+	}
+	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, lookup)
+	gs.PendingDecision = &Decision{ID: "d1", PlayerIdx: 0, CardID: "bumper",
+		Prompt: DiscardFromHandPrompt{}}
+	// Push two replays — both should run because neither sets a decision.
+	gs.PendingPlays = append(gs.PendingPlays,
+		PendingPlay{PlayerIdx: 0, CardID: "bumper", Source: "throne_room"},
+		PendingPlay{PlayerIdx: 0, CardID: "bumper", Source: "throne_room"},
+	)
+
+	_, _, err := Apply(gs, ResolveDecision{PlayerIdx: 0, DecisionID: "d1",
+		Answer: CardListAnswer{}}, lookup)
+	require.NoError(t, err)
+	require.Equal(t, 2, plays)
+	require.Empty(t, gs.PendingPlays)
+}
+
+func TestApply_StopsUnwindingWhenReplaySetsDecision(t *testing.T) {
+	plays := 0
+	bumper := stubResolveCard("bumper", func(gs *GameState, px PlayerIdx) []Event {
+		plays++
+		// Replay sets its own decision.
+		return RequestDecision(gs, px, "bumper", 0, DiscardFromHandPrompt{}, nil)
+	})
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "bumper" {
+			return bumper, true
+		}
+		return basicsLookup2(id)
+	}
+	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, lookup)
+	gs.PendingDecision = &Decision{ID: "d1", PlayerIdx: 0, CardID: "bumper",
+		Prompt: DiscardFromHandPrompt{}}
+	gs.PendingPlays = append(gs.PendingPlays,
+		PendingPlay{PlayerIdx: 0, CardID: "bumper", Source: "throne_room"},
+		PendingPlay{PlayerIdx: 0, CardID: "bumper", Source: "throne_room"},
+	)
+
+	_, _, err := Apply(gs, ResolveDecision{PlayerIdx: 0, DecisionID: "d1",
+		Answer: CardListAnswer{}}, lookup)
+	require.NoError(t, err)
+	require.Equal(t, 1, plays, "second pop must wait for the new decision")
+	require.Len(t, gs.PendingPlays, 1, "second replay still queued")
+	require.NotNil(t, gs.PendingDecision, "new decision must be parked")
+}
+
+func TestApply_NoUnwindWhenStackEmpty(t *testing.T) {
+	stub := stubResolveCard("stub", nil)
+	lookup := func(id CardID) (*Card, bool) {
+		if id == "stub" {
+			return stub, true
+		}
+		return basicsLookup2(id)
+	}
+	gs, _ := NewGame("g", []string{"A", "B"}, nil, 1, lookup)
+	gs.PendingDecision = &Decision{ID: "d1", PlayerIdx: 0, CardID: "stub",
+		Prompt: DiscardFromHandPrompt{}}
+	gs.PendingPlays = nil
+
+	_, _, err := Apply(gs, ResolveDecision{PlayerIdx: 0, DecisionID: "d1",
+		Answer: CardListAnswer{}}, lookup)
+	require.NoError(t, err)
+	require.Empty(t, gs.PendingPlays)
+}

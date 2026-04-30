@@ -22,7 +22,7 @@ type BuyCard struct {
 	Card      CardID
 }
 
-func (BuyCard) isAction()            {}
+func (BuyCard) isAction()             {}
 func (act BuyCard) Player() PlayerIdx { return act.PlayerIdx }
 
 // EndPhase ends the current phase (Action → Buy, or Buy → Cleanup).

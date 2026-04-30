@@ -3,8 +3,8 @@ package cards
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChapel_OnPlay_SetsTrashPrompt(t *testing.T) {
