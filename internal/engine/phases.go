@@ -11,6 +11,19 @@ func cleanupAndEndTurn(gs *GameState) []Event {
 	px := gs.CurrentPlayer
 	var events []Event
 
+	// Flush any orphaned pending-play stack (belt-and-suspenders; Throne Room
+	// should exhaust the stack during its OnResolve chain, but guard cleanup).
+	gs.PendingPlays = nil
+
+	// Defensive: flush any leftover SetAside (cards routed by Library /
+	// Sentry should already have been moved out by their OnResolve, but
+	// belt-and-suspenders).
+	for _, c := range gs.Players[px].SetAside {
+		gs.Players[px].Discard = append(gs.Players[px].Discard, c)
+		events = append(events, Event{Kind: EventCardDiscarded, PlayerIdx: px, CardID: c})
+	}
+	gs.Players[px].SetAside = nil
+
 	// Discard in-play.
 	for _, c := range gs.Players[px].InPlay {
 		gs.Players[px].Discard = append(gs.Players[px].Discard, c)

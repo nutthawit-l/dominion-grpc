@@ -37,14 +37,15 @@ type GameState struct {
 
 // PlayerState tracks one player's zones and resources.
 type PlayerState struct {
-	Name    string
-	Hand    []CardID
-	Deck    []CardID // top of deck = end of slice
-	Discard []CardID
-	InPlay  []CardID
-	Actions int
-	Buys    int
-	Coins   int
+	Name     string
+	Hand     []CardID
+	Deck     []CardID // top of deck = end of slice
+	Discard  []CardID
+	InPlay   []CardID
+	SetAside []CardID // Library / Sentry inspecting zone; cleared by their resolve and by cleanup.
+	Actions  int
+	Buys     int
+	Coins    int
 }
 
 // Supply tracks pile counts by card ID.
