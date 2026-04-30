@@ -62,6 +62,8 @@ func selectStrategy(name string) (bot.Strategy, error) {
 		return bot.NewThroneRoomBM(), nil
 	case "library_bm":
 		return bot.NewLibraryBM(), nil
+	case "sentry_bm":
+		return bot.NewSentryBM(), nil
 	}
 	return nil, fmt.Errorf("unknown strategy %q", name)
 }
