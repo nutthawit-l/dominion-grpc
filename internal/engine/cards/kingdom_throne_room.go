@@ -1,6 +1,8 @@
 package cards
 
 import (
+	"fmt"
+
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 )
 
@@ -18,7 +20,10 @@ var ThroneRoom = &engine.Card{
 			engine.ChooseActionFromHandPrompt{}, nil)
 	},
 	OnResolve: func(gs *engine.GameState, px engine.PlayerIdx, d *engine.Decision, answer engine.Answer, lookup engine.CardLookup) ([]engine.Event, error) {
-		choice := answer.(engine.CardChoiceAnswer)
+		choice, ok := answer.(engine.CardChoiceAnswer)
+		if !ok {
+			return nil, fmt.Errorf("throne_room: expected CardChoiceAnswer, got %T", answer)
+		}
 		// Move chosen card from Hand → InPlay.
 		idx := engine.IndexOf(gs.Players[px].Hand, choice.Card)
 		if idx < 0 {
