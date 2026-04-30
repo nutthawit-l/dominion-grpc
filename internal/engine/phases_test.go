@@ -50,7 +50,7 @@ func TestCleanup_FlushesSetAsideToDiscard(t *testing.T) {
 	gs := newTestState(2)
 	gs.CurrentPlayer = 0
 	gs.StartingPlayer = 0
-	gs.Phase = PhaseBuy
+	gs.Phase = PhaseCleanup
 	gs.Players[0].SetAside = []CardID{"copper", "estate"}
 	gs.Players[0].Deck = []CardID{"silver", "silver", "silver", "silver", "silver"}
 
