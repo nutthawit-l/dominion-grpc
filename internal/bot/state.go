@@ -41,6 +41,9 @@ func (cs *ClientState) Apply(ev *pb.StreamGameEventsResponse) error {
 		cs.Turn = int(k.Snapshot.Turn)
 		cs.CurrentPlayer = int(k.Snapshot.CurrentPlayer)
 		cs.PendingDecision = k.Snapshot.PendingDecision
+		if k.Snapshot.PendingDecision != nil {
+			cs.DecidingPlayer = int(k.Snapshot.PendingDecision.PlayerIdx)
+		}
 		cs.Ended = k.Snapshot.Ended
 		cs.Winners = nil
 		for _, w := range k.Snapshot.Winners {

@@ -16,7 +16,7 @@ func main() {
 	gameID := flag.String("game", "", "game ID to join (required unless --create)")
 	create := flag.Bool("create", false, "create a new bot-only game before joining")
 	asPlayer := flag.Int("as-player", 0, "player index this bot plays")
-	strategyName := flag.String("strategy", "bigmoney", "strategy to use: bigmoney | smithy_bm | witch_bm | militia_bm")
+	strategyName := flag.String("strategy", "bigmoney", "strategy to use: bigmoney | smithy_bm | witch_bm | militia_bm | throneroom_bm | library_bm | sentry_bm")
 	seed := flag.Int64("seed", 1, "game seed (only used with --create)")
 	flag.Parse()
 
@@ -58,6 +58,8 @@ func selectStrategy(name string) (bot.Strategy, error) {
 		return bot.NewWitchBM(), nil
 	case "militia_bm":
 		return bot.NewMilitiaBM(), nil
+	case "throneroom_bm":
+		return bot.NewThroneRoomBM(), nil
 	}
 	return nil, fmt.Errorf("unknown strategy %q", name)
 }
