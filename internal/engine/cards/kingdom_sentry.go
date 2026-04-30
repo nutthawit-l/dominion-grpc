@@ -36,7 +36,7 @@ var Sentry = &engine.Card{
 			for _, c := range choice.Cards {
 				idx := engine.IndexOf(ps.SetAside, c)
 				if idx < 0 {
-					continue
+					continue // skip unknown card IDs — matches engine convention for trash/discard prompts.
 				}
 				ps.SetAside = append(ps.SetAside[:idx], ps.SetAside[idx+1:]...)
 				gs.Trash = append(gs.Trash, c)
@@ -50,7 +50,7 @@ var Sentry = &engine.Card{
 			for _, c := range choice.Cards {
 				idx := engine.IndexOf(ps.SetAside, c)
 				if idx < 0 {
-					continue
+					continue // skip unknown card IDs — matches engine convention for trash/discard prompts.
 				}
 				ps.SetAside = append(ps.SetAside[:idx], ps.SetAside[idx+1:]...)
 				ps.Discard = append(ps.Discard, c)

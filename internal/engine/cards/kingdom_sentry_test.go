@@ -180,3 +180,20 @@ func TestSentry_Step2_Reorder_PutsBackInOrder(t *testing.T) {
 	require.Equal(t, reversed[0], gs.Players[0].Deck[n-2])
 	require.Equal(t, reversed[1], gs.Players[0].Deck[n-1])
 }
+
+func TestSentry_OnPlay_ShufflesDiscardWhenDeckInsufficient(t *testing.T) {
+	gs := newTestStateForCardsWithRNG(2, 42)
+	gs.Players[0].Hand = []engine.CardID{}
+	gs.Players[0].Deck = nil
+	gs.Players[0].Discard = []engine.CardID{"copper", "silver", "gold"}
+	gs.Players[0].InPlay = []engine.CardID{"sentry"}
+
+	Sentry.OnPlay(gs, 0)
+	// Discard reshuffled into deck; Sentry reveals exactly 2 cards.
+	require.Len(t, gs.Players[0].SetAside, 2)
+	require.NotNil(t, gs.PendingDecision)
+	_, ok := gs.PendingDecision.Prompt.(engine.TrashFromRevealedPrompt)
+	require.True(t, ok)
+	// Discard was consumed by the reshuffle and reveal.
+	require.Empty(t, gs.Players[0].Discard)
+}
