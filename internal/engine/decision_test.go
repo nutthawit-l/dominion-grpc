@@ -64,3 +64,25 @@ func TestContextKeys_NewInTier3(t *testing.T) {
 	require.Equal(t, ContextKey("remaining_victims"), CtxKeyRemainingVictims)
 	require.Equal(t, ContextKey("revealed_cards"), CtxKeyRevealedCards)
 }
+
+func TestChooseActionFromHandPrompt_ImplementsPrompt(t *testing.T) {
+	var _ Prompt = ChooseActionFromHandPrompt{}
+}
+
+func TestSetAsideActionPrompt_Shape(t *testing.T) {
+	p := SetAsideActionPrompt{Card: "smithy"}
+	require.Equal(t, CardID("smithy"), p.Card)
+	var _ Prompt = p
+}
+
+func TestDiscardFromRevealedPrompt_Shape(t *testing.T) {
+	p := DiscardFromRevealedPrompt{Cards: []CardID{"copper", "estate"}}
+	require.Equal(t, []CardID{"copper", "estate"}, p.Cards)
+	var _ Prompt = p
+}
+
+func TestReorderCardsPrompt_Shape(t *testing.T) {
+	p := ReorderCardsPrompt{Cards: []CardID{"silver", "gold"}}
+	require.Equal(t, []CardID{"silver", "gold"}, p.Cards)
+	var _ Prompt = p
+}

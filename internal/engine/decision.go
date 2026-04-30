@@ -83,6 +83,41 @@ type TrashFromRevealedPrompt struct {
 
 func (TrashFromRevealedPrompt) isPrompt() {}
 
+// ChooseActionFromHandPrompt asks the player to choose one Action card
+// from their hand to play (e.g., Throne Room's first decision). The
+// engine guarantees ≥ 1 legal Action exists before requesting this; the
+// answer is a CardChoiceAnswer with None=false.
+type ChooseActionFromHandPrompt struct{}
+
+func (ChooseActionFromHandPrompt) isPrompt() {}
+
+// SetAsideActionPrompt asks the player to either set aside the just-
+// drawn Action card (Yes) or keep it in hand (No). Used by Library.
+type SetAsideActionPrompt struct {
+	Card CardID
+}
+
+func (SetAsideActionPrompt) isPrompt() {}
+
+// DiscardFromRevealedPrompt asks the player to choose 0..n cards to
+// discard from a pre-revealed list (e.g., Sentry's second decision).
+type DiscardFromRevealedPrompt struct {
+	Cards []CardID
+}
+
+func (DiscardFromRevealedPrompt) isPrompt() {}
+
+// ReorderCardsPrompt asks the player to specify the new order of a
+// pre-revealed list (e.g., Sentry's third decision). The answer is a
+// CardListAnswer whose Cards slice is interpreted as the desired order
+// from bottom-to-top in the player's deck — same convention the engine
+// already uses everywhere else (slice end = top of deck).
+type ReorderCardsPrompt struct {
+	Cards []CardID
+}
+
+func (ReorderCardsPrompt) isPrompt() {}
+
 // --- Answer types ---
 
 // CardListAnswer holds zero or more cards chosen by the player.

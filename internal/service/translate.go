@@ -149,6 +149,24 @@ func DecisionToProto(d *engine.Decision) *pb.Decision {
 			proto.Cards = append(proto.Cards, string(c))
 		}
 		pd.Prompt = &pb.Decision_TrashFromRevealed{TrashFromRevealed: proto}
+	case engine.ChooseActionFromHandPrompt:
+		pd.Prompt = &pb.Decision_ChooseActionFromHand{ChooseActionFromHand: &pb.ChooseActionFromHandPrompt{}}
+	case engine.SetAsideActionPrompt:
+		pd.Prompt = &pb.Decision_SetAsideAction{SetAsideAction: &pb.SetAsideActionPrompt{
+			CardId: string(p.Card),
+		}}
+	case engine.DiscardFromRevealedPrompt:
+		proto := &pb.DiscardFromRevealedPrompt{}
+		for _, c := range p.Cards {
+			proto.Cards = append(proto.Cards, string(c))
+		}
+		pd.Prompt = &pb.Decision_DiscardFromRevealed{DiscardFromRevealed: proto}
+	case engine.ReorderCardsPrompt:
+		proto := &pb.ReorderCardsPrompt{}
+		for _, c := range p.Cards {
+			proto.Cards = append(proto.Cards, string(c))
+		}
+		pd.Prompt = &pb.Decision_ReorderCards{ReorderCards: proto}
 	}
 	return pd
 }
