@@ -13,8 +13,8 @@
 *.swp
 
 # Binary files
-bot
-server
+/bot
+/server
 
 # Debug files
 **/*__debug*
