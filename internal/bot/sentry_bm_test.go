@@ -56,3 +56,27 @@ func TestSentryBM_Resolve_DiscardFromRevealed_Refuses(t *testing.T) {
 	r := NewSentryBM().Resolve(cs, d)
 	require.Empty(t, r.GetCardList().Cards, "discard nothing")
 }
+
+func TestSentryBM_StopsBuyingAfterOne(t *testing.T) {
+	s := NewSentryBM()
+	s.sentries = 1
+	cs := csWithHand(0, pb.Phase_PHASE_BUY, 5, 1, nil)
+	cs.Snapshot = snapshotWithSupply(map[string]int{
+		"province": 8, "gold": 30, "silver": 40, "sentry": 10,
+	})
+	cs.Snapshot.Players = []*pb.PlayerView{{PlayerIdx: 0, Coins: 5, Buys: 1}}
+	a := s.PickAction(cs)
+	require.Equal(t, "silver", a.GetBuyCard().CardId)
+}
+
+func TestSentryBM_Resolve_ReorderCards_IdentityOrder(t *testing.T) {
+	cs := csWithHand(0, pb.Phase_PHASE_ACTION, 0, 1, nil)
+	d := &pb.Decision{
+		Id: "d1", PlayerIdx: 0, CardId: "sentry", Step: 2,
+		Prompt: &pb.Decision_ReorderCards{ReorderCards: &pb.ReorderCardsPrompt{
+			Cards: []string{"silver", "copper"},
+		}},
+	}
+	r := NewSentryBM().Resolve(cs, d)
+	require.Equal(t, []string{"silver", "copper"}, r.GetCardList().Cards)
+}

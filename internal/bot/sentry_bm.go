@@ -64,9 +64,9 @@ func (s *SentryBM) Resolve(cs *ClientState, d *pb.Decision) *pb.ResolveDecision 
 	case *pb.Decision_TrashFromRevealed:
 		return s.resolveTrash(d)
 	case *pb.Decision_DiscardFromRevealed:
-		return s.resolveDiscard(d)
+		return safeRefusal(cs, d)
 	case *pb.Decision_ReorderCards:
-		return s.resolveReorder(d)
+		return safeRefusal(cs, d)
 	}
 	return safeRefusal(cs, d)
 }
@@ -85,18 +85,4 @@ func (s *SentryBM) resolveTrash(d *pb.Decision) *pb.ResolveDecision {
 	}
 }
 
-func (s *SentryBM) resolveDiscard(d *pb.Decision) *pb.ResolveDecision {
-	return &pb.ResolveDecision{
-		DecisionId: d.Id, PlayerIdx: d.PlayerIdx,
-		Answer: &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: nil}},
-	}
-}
 
-func (s *SentryBM) resolveReorder(d *pb.Decision) *pb.ResolveDecision {
-	cards := d.GetReorderCards().Cards
-	out := append([]string(nil), cards...)
-	return &pb.ResolveDecision{
-		DecisionId: d.Id, PlayerIdx: d.PlayerIdx,
-		Answer: &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: out}},
-	}
-}
