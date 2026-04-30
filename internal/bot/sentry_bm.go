@@ -84,5 +84,3 @@ func (s *SentryBM) resolveTrash(d *pb.Decision) *pb.ResolveDecision {
 		Answer: &pb.ResolveDecision_CardList{CardList: &pb.CardListAnswer{Cards: toTrash}},
 	}
 }
-
-
