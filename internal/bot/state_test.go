@@ -70,6 +70,19 @@ func TestClientState_MyTurnsTaken_StaysZeroIfStartingPlayerIsOpponent(t *testing
 	require.Equal(t, 0, cs.MyTurnsTaken)
 }
 
+func TestClientState_Apply_Snapshot_SetsDecidingPlayerFromPendingDecision(t *testing.T) {
+	cs := &ClientState{Me: 0}
+	ev := &pb.StreamGameEventsResponse{
+		Sequence: 0,
+		Kind: &pb.StreamGameEventsResponse_Snapshot{Snapshot: &pb.GameStateSnapshot{
+			CurrentPlayer:   1,
+			PendingDecision: &pb.Decision{Id: "d1", PlayerIdx: 1},
+		}},
+	}
+	require.NoError(t, cs.Apply(ev))
+	require.Equal(t, 1, cs.DecidingPlayer)
+}
+
 func snapshot(seq uint64, turn, currentPlayer int32) *pb.StreamGameEventsResponse {
 	return &pb.StreamGameEventsResponse{
 		Sequence: seq,

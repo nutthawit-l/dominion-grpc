@@ -9,10 +9,13 @@ type ThroneRoomBM struct {
 	witchOwned bool
 }
 
+// NewThroneRoomBM constructs a ThroneRoomBM strategy.
 func NewThroneRoomBM() *ThroneRoomBM { return &ThroneRoomBM{} }
 
+// Name implements Strategy.
 func (t *ThroneRoomBM) Name() string { return "throneroom_bm" }
 
+// PickAction implements Strategy.
 func (t *ThroneRoomBM) PickAction(cs *ClientState) *pb.Action {
 	me := cs.MyPlayer()
 	if me == nil {
@@ -63,6 +66,7 @@ func (t *ThroneRoomBM) PickAction(cs *ClientState) *pb.Action {
 	return endPhase(cs.Me)
 }
 
+// Resolve implements Strategy.
 func (t *ThroneRoomBM) Resolve(cs *ClientState, d *pb.Decision) *pb.ResolveDecision {
 	if _, ok := d.Prompt.(*pb.Decision_ChooseActionFromHand); ok {
 		return t.resolveChooseAction(cs, d)

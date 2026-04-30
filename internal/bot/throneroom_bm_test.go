@@ -7,19 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// snapshotWithSupply builds a minimal GameStateSnapshot with the given supply
-// pile counts and a single player at index 0.
-func snapshotWithSupply(counts map[string]int) *pb.GameStateSnapshot {
-	piles := make([]*pb.SupplyPile, 0, len(counts))
-	for id, n := range counts {
-		piles = append(piles, &pb.SupplyPile{CardId: id, Count: int32(n)})
-	}
-	return &pb.GameStateSnapshot{
-		Players: []*pb.PlayerView{{PlayerIdx: 0}},
-		Supply:  piles,
-	}
-}
-
 func TestThroneRoomBM_Name(t *testing.T) {
 	require.Equal(t, "throneroom_bm", NewThroneRoomBM().Name())
 }
@@ -83,4 +70,16 @@ func TestThroneRoomBM_Resolve_ChooseAction_PrefersWitch(t *testing.T) {
 	}
 	r := NewThroneRoomBM().Resolve(cs, d)
 	require.Equal(t, "witch", r.GetCardChoice().Card)
+}
+
+func TestThroneRoomBM_Resolve_UnrecognizedPrompt_UsesSafeRefusal(t *testing.T) {
+	cs := &ClientState{Me: 0, Snapshot: &pb.GameStateSnapshot{
+		Players: []*pb.PlayerView{{PlayerIdx: 0, Hand: []string{"copper"}}},
+	}}
+	d := &pb.Decision{
+		Id: "d2", PlayerIdx: 0,
+		Prompt: &pb.Decision_TrashFromHand{TrashFromHand: &pb.TrashFromHandPrompt{Min: 0, Max: 1}},
+	}
+	r := NewThroneRoomBM().Resolve(cs, d)
+	require.Equal(t, "d2", r.DecisionId)
 }
