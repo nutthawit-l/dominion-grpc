@@ -207,13 +207,13 @@ func cardCost(id string) int {
 		return 0
 	case "estate", "moat":
 		return 2
-	case "silver", "cellar", "chapel":
+	case "silver", "cellar", "chapel", "village":
 		return 3
 	case "harbinger", "vassal", "workshop":
 		return 3
-	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy":
+	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy", "throne_room":
 		return 4
-	case "mine", "witch", "bandit", "laboratory", "market", "festival":
+	case "mine", "witch", "bandit", "laboratory", "market", "festival", "library", "sentry":
 		return 5
 	case "gold", "artisan", "council_room":
 		return 6
