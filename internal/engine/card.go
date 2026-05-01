@@ -36,8 +36,20 @@ func (c *Card) HasType(t CardType) bool {
 }
 
 // IsKingdom reports whether c is a kingdom card. A kingdom card is any
-// card tagged TypeAction (plain actions, attacks, reactions). Basics
-// (treasures, victories, curses) are not kingdom cards.
+// card tagged TypeAction (plain actions, attacks, reactions), OR any
+// non-basic Victory card (Gardens-shape). Estate / Duchy / Province
+// are basic Victory and therefore NOT kingdom; treasures and curses
+// are likewise basic.
 func (c *Card) IsKingdom() bool {
-	return c.HasType(TypeAction)
+	if c.HasType(TypeAction) {
+		return true
+	}
+	if c.HasType(TypeVictory) {
+		switch c.ID {
+		case "estate", "duchy", "province":
+			return false
+		}
+		return true
+	}
+	return false
 }
