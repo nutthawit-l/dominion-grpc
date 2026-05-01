@@ -59,12 +59,3 @@ func TestGardens_HasNoOnPlay(t *testing.T) {
 	require.Nil(t, Gardens.OnPlay,
 		"Gardens is Victory-only and has no OnPlay")
 }
-
-// makeCards returns a slice of n copies of the given card ID.
-func makeCards(id engine.CardID, n int) []engine.CardID {
-	out := make([]engine.CardID, n)
-	for i := range out {
-		out[i] = id
-	}
-	return out
-}

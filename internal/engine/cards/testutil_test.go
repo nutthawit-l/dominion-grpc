@@ -33,3 +33,12 @@ func newActionPhaseState() *engine.GameState {
 func testLookup(id engine.CardID) (*engine.Card, bool) {
 	return DefaultRegistry.Lookup(id)
 }
+
+// makeCards returns a slice of n copies of the given card ID.
+func makeCards(id engine.CardID, n int) []engine.CardID {
+	out := make([]engine.CardID, n)
+	for i := range out {
+		out[i] = id
+	}
+	return out
+}
