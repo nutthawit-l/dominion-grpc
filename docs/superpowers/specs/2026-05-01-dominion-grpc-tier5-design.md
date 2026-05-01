@@ -19,7 +19,7 @@
 | **Phase-1a closeout sweep** | New `TestBotVsBot_FullBaseSet_RandomKingdoms` — 1000 games, random 10-of-26 kingdom subsets, random strategy pairs from the full registered set, `-short` skip |
 | **No proto changes** | No new prompts, decisions, events, or messages; `buf breaking` is trivially clean |
 | **No property-test change** | New state fields are scalars, not card slices; conservation is unaffected |
-| **Replay fixture** | One new JSON: TR-of-Merchant followed by Silver gives +$2 (regression guard for charges-double-on-replay) |
+| **Regression test for TR-of-Merchant** | In-package test in `kingdom_merchant_test.go` exercising TR(Merchant) + Silver via Apply round-trip. (Original brainstorm called for a JSON replay fixture under `testdata/replays/`, but the existing `replay_test.go` infrastructure only resolves basics through `basicsLookup2` — kingdom cards aren't reachable. Tier 4 set the precedent of expressing the same regression coverage as an in-package test with `registryLookup`. We follow that.) |
 | **Milestone sequencing** | Tier 0 > Tier 1 > Tier 2 > Tier 3 > Tier 4 > **Tier 5** (Phase 1a complete) > Phase 1b |
 
 ---
@@ -308,11 +308,13 @@ Helpers `pickRandomKingdom`, `pickRandomStrategyPair`, `allKingdomCardIDs`, and 
 
 The pool is **derived**, not hardcoded. The test reads every `IsKingdom()` card from `DefaultRegistry` and uses that set; this auto-includes Gardens (now that `IsKingdom()` is fixed) without a hardcoded list, and prevents drift if a future tier adds cards.
 
-### 3.7 Replay fixture
+### 3.7 Regression test for TR-of-Merchant
 
-One new JSON under `internal/engine/testdata/replays/`:
+Express the same regression coverage as an in-package test in `internal/engine/cards/kingdom_merchant_test.go` (named `TestMerchant_ThroneRoom_DoublesBonusOnFirstSilver`):
 
-- `tier5_throne_merchant_then_silver.json` — fixed seed, kingdom containing Throne Room + Merchant + Silver-supply, action log: TR → Merchant → Silver. Expected final: player coins reflect 2 (Silver) + 2 (TR-doubled Merchant bonus) = 4 from that play sequence. Locks in the charges-double-on-replay path against future regressions.
+- Set up a state with Player 0 holding Throne Room + Merchant + Silver. Apply PlayCard(throne_room), resolve the choose-action prompt with Merchant, then play Silver. Assert final coins reflect 2 (Silver) + 2 (TR-doubled Merchant bonus) = 4 added by that play sequence; assert `MerchantBonusCharges` was 2 just before Silver was played and 0 after.
+
+This delivers the same regression coverage promised by the brainstorm's JSON fixture without extending the engine-package replay infrastructure to know about kingdom cards. (Tier 4 made the same translation: its TR-TR-Witch test lives in `kingdom_throne_room_test.go`, not as a JSON fixture.) See `kingdom_throne_room_test.go` (case `TestThroneRoom_OnResolve_PlaysSmithyTwice`) for the canonical shape.
 
 ### 3.8 Runtime budget after Tier 5
 
@@ -350,16 +352,32 @@ Should finish in well under 90 seconds on the dev box; revisit the budget if not
 
 ### 4.3 Bot library
 
-`internal/bot/strategy.go` — extend `StrategyByName`:
+A `StrategyByName(name string) (Strategy, error)` function does not currently exist; `cmd/bot/main.go` has an inline `selectStrategy` that the closeout sweep would need to duplicate. Tier 5 adds `bot.StrategyByName` (in `internal/bot/strategy.go`) covering every existing strategy plus the two new ones, and refactors `cmd/bot/main.go` to delegate to it. The closeout sweep then uses the same lookup.
 
 ```go
-case "merchant_bm": return &MerchantBM{}, nil
-case "gardens_bm":  return &GardensBM{}, nil
+func StrategyByName(name string) (Strategy, error) {
+    switch name {
+    case "bigmoney":      return BigMoney{}, nil
+    case "smithy_bm":     return SmithyBM{}, nil
+    case "chapel_bm":     return NewChapelBM(), nil
+    case "remodel_bm":    return NewRemodelBM(), nil
+    case "witch_bm":      return NewWitchBM(), nil
+    case "militia_bm":    return NewMilitiaBM(), nil
+    case "throneroom_bm": return NewThroneRoomBM(), nil
+    case "library_bm":    return NewLibraryBM(), nil
+    case "sentry_bm":     return NewSentryBM(), nil
+    case "merchant_bm":   return NewMerchantBM(), nil
+    case "gardens_bm":    return NewGardensBM(), nil
+    }
+    return nil, fmt.Errorf("unknown strategy %q", name)
+}
 ```
 
 `safeRefusal` defaults: **no changes**, since no new prompts are introduced.
 
-`cmd/bot/main.go` — add `merchant_bm` and `gardens_bm` to the `-strategy` help text.
+`isAction()` and `cardCost()` in `strategy.go` are extended to know about `merchant` (Action, cost 3) so the safe-refusal `ChooseActionFromHand` lookup recognizes it. `gardens` does not need an `isAction` entry but should be in `cardCost` (cost 4).
+
+`cmd/bot/main.go` — replace the inline `selectStrategy` switch with `bot.StrategyByName`; add `merchant_bm` and `gardens_bm` to the `-strategy` help text.
 
 ### 4.4 Bot strategies
 
@@ -413,8 +431,9 @@ Both follow the existing `Strategy` interface and the file-per-strategy pattern.
 6. Bot strategies: `MerchantBM` and `GardensBM` (both smoke-only).
 7. Bot smoke sweeps: 50-game `MerchantBM` and `GardensBM` integration tests.
 8. Phase-1a closeout sweep: `TestBotVsBot_FullBaseSet_RandomKingdoms` — 1000 games with random 10-of-26 kingdoms and random strategy pairs over the registered set.
-9. Replay fixture: `tier5_throne_merchant_then_silver.json`.
-10. README update declaring Phase 1a complete.
+9. Regression test for TR-of-Merchant in `kingdom_merchant_test.go` (in lieu of a JSON fixture — see §3.7).
+10. `bot.StrategyByName` factory (new) + `cmd/bot/main.go` refactored to delegate to it.
+11. README update declaring Phase 1a complete.
 
 **Explicitly NOT in this tier:**
 
