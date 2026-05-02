@@ -2,8 +2,11 @@ package bot
 
 import "fmt"
 
-// StrategyByName returns a fresh Strategy by its short name. The set of
-// recognised names mirrors what cmd/bot exposes via its -strategy flag.
+// StrategyByName returns a fresh Strategy by its short name. Used by
+// cmd/bot/main.go and by integration tests that pick strategies from
+// a parameterized list. Adding a new strategy means adding a case
+// here AND extending the closeout sweep's strategies list in
+// integration_full_set_test.go.
 func StrategyByName(name string) (Strategy, error) {
 	switch name {
 	case "bigmoney":
