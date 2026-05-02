@@ -193,7 +193,7 @@ func isAction(id string) bool {
 		"council_room", "moat", "harbinger", "vassal", "workshop",
 		"moneylender", "poacher", "remodel", "mine", "artisan",
 		"cellar", "chapel", "witch", "militia", "bureaucrat",
-		"bandit", "throne_room", "library", "sentry":
+		"bandit", "throne_room", "library", "sentry", "merchant":
 		return true
 	}
 	return false
@@ -207,11 +207,11 @@ func cardCost(id string) int {
 		return 0
 	case "estate", "moat":
 		return 2
-	case "silver", "cellar", "chapel", "village":
+	case "silver", "cellar", "chapel", "village", "merchant":
 		return 3
 	case "harbinger", "vassal", "workshop":
 		return 3
-	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy", "throne_room":
+	case "militia", "bureaucrat", "moneylender", "poacher", "remodel", "smithy", "throne_room", "gardens":
 		return 4
 	case "mine", "witch", "bandit", "laboratory", "market", "festival", "library", "sentry":
 		return 5
