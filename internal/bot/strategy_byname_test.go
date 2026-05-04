@@ -25,3 +25,12 @@ func TestStrategyByName_UnknownReturnsError(t *testing.T) {
 	_, err := StrategyByName("does_not_exist")
 	require.Error(t, err)
 }
+
+func TestIsVictory_IncludesGardens(t *testing.T) {
+	require.True(t, isVictory("gardens"))
+	require.True(t, isVictory("estate"))
+	require.True(t, isVictory("duchy"))
+	require.True(t, isVictory("province"))
+	require.False(t, isVictory("smithy"))
+	require.False(t, isVictory("copper"))
+}

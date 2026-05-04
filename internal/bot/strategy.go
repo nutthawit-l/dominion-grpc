@@ -178,7 +178,7 @@ func cardHasAnyType(id string, filter []pb.CardType) bool {
 
 func isVictory(id string) bool {
 	switch id {
-	case "estate", "duchy", "province":
+	case "estate", "duchy", "province", "gardens":
 		return true
 	}
 	return false
