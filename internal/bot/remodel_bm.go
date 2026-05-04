@@ -41,16 +41,16 @@ func (r *RemodelBM) PickAction(cs *ClientState) *pb.Action {
 		provincesLeft := supplyCount(cs.Snapshot, "province")
 		endgame := provincesLeft <= 4
 		switch {
-		case me.Coins >= 8:
+		case me.Coins >= 8 && provincesLeft > 0:
 			return buyCard(cs.Me, "province")
-		case me.Coins >= 6:
+		case me.Coins >= 6 && supplyCount(cs.Snapshot, "gold") > 0:
 			return buyCard(cs.Me, "gold")
-		case me.Coins >= 5 && endgame:
+		case me.Coins >= 5 && endgame && supplyCount(cs.Snapshot, "duchy") > 0:
 			return buyCard(cs.Me, "duchy")
-		case me.Coins >= 4 && !r.remodelOwned && cs.MyTurnsTaken <= 4:
+		case me.Coins >= 4 && !r.remodelOwned && cs.MyTurnsTaken <= 4 && supplyCount(cs.Snapshot, "remodel") > 0:
 			r.remodelOwned = true
 			return buyCard(cs.Me, "remodel")
-		case me.Coins >= 3:
+		case me.Coins >= 3 && supplyCount(cs.Snapshot, "silver") > 0:
 			return buyCard(cs.Me, "silver")
 		}
 		return endPhase(cs.Me)
