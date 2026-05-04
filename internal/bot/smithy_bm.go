@@ -51,7 +51,7 @@ func (SmithyBM) PickAction(cs *ClientState) *pb.Action {
 			return buyCard(cs.Me, "province")
 		case me.Coins >= 6:
 			return buyCard(cs.Me, "gold")
-		case me.Coins >= 5 && endgame:
+		case me.Coins >= 5 && endgame && supplyCount(cs.Snapshot, "duchy") > 0:
 			return buyCard(cs.Me, "duchy")
 		case me.Coins >= 4 && earlyTurn && smithysOwned < 2:
 			return buyCard(cs.Me, "smithy")

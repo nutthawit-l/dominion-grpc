@@ -56,7 +56,7 @@ func (c *ChapelBM) PickAction(cs *ClientState) *pb.Action {
 			return buyCard(cs.Me, "gold")
 		case endgame && me.Coins >= 2 && supplyCount(cs.Snapshot, "estate") > 0:
 			return buyCard(cs.Me, "estate")
-		case me.Coins >= 2 && !c.chapelOwned && cs.MyTurnsTaken <= 2:
+		case me.Coins >= 2 && !c.chapelOwned && cs.MyTurnsTaken <= 2 && supplyCount(cs.Snapshot, "chapel") > 0:
 			c.chapelOwned = true
 			return buyCard(cs.Me, "chapel")
 		case me.Coins >= 3 && supplyCount(cs.Snapshot, "silver") > 0:

@@ -64,3 +64,28 @@ func TestDetermineWinners_SoloWinner(t *testing.T) {
 	scores := []int{5, 10, 5}
 	require.Equal(t, []PlayerIdx{1}, DetermineWinners(scores))
 }
+
+func TestComputeScore_Gardens_FloorsByTen(t *testing.T) {
+	lookup := func(id CardID) (*Card, bool) {
+		switch id {
+		case "gardens":
+			return &Card{
+				VictoryPoints: func(p PlayerState) int {
+					n := len(p.Hand) + len(p.Deck) + len(p.Discard) + len(p.InPlay) + len(p.SetAside)
+					return n / 10
+				},
+			}, true
+		}
+		return &Card{}, true
+	}
+	// 18 cards across all zones; the single Gardens contributes
+	// floor(18/10) = 1.
+	ps := PlayerState{
+		Hand:     []CardID{"gardens", "copper", "copper", "copper"},
+		Deck:     []CardID{"copper", "copper", "copper", "copper"},
+		Discard:  []CardID{"copper", "copper", "copper", "copper"},
+		InPlay:   []CardID{"copper", "copper", "copper"},
+		SetAside: []CardID{"copper", "copper", "copper"},
+	}
+	require.Equal(t, 1, ComputeScore(ps, lookup))
+}

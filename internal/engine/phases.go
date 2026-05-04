@@ -46,6 +46,8 @@ func cleanupAndEndTurn(gs *GameState) []Event {
 	gs.Players[px].Actions = 0
 	gs.Players[px].Buys = 0
 	gs.Players[px].Coins = 0
+	gs.Players[px].MerchantBonusCharges = 0
+	gs.Players[px].FirstSilverPlayedThisTurn = false
 
 	// Advance to next player.
 	next := (px + 1) % PlayerIdx(len(gs.Players))

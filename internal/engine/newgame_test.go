@@ -60,17 +60,24 @@ func TestNewGame_TwoPlayer_SupplyCounts(t *testing.T) {
 func TestIsKingdom_ActionCardsQualify(t *testing.T) {
 	action := &Card{ID: "x", Types: []CardType{TypeAction}}
 	treasure := &Card{ID: "y", Types: []CardType{TypeTreasure}}
-	victory := &Card{ID: "z", Types: []CardType{TypeVictory}}
+	estate := &Card{ID: "estate", Types: []CardType{TypeVictory}}
+	duchy := &Card{ID: "duchy", Types: []CardType{TypeVictory}}
+	province := &Card{ID: "province", Types: []CardType{TypeVictory}}
 	curse := &Card{ID: "w", Types: []CardType{TypeCurse}}
 	actionAttack := &Card{ID: "v", Types: []CardType{TypeAction, TypeAttack}}
 	actionReaction := &Card{ID: "u", Types: []CardType{TypeAction, TypeReaction}}
+	gardensShape := &Card{ID: "gardens", Types: []CardType{TypeVictory}}
 
 	require.True(t, action.IsKingdom())
 	require.False(t, treasure.IsKingdom())
-	require.False(t, victory.IsKingdom())
+	require.False(t, estate.IsKingdom(), "Estate is basic Victory, not kingdom")
+	require.False(t, duchy.IsKingdom(), "Duchy is basic Victory, not kingdom")
+	require.False(t, province.IsKingdom(), "Province is basic Victory, not kingdom")
 	require.False(t, curse.IsKingdom())
 	require.True(t, actionAttack.IsKingdom())
 	require.True(t, actionReaction.IsKingdom())
+	require.True(t, gardensShape.IsKingdom(),
+		"non-basic Victory cards (Gardens-shape) ARE kingdom")
 }
 
 func TestNewGame_EmptyKingdom_UsesAllRegisteredActions(t *testing.T) {

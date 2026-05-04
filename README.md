@@ -4,10 +4,9 @@ A server-authoritative Dominion implementation in Go. Uses Connect-Go over
 HTTP/2 for the RPC layer; protobuf is the single source of truth for the
 contract between server and any client (bots, future UI, tests).
 
-**Status:** Phase 1a / Tier 0 complete — basics (Copper/Silver/Gold,
-Estate/Duchy/Province/Curse) + BigMoney strategy play end-to-end via a
-bot-vs-bot integration test. See `docs/superpowers/specs/` for architecture
-decisions and the road-map.
+**Status:** Phase 1a complete — all 26 Base-set kingdom cards + 7 basics
+implemented and integration-tested. See `docs/superpowers/specs/` for
+architecture decisions and the road-map.
 
 ## Quick start
 
@@ -51,7 +50,9 @@ make bot ARGS="-game <id> -as-player 1"
 
 Flags accepted by `cmd/bot`: `-server` (default `http://localhost:8080`),
 `-create`, `-game`, `-as-player` (int index), `-seed` (only with `-create`),
-`-strategy` (default `bigmoney`).
+`-strategy` (default `bigmoney`; choices: `bigmoney | smithy_bm | chapel_bm |
+remodel_bm | witch_bm | militia_bm | throneroom_bm | library_bm | sentry_bm |
+merchant_bm | gardens_bm`).
 
 ### Poking the server with curl
 
@@ -107,3 +108,18 @@ See `docs/superpowers/specs/` for:
 - Bot architecture (ClientState reducer, Strategy interface)
 
 And `docs/superpowers/plans/` for the per-tier implementation plans.
+
+## Phase 1a — Done
+
+The Phase 1a "Done when" criterion from the parent design spec has been met:
+
+- All 26 Base-set kingdom cards + 7 basics implemented.
+- 1000-game bot-vs-bot integration sweep over random 10-of-26 kingdom subsets
+  passes (`TestBotVsBot_FullBaseSet_RandomKingdoms`).
+- 500-seed engine property sweep enforces card conservation across every random
+  game.
+
+Tier 5 (special hooks) adds Gardens and Merchant.
+
+Next phase: Phase 1b — React + Vite + TypeScript frontend over the generated
+`connect-web` client.

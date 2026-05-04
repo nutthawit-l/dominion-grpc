@@ -46,6 +46,16 @@ type PlayerState struct {
 	Actions  int
 	Buys     int
 	Coins    int
+
+	// MerchantBonusCharges is incremented by Merchant.OnPlay each time
+	// Merchant is played in the current turn, and drained the first
+	// time Silver is played that turn. Reset to 0 by cleanupAndEndTurn.
+	MerchantBonusCharges int
+
+	// FirstSilverPlayedThisTurn flips true the first time Silver.OnPlay
+	// runs in a given turn. Reset to false by cleanupAndEndTurn. Guards
+	// against repeat triggers within a turn.
+	FirstSilverPlayedThisTurn bool
 }
 
 // Supply tracks pile counts by card ID.

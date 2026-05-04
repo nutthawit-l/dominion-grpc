@@ -65,3 +65,22 @@ func TestCleanup_FlushesSetAsideToDiscard(t *testing.T) {
 	require.Equal(t, 1, discardSet["copper"])
 	require.Equal(t, 1, discardSet["estate"])
 }
+
+func TestCleanup_ResetsMerchantFields(t *testing.T) {
+	gs := newTestState(2)
+	gs.CurrentPlayer = 0
+	gs.StartingPlayer = 0
+	gs.Phase = PhaseCleanup
+	// Pre-load the per-turn Merchant trigger fields for the active player.
+	gs.Players[0].MerchantBonusCharges = 3
+	gs.Players[0].FirstSilverPlayedThisTurn = true
+	fillDeck(gs, 0, "copper", 5)
+	fillDeck(gs, 1, "copper", 5)
+
+	cleanupAndEndTurn(gs)
+
+	require.Equal(t, 0, gs.Players[0].MerchantBonusCharges,
+		"MerchantBonusCharges must reset to 0 at end of turn")
+	require.False(t, gs.Players[0].FirstSilverPlayedThisTurn,
+		"FirstSilverPlayedThisTurn must reset to false at end of turn")
+}

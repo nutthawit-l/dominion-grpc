@@ -76,6 +76,7 @@ func TestSmithyBM_PickAction_BuyPhase_BuysDuchyInEndgame(t *testing.T) {
 	cs.Snapshot.Supply = []*pb.SupplyPile{
 		{CardId: "province", Count: 3},
 		{CardId: "smithy", Count: 8},
+		{CardId: "duchy", Count: 4},
 	}
 	cs.MyTurnsTaken = 10 // past earlyTurn gate
 	act := SmithyBM{}.PickAction(cs)
