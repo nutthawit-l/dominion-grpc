@@ -28,3 +28,9 @@ GOBIN  := $(GOPATH)/bin
 install-tools:
 	GOBIN=$(GOBIN) go install github.com/bufbuild/buf/cmd/buf@v1.67.0
 	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(GOBIN) v2.11.4
+
+install-figma-mcp:
+	claude plugin install figma@claude-plugins-official
+
+install-superpower:
+	claude plugin install superpowers@claude-plugins-official
