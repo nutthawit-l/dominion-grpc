@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 
 	"connectrpc.com/connect"
@@ -11,6 +14,14 @@ import (
 	"github.com/nutthawit-l/dominion-grpc/internal/engine"
 	"github.com/nutthawit-l/dominion-grpc/internal/store"
 )
+
+// roomCode derives a deterministic 5-char base36 room code from the first
+// 3 bytes of a UUID, giving 16M distinct values with no collision risk.
+func roomCode(id uuid.UUID) string {
+	n := uint64(id[0])<<16 | uint64(id[1])<<8 | uint64(id[2])
+	code := strings.ToUpper(strconv.FormatUint(n, 36))
+	return fmt.Sprintf("%05s", code)
+}
 
 // subscriber carries the per-stream metadata used during fanout.
 type subscriber struct {
@@ -53,14 +64,17 @@ func (g *GameService) CreateGame(ctx context.Context, req *connect.Request[pb.Cr
 	for i, k := range req.Msg.Kingdom {
 		kingdom[i] = engine.CardID(k)
 	}
-	id := uuid.NewString()
+	uid, _ := uuid.NewRandom()
+	id := uid.String()
 	gs, err := engine.NewGame(id, names, kingdom, req.Msg.Seed, g.lookup)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
-	g.store.Put(gs)
+	code := roomCode(uid)
+	g.store.Put(gs, code)
 	return connect.NewResponse(&pb.CreateGameResponse{
-		GameId: id,
+		GameId:   id,
+		RoomCode: code,
 	}), nil
 }
 

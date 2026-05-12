@@ -195,6 +195,7 @@ message CreateGameRequest {
 
 message CreateGameResponse {
     string game_id = 1;
+    string room_code = 2; // 5-char base36 room code for human-friendly joining
     // No snapshot here — clients subscribe via StreamGameEvents with a
     // player_idx to receive a snapshot correctly scrubbed to their view.
 }

@@ -10,7 +10,7 @@ import (
 func TestMemory_PutAndGet(t *testing.T) {
 	m := NewMemory()
 	s := &engine.GameState{GameID: "g1"}
-	m.Put(s)
+	m.Put(s, "ATEST")
 
 	got, ok := m.Get("g1")
 	require.True(t, ok)
@@ -25,7 +25,7 @@ func TestMemory_GetMissing(t *testing.T) {
 
 func TestMemory_WithLock(t *testing.T) {
 	m := NewMemory()
-	m.Put(&engine.GameState{GameID: "g", Turn: 0})
+	m.Put(&engine.GameState{GameID: "g", Turn: 0}, "BTEST")
 
 	err := m.WithLock("g", func(s *engine.GameState) error {
 		s.Turn = 5

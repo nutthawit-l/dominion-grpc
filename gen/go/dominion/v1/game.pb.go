@@ -1642,6 +1642,7 @@ func (x *CreateGameRequest) GetKingdom() []string {
 type CreateGameResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GameId        string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	RoomCode      string                 `protobuf:"bytes,2,opt,name=room_code,json=roomCode,proto3" json:"room_code,omitempty"` // 5-char base36 room code for human-friendly joining
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1679,6 +1680,13 @@ func (*CreateGameResponse) Descriptor() ([]byte, []int) {
 func (x *CreateGameResponse) GetGameId() string {
 	if x != nil {
 		return x.GameId
+	}
+	return ""
+}
+
+func (x *CreateGameResponse) GetRoomCode() string {
+	if x != nil {
+		return x.RoomCode
 	}
 	return ""
 }
@@ -2376,9 +2384,10 @@ const file_dominion_v1_game_proto_rawDesc = "" +
 	"\x11CreateGameRequest\x12\x18\n" +
 	"\aplayers\x18\x01 \x03(\tR\aplayers\x12\x12\n" +
 	"\x04seed\x18\x02 \x01(\x03R\x04seed\x12\x18\n" +
-	"\akingdom\x18\x03 \x03(\tR\akingdom\"-\n" +
+	"\akingdom\x18\x03 \x03(\tR\akingdom\"J\n" +
 	"\x12CreateGameResponse\x12\x17\n" +
-	"\agame_id\x18\x01 \x01(\tR\x06gameId\"Q\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\x1b\n" +
+	"\troom_code\x18\x02 \x01(\tR\broomCode\"Q\n" +
 	"\x17StreamGameEventsRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\x1d\n" +
 	"\n" +
